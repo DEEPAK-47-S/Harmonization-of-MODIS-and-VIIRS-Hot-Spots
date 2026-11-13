@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, MapPin, Check } from 'lucide-react';
 import { useAOI, AOI_PRESETS } from '../context/AOIContext';
-import { AOIBounds } from '../types';
+import { AOIBounds, formatAOIBounds } from '../types';
 
 interface Props {
   isOpen: boolean;
@@ -73,8 +73,8 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
                       <span className="font-semibold text-sm">{p.name}</span>
                       {isSelected && <Check className="w-4 h-4 text-orange-400" />}
                     </div>
-                    <p className="text-[11px] text-slate-400">
-                      [{p.west.toFixed(1)}°W, {p.south.toFixed(1)}°S, {p.east.toFixed(1)}°E, {p.north.toFixed(1)}°N]
+                    <p className="text-[11px] text-slate-400 font-mono">
+                      {formatAOIBounds(p)}
                     </p>
                   </button>
                 );
