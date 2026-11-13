@@ -77,17 +77,27 @@ class GlobalFireService:
 
             country_summaries.sort(key=lambda x: x["observation_count"], reverse=True)
 
+            kpi_data = {
+                "total_observations": total_obs,
+                "total_modis": total_modis,
+                "modis_observations": total_modis,
+                "total_viirs": total_viirs,
+                "viirs_observations": total_viirs,
+                "active_grid_cells": active_cells,
+                "cross_sensor_co_detected": co_detected,
+                "co_detected_cells": co_detected,
+                "active_countries_count": len(country_summaries),
+                "active_continents_count": len([c for c in continent_breakdown if c.get("count", 0) > 0]),
+                "latest_observation_utc": latest_obs.acquisition_datetime_utc.isoformat() if latest_obs else None
+            }
+
             return {
                 "scope": "GLOBAL",
-                "kpis": {
-                    "total_observations": total_obs,
-                    "total_modis": total_modis,
-                    "total_viirs": total_viirs,
-                    "active_grid_cells": active_cells,
-                    "cross_sensor_co_detected": co_detected,
-                    "latest_observation_utc": latest_obs.acquisition_datetime_utc.isoformat() if latest_obs else None
-                },
+                "kpi": kpi_data,
+                "kpis": kpi_data,
+                "continents": continent_breakdown,
                 "continent_breakdown": continent_breakdown,
+                "top_countries": country_summaries[:10],
                 "top_active_countries": country_summaries[:10],
                 "total_tracked_countries": len(country_summaries)
             }

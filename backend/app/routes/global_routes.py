@@ -26,7 +26,11 @@ def get_countries():
     """
     Returns directory of all countries with ISO3, names, continents, and bounds.
     """
-    return jsonify(get_countries_list())
+    continent = request.args.get("continent")
+    countries = get_countries_list()
+    if continent and continent != "all":
+        countries = [c for c in countries if c.get("continent", "").lower() == continent.lower()]
+    return jsonify(countries)
 
 @global_bp.route("/global/country/<iso3>/summary", methods=["GET"])
 def get_country_summary(iso3):

@@ -194,13 +194,13 @@ export const FirePulseAPI = {
   },
 
   getContinents: async (): Promise<ContinentItem[]> => {
-    const res = await api.get<{ continents: ContinentItem[] }>('/global/continents');
-    return res.data.continents;
+    const res = await api.get('/global/continents');
+    return Array.isArray(res.data) ? res.data : (res.data.continents || []);
   },
 
   getCountries: async (continent?: string): Promise<CountryItem[]> => {
-    const res = await api.get<{ countries: CountryItem[] }>('/global/countries', { params: { continent } });
-    return res.data.countries;
+    const res = await api.get('/global/countries', { params: { continent } });
+    return Array.isArray(res.data) ? res.data : (res.data.countries || []);
   },
 
   getCountryAnalytics: async (iso3: string): Promise<CountryAnalytics> => {
