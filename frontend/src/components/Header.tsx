@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, RefreshCw, Download } from 'lucide-react';
+import { MapPin, RefreshCw, Download, Sparkles, ChevronDown } from 'lucide-react';
 import { useAOI } from '../context/AOIContext';
 import { AOISelectorModal } from './AOISelectorModal';
 import { FirePulseAPI } from '../services/api';
+import { formatAOIBounds } from '../types';
 
 interface Props {
   title: string;
@@ -25,7 +26,7 @@ export const Header: React.FC<Props> = ({ title, subtitle }) => {
     try {
       const [hData, fStatus] = await Promise.all([
         FirePulseAPI.getHealth(),
-        FirePulseAPI.getFirmsStatus()
+        FirePulseAPI.getFirmsStatus().catch(() => null)
       ]);
       setApiOnline(hData.database_connected);
       setHasMapKey(hData.firms_map_key_configured);
@@ -50,62 +51,67 @@ export const Header: React.FC<Props> = ({ title, subtitle }) => {
 
   return (
     <>
-      <header className="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-        <div>
-          <h1 className="text-lg font-bold text-white tracking-tight">{title}</h1>
-          {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+      <header className="h-16 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-30 shadow-lg">
+        <div className="flex items-center space-x-3">
+          <div>
+            <h1 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
+              <span>{title}</span>
+            </h1>
+            {subtitle && <p className="text-[11px] text-slate-400 font-medium line-clamp-1">{subtitle}</p>}
+          </div>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5">
           {/* AOI Selector Pill */}
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-xs font-medium text-slate-200 transition group"
+            className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 text-xs font-semibold text-slate-200 transition shadow-sm hover:border-orange-500/50 group"
           >
-            <MapPin className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform" />
-            <span className="font-semibold text-white">{aoi.name || 'Custom AOI'}</span>
-            <span className="text-slate-400 font-mono text-[11px]">
-              [{aoi.west.toFixed(1)}&deg;W, {aoi.south.toFixed(1)}&deg;S &rarr; {aoi.east.toFixed(1)}&deg;E, {aoi.north.toFixed(1)}&deg;N]
+            <MapPin className="w-3.5 h-3.5 text-orange-400 group-hover:scale-125 transition-transform" />
+            <span className="font-bold text-white tracking-tight">{aoi.name || 'Custom AOI'}</span>
+            <span className="text-[10px] text-slate-400 font-mono bg-slate-950/80 px-1.5 py-0.5 rounded border border-white/5">
+              {formatAOIBounds(aoi)}
             </span>
+            <ChevronDown className="w-3 h-3 text-slate-500 group-hover:text-slate-300" />
           </button>
 
-          {/* Refresh Button */}
+          {/* Quick Refresh Button */}
           <button
             onClick={handleRefresh}
-            title="Refresh current data"
-            className="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-slate-400 hover:text-white transition"
+            title="Refresh current data & recalculate grid"
+            className="p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 text-slate-400 hover:text-white transition hover:border-slate-600"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-orange-400' : ''}`} />
           </button>
 
-          {/* Quick Export CSV */}
+          {/* Quick Export CSV Button */}
           <a
             href={FirePulseAPI.getExportUrl('observations', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
             download
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-xs font-medium text-slate-300 hover:text-white transition"
-            title="Download filtered observations CSV"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 text-xs font-semibold text-slate-300 hover:text-white transition hover:border-cyan-500/50"
+            title="Download observations CSV"
           >
             <Download className="w-3.5 h-3.5 text-cyan-400" />
             <span>CSV</span>
           </a>
 
-          {/* API Health & Key Indicator */}
+          {/* NASA Live Status Pill */}
           <div
             title={
               apiOnline
                 ? (hasMapKey
-                  ? `NASA FIRMS Connected: ${quotaInfo ? `${quotaInfo.current} / ${quotaInfo.limit} transactions used in current 10m interval. Global + US/Canada valid.` : 'Key configured & verified.'}`
+                  ? `NASA FIRMS Connected: ${quotaInfo ? `${quotaInfo.current} / ${quotaInfo.limit} transactions used in current 10m window. Global + US/Canada valid.` : 'Key configured & verified.'}`
                   : 'Backend online. NASA MAP_KEY not yet configured in backend/.env')
-                : 'Backend API unreachable — is the Flask server running?'
+                : 'Backend API unreachable'
             }
-            className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border transition ${
+            className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
               apiOnline === null
                 ? 'bg-slate-950/60 border-slate-800 text-slate-500'
                 : apiOnline
                 ? hasMapKey
-                  ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-400 shadow-sm shadow-emerald-950'
-                  : 'bg-amber-950/40 border-amber-800/60 text-amber-400'
-                : 'bg-rose-950/40 border-rose-800/60 text-rose-400'
+                  ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                  : 'bg-amber-950/50 border-amber-700/60 text-amber-300'
+                : 'bg-rose-950/50 border-rose-700/60 text-rose-300'
             }`}
           >
             {apiOnline === null ? (
@@ -113,24 +119,24 @@ export const Header: React.FC<Props> = ({ title, subtitle }) => {
             ) : apiOnline ? (
               hasMapKey ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>NASA FIRMS Live</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+                  <span className="tracking-wide">NASA LIVE</span>
                   {quotaInfo && (
-                    <span className="text-[10px] text-emerald-300/80 font-mono">
-                      ({quotaInfo.current}/{quotaInfo.limit})
+                    <span className="text-[10px] text-emerald-300 font-mono bg-emerald-900/60 px-1.5 py-0.5 rounded-md border border-emerald-700/50">
+                      {quotaInfo.current}/{quotaInfo.limit}
                     </span>
                   )}
                 </>
               ) : (
                 <>
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  <span>Key Needed</span>
+                  <span>KEY NEEDED</span>
                 </>
               )
             ) : (
               <>
                 <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span>API Offline</span>
+                <span>OFFLINE</span>
               </>
             )}
           </div>

@@ -163,3 +163,12 @@ export interface AnomalyEvaluation {
   all_evaluated_days: any[];
 }
 
+export const formatCoord = (val: number, isLat: boolean): string => {
+  const dir = isLat ? (val >= 0 ? 'N' : 'S') : (val >= 0 ? 'E' : 'W');
+  return `${Math.abs(val).toFixed(2)}°${dir}`;
+};
+
+export const formatAOIBounds = (aoi: AOIBounds): string => {
+  return `${formatCoord(aoi.south, true)}–${formatCoord(aoi.north, true)}, ${formatCoord(aoi.west, false)}–${formatCoord(aoi.east, false)}`;
+};
+

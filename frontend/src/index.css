@@ -4,44 +4,90 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans min-h-screen antialiased;
+    @apply bg-slate-950 text-slate-100 font-sans min-h-screen antialiased selection:bg-orange-500/30 selection:text-orange-200;
   }
 }
 
-/* Custom Scrollbar for scientific dashboards */
+/* Custom Scrollbar for scientific GenZ dashboard */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #090d16;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 3px;
+  background: #1e293b;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #f97316;
 }
 
-/* Leaflet dark theme adjustments */
+/* Leaflet dark theme & modern glassmorphic popups */
 .leaflet-container {
-  background-color: #0b1120 !important;
+  background-color: #030712 !important;
   font-family: inherit;
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background-color: #0f172a !important;
+  background: rgba(15, 23, 42, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   color: #f8fafc !important;
-  border: 1px solid #334155 !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(249, 115, 22, 0.15) !important;
 }
 
 .leaflet-popup-content {
-  margin: 12px 14px !important;
+  margin: 14px 16px !important;
   line-height: 1.4 !important;
 }
 
+.leaflet-container a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  padding: 8px 8px 0 0 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: #f8fafc !important;
+}
+
+/* Pulse Glow Animation */
+@keyframes fire-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(249, 115, 22, 0.4), 0 0 30px rgba(239, 68, 68, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(249, 115, 22, 0.8), 0 0 50px rgba(239, 68, 68, 0.4);
+  }
+}
+
+.animate-fire-glow {
+  animation: fire-glow 2.5s infinite ease-in-out;
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glass-card:hover {
+  border-color: rgba(249, 115, 22, 0.35);
+  box-shadow: 0 10px 30px -10px rgba(249, 115, 22, 0.15);
+}

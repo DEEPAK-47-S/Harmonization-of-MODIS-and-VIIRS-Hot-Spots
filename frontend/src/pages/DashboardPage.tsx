@@ -28,7 +28,7 @@ import { Header } from '../components/Header';
 import { useAOI } from '../context/AOIContext';
 import { useToast } from '../context/ToastContext';
 import { FirePulseAPI } from '../services/api';
-import { DashboardSummary } from '../types';
+import { Observation, GridCell, DashboardSummary, formatAOIBounds } from '../types';
 import { DashboardSkeleton } from '../components/LoadingSpinner';
 
 export const DashboardPage: React.FC = () => {
@@ -101,9 +101,12 @@ export const DashboardPage: React.FC = () => {
               <Satellite className="w-5 h-5 text-orange-400" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white">Active Area of Interest: {aoi.name}</h2>
-              <p className="text-xs text-slate-400">
-                Boundaries: {aoi.west.toFixed(2)}°W, {aoi.south.toFixed(2)}°S to {aoi.east.toFixed(2)}°E, {aoi.north.toFixed(2)}°N
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>Active AOI:</span>
+                <span className="text-orange-400 font-extrabold">{aoi.name}</span>
+              </h2>
+              <p className="text-xs text-slate-400 font-mono tracking-wide mt-0.5">
+                {formatAOIBounds(aoi)}
               </p>
             </div>
           </div>
