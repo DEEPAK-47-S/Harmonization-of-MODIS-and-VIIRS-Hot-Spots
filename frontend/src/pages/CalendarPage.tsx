@@ -144,11 +144,22 @@ export const CalendarPage: React.FC = () => {
               <ChevronLeft className="w-5 h-5" />
             </button>
 
-            <div className="text-center px-3">
-              <h2 className="text-lg font-black text-white tracking-tight">
-                {MONTH_NAMES[selectedMonth - 1]} {selectedYear}
-              </h2>
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-center px-3 flex flex-col items-center">
+              <div className="flex items-center space-x-2">
+                <span className="text-lg font-black text-white tracking-tight">
+                  {MONTH_NAMES[selectedMonth - 1]}
+                </span>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="bg-slate-950 border border-slate-700 hover:border-orange-500 rounded-lg px-2 py-0.5 text-xs font-mono text-orange-400 font-bold cursor-pointer transition focus:outline-none"
+                >
+                  {[2026, 2025, 2024, 2023, 2022, 2021, 2020].map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">
                 Timezone: UTC
               </span>
             </div>

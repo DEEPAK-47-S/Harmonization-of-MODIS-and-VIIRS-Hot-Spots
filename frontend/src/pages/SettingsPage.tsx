@@ -23,6 +23,7 @@ export const SettingsPage: React.FC = () => {
   // Health and MAP_KEY status
   const [health, setHealth] = useState<any | null>(null);
   const [dataQuality, setDataQuality] = useState<any | null>(null);
+  const [firmsStatus, setFirmsStatus] = useState<any | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Manual NRT Ingestion state
@@ -57,12 +58,14 @@ export const SettingsPage: React.FC = () => {
   const fetchSystemStatus = async () => {
     setLoading(true);
     try {
-      const [h, dq] = await Promise.all([
+      const [h, dq, fs] = await Promise.all([
         FirePulseAPI.getHealth(),
-        FirePulseAPI.getDataQuality()
+        FirePulseAPI.getDataQuality(),
+        FirePulseAPI.getFirmsStatus().catch(() => null)
       ]);
       setHealth(h);
       setDataQuality(dq);
+      setFirmsStatus(fs);
     } catch (err) {
       console.error('Failed to load system status:', err);
       showToast('error', 'Status Load Failed', 'Could not reach the backend API.');
@@ -197,15 +200,35 @@ export const SettingsPage: React.FC = () => {
 
             <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-400">MAP_KEY Status</span>
+                <span className="text-xs font-semibold text-slate-400">NASA FIRMS API Key</span>
                 <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
                   health?.firms_map_key_configured
                     ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                     : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
                 }`}>
-                  {health?.firms_map_key_configured ? '✓ KEY CONFIGURED' : '⚠ KEY MISSING'}
+                  {health?.firms_map_key_configured ? '✓ ACTIVE & VERIFIED' : '⚠ KEY MISSING'}
                 </span>
               </div>
+
+              {firmsStatus && firmsStatus.configured && (
+                <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 space-y-1.5 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400">Transaction Quota:</span>
+                    <span className="font-mono font-bold text-emerald-400">
+                      {firmsStatus.current_transactions ?? 0} / {firmsStatus.transaction_limit ?? 5000} tx
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px] text-slate-500">
+                    <span>Interval Window:</span>
+                    <span>{firmsStatus.interval || '10 minutes'}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px] text-slate-500">
+                    <span>Coverage Scope:</span>
+                    <span className="text-slate-300">{firmsStatus.coverage || 'Global + US/Canada'}</span>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-400">Database Engine</span>
                 <span className="font-mono text-white">SQLite (SQLAlchemy)</span>

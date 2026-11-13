@@ -1,4 +1,4 @@
-﻿Write-Host "==================================================" -ForegroundColor Cyan
+Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host " 🔥 FirePulse Full-Stack Launcher" -ForegroundColor Yellow
 Write-Host " NASA Space Apps Challenge 2026 - Virtual Warriors" -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Cyan
@@ -20,3 +20,4 @@ Start-Process "http://127.0.0.1:5000/"
 # Run Flask backend (which serves both REST API and built React SPA)
 $env:PYTHONPATH = "backend"
 & ".\backend\.venv\Scripts\python.exe" "backend\run.py"
+

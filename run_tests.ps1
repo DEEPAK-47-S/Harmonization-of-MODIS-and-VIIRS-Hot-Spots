@@ -1,4 +1,4 @@
-﻿Write-Host "==================================================" -ForegroundColor Cyan
+Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host " 🔥 FirePulse Test Suite Runner" -ForegroundColor Yellow
 Write-Host " NASA Space Apps Challenge 2026 - Virtual Warriors" -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Cyan
@@ -11,3 +11,4 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Write-Host "`n❌ Some tests failed. Please inspect the log above." -ForegroundColor Red
 }
+

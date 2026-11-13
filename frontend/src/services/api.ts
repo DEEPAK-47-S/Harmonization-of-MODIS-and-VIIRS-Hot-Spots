@@ -32,6 +32,11 @@ export const FirePulseAPI = {
     return res.data;
   },
 
+  getFirmsStatus: async () => {
+    const res = await api.get('/data/firms-status');
+    return res.data;
+  },
+
   // Ingestion
   ingestRecent: async (payload: {
     sources?: string[];

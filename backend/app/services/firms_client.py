@@ -52,7 +52,7 @@ class FirmsClient:
     """
 
     def __init__(self, map_key: Optional[str] = None):
-        self.map_key = map_key or Config.FIRMS_MAP_KEY
+        self.map_key = map_key if map_key is not None else Config.FIRMS_MAP_KEY
         self.cache_dir = Config.DATA_RAW_DIR
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 

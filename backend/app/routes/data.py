@@ -37,6 +37,51 @@ def get_availability():
     availability = DataAvailabilityService.get_source_availability()
     return jsonify(availability), 200
 
+@data_bp.route("/data/firms-status", methods=["GET"])
+def get_firms_status():
+    """
+    Check NASA FIRMS MAP_KEY quota and live transaction status directly with NASA.
+    Never exposes the raw MAP_KEY.
+    """
+    import requests
+    client = FirmsClient()
+    try:
+        client.validate_key()
+        url = f"https://firms.modaps.eosdis.nasa.gov/mapserver/mapkey_status/?MAP_KEY={client.map_key}"
+        resp = requests.get(url, timeout=10)
+        if resp.status_code == 200:
+            try:
+                data = resp.json()
+            except Exception:
+                data = {"raw": resp.text.strip()}
+            return jsonify({
+                "configured": True,
+                "status": "ACTIVE",
+                "transaction_limit": data.get("transaction_limit", 5000),
+                "current_transactions": data.get("current_transactions", 0),
+                "interval": data.get("transaction_interval", "10 minutes"),
+                "coverage": "Global + US/Canada"
+            }), 200
+        else:
+            return jsonify({
+                "configured": True,
+                "status": "DEGRADED",
+                "http_status": resp.status_code
+            }), 200
+    except MissingMapKeyError:
+        return jsonify({
+            "configured": False,
+            "status": "MISSING_KEY",
+            "message": "FIRMS_MAP_KEY is not configured in backend/.env"
+        }), 200
+    except Exception as e:
+        logger.warning(f"Failed to check FIRMS status: {e}")
+        return jsonify({
+            "configured": True,
+            "status": "UNKNOWN",
+            "error": str(e)
+        }), 200
+
 @data_bp.route("/data/ingest/recent", methods=["POST"])
 def ingest_recent():
     """

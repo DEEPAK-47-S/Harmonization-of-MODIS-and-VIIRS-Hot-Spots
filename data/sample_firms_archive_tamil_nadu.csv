@@ -16,3 +16,4 @@ latitude,longitude,brightness,scan,track,acq_date,acq_time,satellite,instrument,
 11.0192,76.9575,348.5,0.38,0.37,2026-03-18,1415,NOAA-20,VIIRS,high,2.0NRT,297.2,18.9,D
 11.3300,77.5600,319.8,1.2,1.1,2026-03-18,0825,Aqua,MODIS,75,6.1NRT,294.5,16.2,D
 11.3320,77.5615,335.0,0.38,0.37,2026-03-18,1415,NOAA-21,VIIRS,nominal,2.0NRT,293.1,11.0,D
+

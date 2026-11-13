@@ -14,6 +14,7 @@ export const Header: React.FC<Props> = ({ title, subtitle }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [apiOnline, setApiOnline] = useState<boolean | null>(null);
   const [hasMapKey, setHasMapKey] = useState<boolean>(false);
+  const [quotaInfo, setQuotaInfo] = useState<{ current: number; limit: number } | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
@@ -22,9 +23,18 @@ export const Header: React.FC<Props> = ({ title, subtitle }) => {
 
   const checkHealth = async () => {
     try {
-      const data = await FirePulseAPI.getHealth();
-      setApiOnline(data.database_connected);
-      setHasMapKey(data.firms_map_key_configured);
+      const [hData, fStatus] = await Promise.all([
+        FirePulseAPI.getHealth(),
+        FirePulseAPI.getFirmsStatus()
+      ]);
+      setApiOnline(hData.database_connected);
+      setHasMapKey(hData.firms_map_key_configured);
+      if (fStatus && fStatus.configured && fStatus.status === 'ACTIVE') {
+        setQuotaInfo({
+          current: fStatus.current_transactions ?? 0,
+          limit: fStatus.transaction_limit ?? 5000
+        });
+      }
     } catch {
       setApiOnline(false);
       setHasMapKey(false);
@@ -83,15 +93,17 @@ export const Header: React.FC<Props> = ({ title, subtitle }) => {
           <div
             title={
               apiOnline
-                ? (hasMapKey ? 'NASA FIRMS API Key configured & Database connected' : 'Backend online. NASA MAP_KEY not yet configured in backend/.env')
+                ? (hasMapKey
+                  ? `NASA FIRMS Connected: ${quotaInfo ? `${quotaInfo.current} / ${quotaInfo.limit} transactions used in current 10m interval. Global + US/Canada valid.` : 'Key configured & verified.'}`
+                  : 'Backend online. NASA MAP_KEY not yet configured in backend/.env')
                 : 'Backend API unreachable — is the Flask server running?'
             }
-            className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+            className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border transition ${
               apiOnline === null
                 ? 'bg-slate-950/60 border-slate-800 text-slate-500'
                 : apiOnline
                 ? hasMapKey
-                  ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-400'
+                  ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-400 shadow-sm shadow-emerald-950'
                   : 'bg-amber-950/40 border-amber-800/60 text-amber-400'
                 : 'bg-rose-950/40 border-rose-800/60 text-rose-400'
             }`}
@@ -101,8 +113,13 @@ export const Header: React.FC<Props> = ({ title, subtitle }) => {
             ) : apiOnline ? (
               hasMapKey ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>FIRMS Connected</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>NASA FIRMS Live</span>
+                  {quotaInfo && (
+                    <span className="text-[10px] text-emerald-300/80 font-mono">
+                      ({quotaInfo.current}/{quotaInfo.limit})
+                    </span>
+                  )}
                 </>
               ) : (
                 <>

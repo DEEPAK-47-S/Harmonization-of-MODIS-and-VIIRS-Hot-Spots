@@ -192,6 +192,67 @@ export const ComparisonPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Spatial Resolution Footprint Infographic */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-white">Spatial Footprint Discrepancy & Area Ratio</h3>
+              <p className="text-xs text-slate-400">Comparing pixel area resolution between MODIS (1,000m) and VIIRS (375m I-Bands)</p>
+            </div>
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
+              Area Ratio: ~7.11 to 1
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            {/* Visual Box Diagram */}
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center justify-center">
+              <span className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wider">Pixel Scale Diagram</span>
+              <div className="relative w-44 h-44 border-2 border-dashed border-amber-500/80 bg-amber-500/5 rounded-lg flex flex-wrap p-1 gap-1 items-start justify-start">
+                <span className="absolute -top-3 left-2 bg-slate-950 px-1 text-[10px] font-bold text-amber-400">
+                  MODIS: 1,000 m
+                </span>
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-12 h-12 border border-sky-400 bg-sky-500/20 rounded flex items-center justify-center text-[10px] font-mono text-sky-300 font-bold"
+                    title="VIIRS 375m I-Band footprint"
+                  >
+                    375m
+                  </div>
+                ))}
+                <div className="w-12 h-12 border border-sky-400/40 border-dashed rounded flex items-center justify-center text-[9px] text-sky-400/60 font-mono">
+                  +0.11
+                </div>
+              </div>
+              <span className="text-[10px] text-slate-500 mt-3 font-mono">1 MODIS Pixel &approx; 7.11 VIIRS Pixels</span>
+            </div>
+
+            {/* Explanation & Math Breakdown */}
+            <div className="md:col-span-2 space-y-3 text-xs text-slate-300">
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center">
+                <div>
+                  <strong className="text-amber-400 block">MODIS (Terra & Aqua) Footprint Area</strong>
+                  <span className="text-[11px] text-slate-400">1,000 m &times; 1,000 m nominal nadir resolution</span>
+                </div>
+                <span className="font-mono font-bold text-white text-sm">1,000,000 m&sup2; (1.00 km&sup2;)</span>
+              </div>
+
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center">
+                <div>
+                  <strong className="text-cyan-400 block">VIIRS (NOAA-20/21) Footprint Area</strong>
+                  <span className="text-[11px] text-slate-400">375 m &times; 375 m nominal I-Band resolution</span>
+                </div>
+                <span className="font-mono font-bold text-white text-sm">140,625 m&sup2; (0.14 km&sup2;)</span>
+              </div>
+
+              <p className="text-slate-400 leading-relaxed text-[11px]">
+                Because each VIIRS detection observes only 14% of a MODIS pixel's ground area, a single wildfire perimeter is frequently recorded as multiple adjacent VIIRS detections, whereas MODIS records a single detection. This is why FirePulse performs <strong className="text-white">analytical aggregation onto a common 1km grid (EPSG:6933)</strong> rather than summing raw sensor counts.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* 1km Common Grid Overlap Analysis */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
           <h3 className="text-base font-bold text-white mb-1">Common 1km Analytical Grid Overlap Analysis</h3>

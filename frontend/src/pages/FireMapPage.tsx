@@ -46,6 +46,7 @@ export const FireMapPage: React.FC = () => {
   const [minFrp, setMinFrp] = useState<number>(0);
   const [showGrid, setShowGrid] = useState<boolean>(true);
   const [showPoints, setShowPoints] = useState<boolean>(true);
+  const [basemap, setBasemap] = useState<'dark' | 'satellite' | 'osm'>('dark');
   const [dateFrom, setDateFrom] = useState<string>('');
   const [dateTo, setDateTo] = useState<string>('');
 
@@ -97,8 +98,15 @@ export const FireMapPage: React.FC = () => {
             zoomControl={false}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              key={basemap}
+              attribution='&copy; OpenStreetMap, CARTO, ESRI World Imagery'
+              url={
+                basemap === 'satellite'
+                  ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+                  : basemap === 'osm'
+                  ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                  : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+              }
               maxZoom={19}
             />
 
@@ -231,6 +239,40 @@ export const FireMapPage: React.FC = () => {
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">Map Layer Controls</h3>
             </div>
             {loading && <span className="text-[11px] text-orange-400 animate-pulse font-medium">Loading...</span>}
+          </div>
+
+          {/* Basemap Switcher */}
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-400 mb-1.5">Map Imagery Style</label>
+            <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setBasemap('dark')}
+                className={`py-1 rounded-lg font-bold transition ${
+                  basemap === 'dark' ? 'bg-slate-800 text-orange-400' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Dark
+              </button>
+              <button
+                type="button"
+                onClick={() => setBasemap('satellite')}
+                className={`py-1 rounded-lg font-bold transition ${
+                  basemap === 'satellite' ? 'bg-slate-800 text-cyan-400' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Satellite
+              </button>
+              <button
+                type="button"
+                onClick={() => setBasemap('osm')}
+                className={`py-1 rounded-lg font-bold transition ${
+                  basemap === 'osm' ? 'bg-slate-800 text-emerald-400' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Street
+              </button>
+            </div>
           </div>
 
           {/* Sensor Filter */}
