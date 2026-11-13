@@ -7,6 +7,7 @@ from .comparison import comparison_bp
 from .trends import trends_bp
 from .anomalies import anomalies_bp
 from .export import export_bp
+from .global_routes import global_bp
 
 __all__ = [
     "health_bp",
@@ -17,6 +18,7 @@ __all__ = [
     "comparison_bp",
     "trends_bp",
     "anomalies_bp",
-    "export_bp"
+    "export_bp",
+    "global_bp"
 ]
 

@@ -172,3 +172,138 @@ export const formatAOIBounds = (aoi: AOIBounds): string => {
   return `${formatCoord(aoi.south, true)}–${formatCoord(aoi.north, true)}, ${formatCoord(aoi.west, false)}–${formatCoord(aoi.east, false)}`;
 };
 
+export interface ContinentItem {
+  key: string;
+  name: string;
+  observations_count: number;
+  active_cells_count: number;
+  mean_frp_mw: number;
+  bounds: [number, number, number, number]; // [west, south, east, north]
+}
+
+export interface CountryItem {
+  iso3: string;
+  name: string;
+  continent: string;
+  center_lat: number;
+  center_lon: number;
+  bounds: [number, number, number, number];
+  observations_count?: number;
+  active_cells_count?: number;
+}
+
+export interface GlobalSummary {
+  scope: string;
+  kpi: {
+    total_observations: number;
+    modis_observations: number;
+    viirs_observations: number;
+    active_grid_cells: number;
+    co_detected_cells: number;
+    active_countries_count: number;
+    active_continents_count: number;
+    latest_observation_utc: string | null;
+  };
+  continents: ContinentItem[];
+  top_countries: Array<{
+    iso3: string;
+    name: string;
+    continent: string;
+    observations_count: number;
+    active_cells_count: number;
+  }>;
+}
+
+export interface CountryAnalytics {
+  country: {
+    iso3: string;
+    name: string;
+    continent: string;
+    center_lat: number;
+    center_lon: number;
+    bounds: [number, number, number, number];
+  };
+  kpi: {
+    total_observations: number;
+    modis_observations: number;
+    viirs_observations: number;
+    active_grid_cells: number;
+    co_detected_cells: number;
+    mean_frp_mw: number;
+    max_frp_mw: number;
+  };
+  timeline: Array<{
+    date: string;
+    active_grid_cells: number;
+    modis_count: number;
+    viirs_count: number;
+    co_detected_cells: number;
+  }>;
+  sensor_split: {
+    modis: { count: number; mean_frp: number };
+    viirs: { count: number; mean_frp: number };
+  };
+}
+
+export interface MapDensityCluster {
+  lat: number;
+  lon: number;
+  total_detections: number;
+  modis_detections: number;
+  viirs_detections: number;
+  has_co_detection: boolean;
+  mean_frp: number;
+  point_count: number;
+}
+
+export interface MapDensityResponse {
+  grid_step_deg: number;
+  total_cells: number;
+  clusters: MapDensityCluster[];
+  sample_points: Observation[];
+}
+
+export interface TimeMachineFrame {
+  date_utc: string;
+  total_observations: number;
+  modis_count: number;
+  viirs_count: number;
+  active_cells: number;
+  top_continents: Array<{
+    continent: string;
+    count: number;
+  }>;
+  clusters: MapDensityCluster[];
+}
+
+export interface CoverageSource {
+  source_id: string;
+  sensor_family: string;
+  satellite: string;
+  processing_type: string;
+  nominal_start: string;
+  nominal_end: string;
+  status: string;
+  operational: boolean;
+  notes: string;
+}
+
+export interface CoverageMatrix {
+  generated_at_utc: string;
+  sources: CoverageSource[];
+  database_records: {
+    total_observations: number;
+    earliest_observation: string | null;
+    latest_observation: string | null;
+    modis_observations: number;
+    viirs_observations: number;
+    sensor_counts: Record<string, number>;
+  };
+  snpp_cessation_notice: {
+    satellite: string;
+    last_archive_date: string;
+    notes: string;
+  };
+}
+
+

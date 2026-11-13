@@ -6,7 +6,14 @@ import {
   GridCell, 
   CalendarResponse, 
   SensorComparisonData, 
-  AnomalyEvaluation 
+  AnomalyEvaluation,
+  GlobalSummary,
+  ContinentItem,
+  CountryItem,
+  CountryAnalytics,
+  MapDensityResponse,
+  TimeMachineFrame,
+  CoverageMatrix
 } from '../types';
 
 const api = axios.create({
@@ -177,6 +184,72 @@ export const FirePulseAPI = {
   // Data Quality
   getDataQuality: async () => {
     const res = await api.get('/data-quality');
+    return res.data;
+  },
+
+  // Global Fire Intelligence APIs
+  getGlobalSummary: async (days: number = 7): Promise<GlobalSummary> => {
+    const res = await api.get<GlobalSummary>('/global/summary', { params: { days } });
+    return res.data;
+  },
+
+  getContinents: async (): Promise<ContinentItem[]> => {
+    const res = await api.get<{ continents: ContinentItem[] }>('/global/continents');
+    return res.data.continents;
+  },
+
+  getCountries: async (continent?: string): Promise<CountryItem[]> => {
+    const res = await api.get<{ countries: CountryItem[] }>('/global/countries', { params: { continent } });
+    return res.data.countries;
+  },
+
+  getCountryAnalytics: async (iso3: string): Promise<CountryAnalytics> => {
+    const res = await api.get<CountryAnalytics>(`/global/country/${iso3}/summary`);
+    return res.data;
+  },
+
+  getMapDensity: async (params?: {
+    west?: number;
+    south?: number;
+    east?: number;
+    north?: number;
+    zoom?: number;
+  }): Promise<MapDensityResponse> => {
+    const res = await api.get<MapDensityResponse>('/global/map-density', { params });
+    return res.data;
+  },
+
+  getGlobalCoverage: async (): Promise<CoverageMatrix> => {
+    const res = await api.get<CoverageMatrix>('/global/coverage');
+    return res.data;
+  },
+
+  getTimeMachineFrames: async (params?: {
+    days?: number;
+    west?: number;
+    south?: number;
+    east?: number;
+    north?: number;
+  }): Promise<{ frames: TimeMachineFrame[]; total_days: number }> => {
+    const res = await api.get<{ frames: TimeMachineFrame[]; total_days: number }>('/global/timemachine', { params });
+    return res.data;
+  },
+
+  getCountryComparison: async (countries: string[]): Promise<{
+    countries: Array<{
+      iso3: string;
+      name: string;
+      continent: string;
+      total_observations: number;
+      modis_observations: number;
+      viirs_observations: number;
+      active_cells: number;
+      mean_frp: number;
+      detection_ratio: number;
+    }>;
+    metrics: Record<string, any>;
+  }> => {
+    const res = await api.get('/global/comparison', { params: { countries: countries.join(',') } });
     return res.data;
   },
 

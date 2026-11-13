@@ -7,7 +7,7 @@ from .config import Config
 from .db import init_db
 from .routes import (
     health_bp, data_bp, dashboard_bp, hotspots_bp,
-    calendar_bp, comparison_bp, trends_bp, anomalies_bp, export_bp
+    calendar_bp, comparison_bp, trends_bp, anomalies_bp, export_bp, global_bp
 )
 
 logging.basicConfig(
@@ -39,6 +39,7 @@ def create_app(config_class=Config) -> Flask:
     app.register_blueprint(trends_bp, url_prefix="/api")
     app.register_blueprint(anomalies_bp, url_prefix="/api")
     app.register_blueprint(export_bp, url_prefix="/api")
+    app.register_blueprint(global_bp, url_prefix="/api")
 
     # Serve built frontend or informative interactive portal
     dist_dir = Config.WORKSPACE_DIR / "frontend" / "dist"

@@ -1,0 +1,450 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Globe2, 
+  MapPin, 
+  Search, 
+  Flame, 
+  Layers, 
+  BarChart3, 
+  ArrowUpRight, 
+  Check, 
+  Info,
+  Calendar,
+  Activity,
+  ChevronRight
+} from 'lucide-react';
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  Legend 
+} from 'recharts';
+import { Header } from '../components/Header';
+import { FirePulseAPI } from '../services/api';
+import { useAOI } from '../context/AOIContext';
+import { useToast } from '../context/ToastContext';
+import { 
+  GlobalSummary, 
+  CountryItem, 
+  ContinentItem, 
+  CountryAnalytics, 
+  formatCoord, 
+  AOIBounds 
+} from '../types';
+
+export const GlobalExplorerPage: React.FC = () => {
+  const { setAOI, triggerRefresh } = useAOI();
+  const { showToast } = useToast();
+
+  const [loading, setLoading] = useState(true);
+  const [globalSummary, setGlobalSummary] = useState<GlobalSummary | null>(null);
+  const [continents, setContinents] = useState<ContinentItem[]>([]);
+  const [countries, setCountries] = useState<CountryItem[]>([]);
+  const [selectedContinent, setSelectedContinent] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Selected Country for drilldown
+  const [selectedIso3, setSelectedIso3] = useState<string>('IND');
+  const [countryAnalytics, setCountryAnalytics] = useState<CountryAnalytics | null>(null);
+  const [loadingCountry, setLoadingCountry] = useState(false);
+
+  useEffect(() => {
+    loadGlobalData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedIso3) {
+      loadCountryData(selectedIso3);
+    }
+  }, [selectedIso3]);
+
+  const loadGlobalData = async () => {
+    setLoading(true);
+    try {
+      const [sum, contList, countList] = await Promise.all([
+        FirePulseAPI.getGlobalSummary(7).catch(() => null),
+        FirePulseAPI.getContinents().catch(() => []),
+        FirePulseAPI.getCountries().catch(() => [])
+      ]);
+      setGlobalSummary(sum);
+      setContinents(contList);
+      setCountries(countList);
+    } catch (err) {
+      console.error('Error loading global data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadCountryData = async (iso3: string) => {
+    setLoadingCountry(true);
+    try {
+      const data = await FirePulseAPI.getCountryAnalytics(iso3);
+      setCountryAnalytics(data);
+    } catch (err) {
+      console.error(`Error loading country analytics for ${iso3}:`, err);
+    } finally {
+      setLoadingCountry(false);
+    }
+  };
+
+  const handleSetAOIToCountry = (c: CountryItem | CountryAnalytics['country']) => {
+    const newAoi: AOIBounds = {
+      name: `${c.name} (${c.iso3})`,
+      west: c.bounds[0],
+      south: c.bounds[1],
+      east: c.bounds[2],
+      north: c.bounds[3]
+    };
+    setAOI(newAoi);
+    triggerRefresh();
+    showToast('success', 'AOI Scope Updated', `Monitoring focused on ${c.name}`);
+  };
+
+  const filteredCountries = countries.filter(c => {
+    const matchesContinent = selectedContinent === 'all' || c.continent.toLowerCase() === selectedContinent.toLowerCase();
+    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          c.iso3.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesContinent && matchesSearch;
+  });
+
+  return (
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
+      <Header 
+        title="Global Fire Explorer" 
+        subtitle="Worldwide country and continental active fire analytics" 
+      />
+
+      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* PAGE INTRO */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
+              Global Scale / Continental &amp; Country Breakdown
+            </span>
+            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
+              Earth at a glance.
+            </h1>
+            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+              Cross-sensor active fire detections across all seven continents and 30+ monitored countries.
+              Select any nation to inspect granular 1km grid harmonizations and sensor attribution.
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => {
+                setAOI({ name: 'Entire World', west: -180, south: -90, east: 180, north: 90 });
+                triggerRefresh();
+                showToast('info', 'Global Scope', 'Application reset to Worldwide coverage');
+              }}
+              className="flex items-center space-x-1.5 px-3 py-1.5 bg-white border border-[#E1DED5] rounded-md text-xs font-medium text-[#252923] hover:bg-[#FAF8F3]"
+            >
+              <Globe2 className="w-3.5 h-3.5 text-[#E65C35]" />
+              <span>Set Global Scope</span>
+            </button>
+          </div>
+        </div>
+
+        {/* WORLDWIDE KPI STRIP */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-[#777970] font-semibold">Active Countries</span>
+              <Globe2 className="w-4 h-4 text-[#E65C35]" />
+            </div>
+            <div className="text-2xl font-serif font-bold text-[#252923]">
+              {loading ? '—' : (globalSummary?.kpi.active_countries_count ?? countries.length)}
+            </div>
+            <div className="text-[11px] text-[#252923] font-medium mt-0.5">Monitored Sovereign Borders</div>
+            <p className="text-[10px] text-[#777970] mt-1 leading-tight">
+              Territories with recorded satellite fire hot spots in database.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-[#C27B26] font-semibold">Global MODIS</span>
+              <span className="w-2 h-2 rounded-full bg-[#C27B26]"></span>
+            </div>
+            <div className="text-2xl font-serif font-bold text-[#252923]">
+              {loading ? '—' : (globalSummary?.kpi.modis_observations.toLocaleString() ?? '0')}
+            </div>
+            <div className="text-[11px] text-[#252923] font-medium mt-0.5">Terra &amp; Aqua Hotspots</div>
+            <p className="text-[10px] text-[#777970] mt-1 leading-tight">
+              1 km nadir resolution thermal detections globally.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-[#318C9B] font-semibold">Global VIIRS</span>
+              <span className="w-2 h-2 rounded-full bg-[#318C9B]"></span>
+            </div>
+            <div className="text-2xl font-serif font-bold text-[#252923]">
+              {loading ? '—' : (globalSummary?.kpi.viirs_observations.toLocaleString() ?? '0')}
+            </div>
+            <div className="text-[11px] text-[#252923] font-medium mt-0.5">NOAA-20/21 &amp; S-NPP Hotspots</div>
+            <p className="text-[10px] text-[#777970] mt-1 leading-tight">
+              375 m I-band detections capturing finer active flame fronts.
+            </p>
+          </div>
+
+          <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-[#54785E] font-semibold">Harmonized Grid Cells</span>
+              <Layers className="w-4 h-4 text-[#54785E]" />
+            </div>
+            <div className="text-2xl font-serif font-bold text-[#252923]">
+              {loading ? '—' : (globalSummary?.kpi.active_grid_cells.toLocaleString() ?? '0')}
+            </div>
+            <div className="text-[11px] text-[#252923] font-medium mt-0.5">1 km Cylindrical Equal-Area</div>
+            <p className="text-[10px] text-[#777970] mt-1 leading-tight">
+              Standardized spatial binning preventing double-counting.
+            </p>
+          </div>
+        </div>
+
+        {/* CONTINENT SELECTOR PILLS */}
+        <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-serif font-semibold text-[#252923]">Continental Filter</span>
+            <span className="text-[11px] font-mono text-[#777970]">{filteredCountries.length} countries matching</span>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedContinent('all')}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                selectedContinent === 'all'
+                  ? 'bg-[#252923] text-white shadow-sm'
+                  : 'bg-[#FAF8F3] text-[#777970] hover:text-[#252923] hover:bg-[#EBE8DF]'
+              }`}
+            >
+              All Continents
+            </button>
+            {continents.map((cont) => (
+              <button
+                key={cont.key}
+                onClick={() => setSelectedContinent(cont.key)}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                  selectedContinent.toLowerCase() === cont.key.toLowerCase()
+                    ? 'bg-[#E65C35] text-white shadow-sm'
+                    : 'bg-[#FAF8F3] text-[#777970] hover:text-[#252923] hover:bg-[#EBE8DF]'
+                }`}
+              >
+                {cont.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* TWO-COLUMN EXPLORER: COUNTRY LIST (LEFT) & COUNTRY INSPECTOR (RIGHT) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* LEFT: COUNTRY LIST */}
+          <div className="lg:col-span-4 bg-white border border-[#E1DED5] rounded-lg p-4 shadow-card space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E1DED5] pb-3">
+              <h3 className="font-serif font-semibold text-sm text-[#252923]">Country Directory</h3>
+              <span className="text-[10px] font-mono text-[#777970] uppercase">Select to Inspect</span>
+            </div>
+
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#777970]" />
+              <input
+                type="text"
+                placeholder="Search by country or ISO code..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#FAF8F3] border border-[#E1DED5] rounded text-[#252923] placeholder-[#A0A29A] focus:outline-none focus:border-[#E65C35]"
+              />
+            </div>
+
+            <div className="space-y-1.5 max-h-[500px] overflow-y-auto pr-1">
+              {filteredCountries.map((c) => {
+                const isSelected = selectedIso3 === c.iso3;
+                return (
+                  <button
+                    key={c.iso3}
+                    onClick={() => setSelectedIso3(c.iso3)}
+                    className={`w-full text-left p-2.5 rounded-md text-xs border transition-all flex items-center justify-between ${
+                      isSelected
+                        ? 'border-[#E65C35] bg-[#FCECE7] text-[#252923]'
+                        : 'border-[#E1DED5] bg-white hover:bg-[#FAF8F3] text-[#252923]'
+                    }`}
+                  >
+                    <div>
+                      <div className="font-semibold text-xs flex items-center space-x-1.5">
+                        <span>{c.name}</span>
+                        <span className="text-[10px] font-mono px-1 py-0.2 bg-[#EBE8DF] rounded text-[#777970]">{c.iso3}</span>
+                      </div>
+                      <div className="text-[10px] text-[#777970] font-mono capitalize">
+                        {c.continent} • {formatCoord(c.center_lat, true)}, {formatCoord(c.center_lon, false)}
+                      </div>
+                    </div>
+                    <ChevronRight className={`w-3.5 h-3.5 ${isSelected ? 'text-[#E65C35]' : 'text-[#A0A29A]'}`} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RIGHT: DETAILED COUNTRY INSPECTOR */}
+          <div className="lg:col-span-8 space-y-6">
+            {countryAnalytics ? (
+              <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-6">
+                
+                {/* Country Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E1DED5] pb-4">
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xl font-serif font-bold text-[#252923]">
+                        {countryAnalytics.country.name}
+                      </span>
+                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#FAF8F3] border border-[#E1DED5] font-semibold text-[#252923]">
+                        {countryAnalytics.country.iso3}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#777970] font-mono mt-0.5">
+                      Continent: <span className="capitalize">{countryAnalytics.country.continent}</span> • 
+                      Center: {formatCoord(countryAnalytics.country.center_lat, true)}, {formatCoord(countryAnalytics.country.center_lon, false)}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => handleSetAOIToCountry(countryAnalytics.country)}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#E65C35] hover:bg-[#D44F29] text-white text-xs font-semibold rounded-md shadow-sm transition-colors shrink-0"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>Focus Dashboard on {countryAnalytics.country.name}</span>
+                  </button>
+                </div>
+
+                {/* Country KPI Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
+                    <div className="text-[10px] font-mono uppercase text-[#777970]">Total Observations</div>
+                    <div className="text-lg font-serif font-bold text-[#252923] mt-0.5">
+                      {countryAnalytics.kpi.total_observations.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-[#777970]">Active hot spots</div>
+                  </div>
+
+                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
+                    <div className="text-[10px] font-mono uppercase text-[#C27B26]">MODIS (1km)</div>
+                    <div className="text-lg font-serif font-bold text-[#C27B26] mt-0.5">
+                      {countryAnalytics.kpi.modis_observations.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-[#777970]">Terra + Aqua</div>
+                  </div>
+
+                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
+                    <div className="text-[10px] font-mono uppercase text-[#318C9B]">VIIRS (375m)</div>
+                    <div className="text-lg font-serif font-bold text-[#318C9B] mt-0.5">
+                      {countryAnalytics.kpi.viirs_observations.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-[#777970]">NOAA-20/21</div>
+                  </div>
+
+                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
+                    <div className="text-[10px] font-mono uppercase text-[#54785E]">Co-Detected Cells</div>
+                    <div className="text-lg font-serif font-bold text-[#54785E] mt-0.5">
+                      {countryAnalytics.kpi.co_detected_cells.toLocaleString()}
+                    </div>
+                    <div className="text-[10px] text-[#777970]">Dual confirmation</div>
+                  </div>
+                </div>
+
+                {/* Fire Radiative Power (MW) Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#FAF8F3] p-3.5 rounded-md border border-[#E1DED5]">
+                  <div className="flex items-center space-x-3">
+                    <Activity className="w-5 h-5 text-[#E65C35]" />
+                    <div>
+                      <div className="text-xs font-semibold text-[#252923]">Mean Fire Radiative Power</div>
+                      <div className="text-sm font-serif font-bold text-[#E65C35]">
+                        {countryAnalytics.kpi.mean_frp_mw.toFixed(1)} MW
+                      </div>
+                      <div className="text-[10px] text-[#777970]">Average intensity per detection</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Flame className="w-5 h-5 text-[#BD493C]" />
+                    <div>
+                      <div className="text-xs font-semibold text-[#252923]">Peak Radiative Power (Max)</div>
+                      <div className="text-sm font-serif font-bold text-[#BD493C]">
+                        {countryAnalytics.kpi.max_frp_mw.toFixed(1)} MW
+                      </div>
+                      <div className="text-[10px] text-[#777970]">Highest energetic event recorded</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 14-Day Timeline Bar Chart */}
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-serif font-semibold text-[#252923]">
+                      14-Day Daily Hot Spot Timeline ({countryAnalytics.country.name})
+                    </h4>
+                    <span className="text-[10px] font-mono text-[#777970]">MODIS vs VIIRS</span>
+                  </div>
+
+                  <div className="h-56 w-full">
+                    {countryAnalytics.timeline.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={countryAnalytics.timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fontSize: 10, fill: '#777970' }} 
+                            tickFormatter={(v) => v.slice(5)}
+                          />
+                          <YAxis tick={{ fontSize: 10, fill: '#777970' }} />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: '#FFFFFF', 
+                              borderColor: '#E1DED5', 
+                              borderRadius: '6px', 
+                              fontSize: '11px',
+                              color: '#252923' 
+                            }} 
+                          />
+                          <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '6px' }} />
+                          <Bar dataKey="modis_count" name="MODIS (1km)" fill="#C27B26" radius={[2, 2, 0, 0]} />
+                          <Bar dataKey="viirs_count" name="VIIRS (375m)" fill="#318C9B" radius={[2, 2, 0, 0]} />
+                          <Bar dataKey="active_grid_cells" name="1km Active Cells" fill="#E65C35" radius={[2, 2, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center text-xs text-[#777970] bg-[#FAF8F3] rounded border border-dashed border-[#E1DED5]">
+                        No timeline data recorded for this country in the current database.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sensor Resolution Note */}
+                <div className="p-3 bg-[#FAF8F3] rounded-md border border-[#E1DED5] flex items-start space-x-2.5 text-[11px] text-[#777970]">
+                  <Info className="w-4 h-4 text-[#777970] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-[#252923]">Sensor Harmonization Principle: </span>
+                    VIIRS typically detects 3x to 5x more hot spots than MODIS due to its 375m footprint.
+                    In FirePulse, both streams are aggregated into 1km equal-area cells to ensure consistent historical comparability.
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              <div className="bg-white border border-[#E1DED5] rounded-lg p-12 text-center text-xs text-[#777970]">
+                {loadingCountry ? 'Loading country data...' : 'Select a country on the left to inspect its active fire metrics.'}
+              </div>
+            )}
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  );
+};

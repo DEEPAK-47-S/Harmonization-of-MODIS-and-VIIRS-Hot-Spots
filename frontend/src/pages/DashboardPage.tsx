@@ -36,7 +36,7 @@ import { Header } from '../components/Header';
 import { useAOI } from '../context/AOIContext';
 import { useToast } from '../context/ToastContext';
 import { FirePulseAPI } from '../services/api';
-import { DashboardSummary, Observation, GridCell, formatAOIBounds, formatCoord } from '../types';
+import { DashboardSummary, Observation, GridCell, GlobalSummary, MapDensityCluster, formatAOIBounds, formatCoord } from '../types';
 
 // Map auto-fitter helper
 const MapBoundsFitter: React.FC<{ 
@@ -73,6 +73,8 @@ export const DashboardPage: React.FC = () => {
   const { showToast } = useToast();
 
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [globalSummary, setGlobalSummary] = useState<GlobalSummary | null>(null);
+  const [densityClusters, setDensityClusters] = useState<MapDensityCluster[]>([]);
   const [hotspots, setHotspots] = useState<Observation[]>([]);
   const [gridCells, setGridCells] = useState<GridCell[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -90,6 +92,8 @@ export const DashboardPage: React.FC = () => {
   const [tableSortAsc, setTableSortAsc] = useState<boolean>(false);
   const pageSize = 8;
 
+  const isWorld = aoi.name === 'Entire World' || (aoi.west <= -170 && aoi.east >= 170);
+
   useEffect(() => {
     loadDashboardData();
   }, [aoi, refreshKey]);
@@ -97,21 +101,25 @@ export const DashboardPage: React.FC = () => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [sumData, spotData] = await Promise.all([
+      const [sumData, spotData, globData, densData] = await Promise.all([
         FirePulseAPI.getDashboardSummary(aoi),
         FirePulseAPI.getHotspots({
           west: aoi.west,
           south: aoi.south,
           east: aoi.east,
           north: aoi.north,
-          limit: 150,
-          include_grid: true
-        }).catch(() => ({ hotspots: [], grid_cells: [] }))
+          limit: isWorld ? 0 : 150,
+          include_grid: !isWorld
+        }).catch(() => ({ hotspots: [], grid_cells: [] })),
+        isWorld ? FirePulseAPI.getGlobalSummary(7).catch(() => null) : Promise.resolve(null),
+        isWorld ? FirePulseAPI.getMapDensity({ zoom: 3 }).catch(() => ({ clusters: [] })) : Promise.resolve({ clusters: [] })
       ]);
 
       setSummary(sumData);
       setHotspots(spotData.hotspots || []);
       setGridCells(spotData.grid_cells || []);
+      setGlobalSummary(globData);
+      setDensityClusters(densData?.clusters || []);
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
     } finally {
@@ -185,13 +193,15 @@ export const DashboardPage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
           <div className="space-y-1.5">
             <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
-              Earth Observation / Fire Activity
+              {isWorld ? 'Global Earth Observation / Planetary Fire Intel' : `Regional Earth Observation / ${aoi.name}`}
             </span>
             <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
-              Fire activity, in focus.
+              {isWorld ? 'One planet. A clearer picture of fire activity.' : `Fire activity, in focus: ${aoi.name}`}
             </h1>
             <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
-              Explore where satellite observations detect burning activity across the planet, harmonized to a common 1km grid.
+              {isWorld 
+                ? 'Worldwide active fire detections across all seven continents, harmonized from NASA MODIS (Terra/Aqua) and VIIRS (NOAA-20/21/S-NPP) into a standardized 1km equal-area grid.' 
+                : `Explore where satellite observations detect burning activity across ${aoi.name}, harmonized to a common 1km grid.`}
             </p>
           </div>
 
@@ -202,7 +212,7 @@ export const DashboardPage: React.FC = () => {
               className="flex items-center space-x-2 px-3.5 py-2 rounded-md text-xs font-semibold bg-[#E65C35] hover:bg-[#D44F29] text-white transition-colors shadow-sm disabled:opacity-50"
             >
               <Play className={`w-3.5 h-3.5 ${ingesting ? 'animate-spin' : ''}`} />
-              <span>{ingesting ? 'Fetching NASA FIRMS...' : 'Sync NASA FIRMS (3 Days)'}</span>
+              <span>{ingesting ? 'Fetching NASA FIRMS...' : isWorld ? 'Sync Global NASA (3 Days)' : 'Sync Region NASA (3 Days)'}</span>
             </button>
             <Link
               to="/settings"
@@ -346,8 +356,8 @@ export const DashboardPage: React.FC = () => {
 
             <div className="h-[380px] w-full relative">
               <MapContainer
-                center={[aoi.south + (aoi.north - aoi.south) / 2, aoi.west + (aoi.east - aoi.west) / 2]}
-                zoom={7}
+                center={isWorld ? [20, 0] : [aoi.south + (aoi.north - aoi.south) / 2, aoi.west + (aoi.east - aoi.west) / 2]}
+                zoom={isWorld ? 2 : 7}
                 style={{ height: '100%', width: '100%' }}
                 attributionControl={true}
               >
@@ -373,24 +383,73 @@ export const DashboardPage: React.FC = () => {
                   />
                 )}
 
-                <MapBoundsFitter aoi={aoi} hotspots={visibleHotspots} />
+                {!isWorld && <MapBoundsFitter aoi={aoi} hotspots={visibleHotspots} />}
 
-                {/* AOI Bounding Box */}
-                <Rectangle
-                  bounds={[
-                    [aoi.south, aoi.west],
-                    [aoi.north, aoi.east]
-                  ]}
-                  pathOptions={{
-                    color: '#E65C35',
-                    weight: 1.5,
-                    dashArray: '4, 4',
-                    fill: false
-                  }}
-                />
+                {/* AOI Bounding Box for regional views */}
+                {!isWorld && (
+                  <Rectangle
+                    bounds={[
+                      [aoi.south, aoi.west],
+                      [aoi.north, aoi.east]
+                    ]}
+                    pathOptions={{
+                      color: '#E65C35',
+                      weight: 1.5,
+                      dashArray: '4, 4',
+                      fill: false
+                    }}
+                  />
+                )}
 
-                {/* 1km Grid Cells */}
-                {showGrid && gridCells.map(cell => {
+                {/* World Mode: Macro Density Clusters */}
+                {isWorld && densityClusters.map((c, idx) => {
+                  const radius = Math.min(20, Math.max(5, Math.sqrt(c.total_detections) * 2.5));
+                  const color = c.has_co_detection 
+                    ? '#BD493C' 
+                    : c.viirs_detections > 0 
+                    ? '#318C9B' 
+                    : '#C27B26';
+
+                  return (
+                    <CircleMarker
+                      key={`global-clust-${idx}`}
+                      center={[c.lat, c.lon]}
+                      radius={radius}
+                      pathOptions={{
+                        fillColor: color,
+                        fillOpacity: 0.75,
+                        color: '#FFFFFF',
+                        weight: 1
+                      }}
+                    >
+                      <Popup>
+                        <div className="p-2 space-y-1 text-xs font-sans text-[#252923]">
+                          <div className="font-bold border-b pb-1">
+                            {c.total_detections} Total Detections
+                          </div>
+                          <div className="text-[10px] text-[#777970] font-mono">
+                            {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
+                          </div>
+                          <div className="flex justify-between text-[11px] pt-1">
+                            <span className="text-[#C27B26]">MODIS: {c.modis_detections}</span>
+                            <span className="text-[#318C9B]">VIIRS: {c.viirs_detections}</span>
+                          </div>
+                          {c.has_co_detection && (
+                            <div className="text-[10px] text-[#BD493C] font-semibold">
+                              ✓ Cross-Sensor Co-Detection
+                            </div>
+                          )}
+                          <div className="text-[10px] text-[#777970]">
+                            Mean FRP: {c.mean_frp.toFixed(1)} MW
+                          </div>
+                        </div>
+                      </Popup>
+                    </CircleMarker>
+                  );
+                })}
+
+                {/* Regional Mode: 1km Grid Cells */}
+                {!isWorld && showGrid && gridCells.map(cell => {
                   const b = cell.cell_bounds_wgs84;
                   if (!b) return null;
                   const isCo = cell.cross_sensor_presence;
@@ -418,8 +477,8 @@ export const DashboardPage: React.FC = () => {
                   );
                 })}
 
-                {/* Observation Points */}
-                {visibleHotspots.map(h => {
+                {/* Regional Mode: Granular Observation Points */}
+                {!isWorld && visibleHotspots.map(h => {
                   const isModis = h.sensor_family === 'MODIS';
                   const color = isModis ? '#C27B26' : '#318C9B';
                   return (
@@ -503,37 +562,77 @@ export const DashboardPage: React.FC = () => {
 
               {/* Summary Items */}
               <div className="space-y-3 text-xs">
-                <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
-                  <span className="text-[10px] font-mono uppercase text-[#777970]">Latest UTC Acquisition</span>
-                  <div className="font-mono font-medium text-sm text-[#252923] mt-0.5">
-                    {summary?.kpi.latest_observation_utc ? summary.kpi.latest_observation_utc.replace('T', ' ').slice(0, 16) + ' UTC' : 'No records recorded'}
+                {isWorld && globalSummary && globalSummary.top_countries.length > 0 ? (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-mono uppercase text-[#777970] font-semibold">Top Active Nations</span>
+                    <div className="space-y-1.5">
+                      {globalSummary.top_countries.slice(0, 4).map((tc) => (
+                        <div key={tc.iso3} className="p-2 bg-[#FAF8F3] border border-[#E1DED5] rounded flex items-center justify-between">
+                          <div>
+                            <span className="font-semibold text-[#252923] text-xs">{tc.name}</span>
+                            <span className="text-[10px] font-mono text-[#777970] ml-1.5">{tc.iso3}</span>
+                          </div>
+                          <span className="text-[11px] font-mono font-bold text-[#E65C35]">
+                            {tc.observations_count.toLocaleString()} pts
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
+                      <span className="text-[10px] font-mono uppercase text-[#777970]">Latest UTC Acquisition</span>
+                      <div className="font-mono font-medium text-sm text-[#252923] mt-0.5">
+                        {summary?.kpi.latest_observation_utc ? summary.kpi.latest_observation_utc.replace('T', ' ').slice(0, 16) + ' UTC' : 'No records recorded'}
+                      </div>
+                    </div>
 
-                <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
-                  <span className="text-[10px] font-mono uppercase text-[#777970]">Active Area of Interest</span>
-                  <div className="font-semibold text-xs text-[#252923] mt-0.5">{aoi.name}</div>
-                  <div className="font-mono text-[10px] text-[#777970]">{formatAOIBounds(aoi)}</div>
-                </div>
+                    <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
+                      <span className="text-[10px] font-mono uppercase text-[#777970]">Active Area of Interest</span>
+                      <div className="font-semibold text-xs text-[#252923] mt-0.5">{aoi.name}</div>
+                      <div className="font-mono text-[10px] text-[#777970]">{formatAOIBounds(aoi)}</div>
+                    </div>
+                  </>
+                )}
 
                 <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
                   <span className="text-[10px] font-mono uppercase text-[#777970]">Analytical Projection</span>
                   <div className="font-mono font-medium text-xs text-[#252923] mt-0.5">EPSG:6933 Equal-Area</div>
                   <p className="text-[10px] text-[#777970] mt-0.5">
-                    Guarantees equal ground surface area (1 km²) per grid cell.
+                    Guarantees equal ground surface area (1 km²) per grid cell worldwide.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-[#E1DED5]">
-              <Link 
-                to="/comparison"
-                className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors"
-              >
-                <span>View Full Sensor Comparison</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
+            <div className="pt-2 border-t border-[#E1DED5] space-y-1.5">
+              {isWorld ? (
+                <>
+                  <Link 
+                    to="/global-explorer"
+                    className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors"
+                  >
+                    <span>Explore Continents &amp; Countries</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                  <Link 
+                    to="/time-machine"
+                    className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] text-xs font-semibold text-[#E65C35] border border-[#E1DED5] transition-colors"
+                  >
+                    <span>Launch Global Time Machine</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </>
+              ) : (
+                <Link 
+                  to="/comparison"
+                  className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors"
+                >
+                  <span>View Full Sensor Comparison</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
             </div>
           </div>
         </div>

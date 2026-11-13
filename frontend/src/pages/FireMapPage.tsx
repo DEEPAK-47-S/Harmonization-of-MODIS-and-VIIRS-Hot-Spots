@@ -24,7 +24,7 @@ import {
 import { Header } from '../components/Header';
 import { useAOI } from '../context/AOIContext';
 import { FirePulseAPI } from '../services/api';
-import { Observation, GridCell, formatCoord } from '../types';
+import { Observation, GridCell, MapDensityCluster, formatCoord } from '../types';
 
 // Map Auto-Fitter
 const MapFitter: React.FC<{ 
@@ -60,6 +60,7 @@ export const FireMapPage: React.FC = () => {
   const { aoi, refreshKey } = useAOI();
   const [hotspots, setHotspots] = useState<Observation[]>([]);
   const [gridCells, setGridCells] = useState<GridCell[]>([]);
+  const [densityClusters, setDensityClusters] = useState<MapDensityCluster[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
   // Basemap style: 'light' (ESRI Light Gray), 'satellite' (ESRI World Imagery), 'osm' (OpenStreetMap)
@@ -78,6 +79,8 @@ export const FireMapPage: React.FC = () => {
   const [selectedObs, setSelectedObs] = useState<Observation | null>(null);
   const [copiedCoord, setCopiedCoord] = useState<boolean>(false);
 
+  const isWorld = aoi.name === 'Entire World' || (aoi.west <= -170 && aoi.east >= 170);
+
   useEffect(() => {
     fetchHotspots();
   }, [aoi, refreshKey, sensorFilter, minFrp, showGrid, dateFrom, dateTo]);
@@ -85,20 +88,28 @@ export const FireMapPage: React.FC = () => {
   const fetchHotspots = async () => {
     setLoading(true);
     try {
-      const res = await FirePulseAPI.getHotspots({
-        west: aoi.west,
-        south: aoi.south,
-        east: aoi.east,
-        north: aoi.north,
-        sensor: sensorFilter === 'ALL' ? undefined : sensorFilter,
-        min_frp: minFrp > 0 ? minFrp : undefined,
-        include_grid: showGrid,
-        date_from: dateFrom || undefined,
-        date_to: dateTo || undefined,
-        limit: 5000
-      });
-      setHotspots(res.hotspots);
-      setGridCells(res.grid_cells || []);
+      if (isWorld) {
+        const dens = await FirePulseAPI.getMapDensity({ zoom: 3 });
+        setDensityClusters(dens.clusters || []);
+        setHotspots([]);
+        setGridCells([]);
+      } else {
+        const res = await FirePulseAPI.getHotspots({
+          west: aoi.west,
+          south: aoi.south,
+          east: aoi.east,
+          north: aoi.north,
+          sensor: sensorFilter === 'ALL' ? undefined : sensorFilter,
+          min_frp: minFrp > 0 ? minFrp : undefined,
+          include_grid: showGrid,
+          date_from: dateFrom || undefined,
+          date_to: dateTo || undefined,
+          limit: 5000
+        });
+        setHotspots(res.hotspots);
+        setGridCells(res.grid_cells || []);
+        setDensityClusters([]);
+      }
     } catch (err) {
       console.error('Failed to load hotspots:', err);
     } finally {
@@ -135,8 +146,8 @@ export const FireMapPage: React.FC = () => {
         {/* Full Screen Map Canvas */}
         <div className="flex-1 h-full w-full relative z-0">
           <MapContainer
-            center={[centerLat, centerLon]}
-            zoom={9}
+            center={isWorld ? [20, 0] : [centerLat, centerLon]}
+            zoom={isWorld ? 2 : 9}
             className="h-full w-full"
             zoomControl={false}
           >
@@ -184,23 +195,72 @@ export const FireMapPage: React.FC = () => {
               />
             )}
 
-            <MapFitter aoi={aoi} hotspots={hotspots} />
+            {!isWorld && <MapFitter aoi={aoi} hotspots={hotspots} />}
 
-            {/* AOI Bounding Box */}
-            <Rectangle
-              bounds={[
-                [aoi.south, aoi.west],
-                [aoi.north, aoi.east]
-              ]}
-              pathOptions={{
-                color: '#E65C35',
-                weight: 1.5,
-                fill: true,
-                fillColor: '#E65C35',
-                fillOpacity: 0.04,
-                dashArray: '5, 5'
-              }}
-            />
+            {/* AOI Bounding Box for regional view */}
+            {!isWorld && (
+              <Rectangle
+                bounds={[
+                  [aoi.south, aoi.west],
+                  [aoi.north, aoi.east]
+                ]}
+                pathOptions={{
+                  color: '#E65C35',
+                  weight: 1.5,
+                  fill: true,
+                  fillColor: '#E65C35',
+                  fillOpacity: 0.04,
+                  dashArray: '5, 5'
+                }}
+              />
+            )}
+
+            {/* World Scope: Macro Density Clusters */}
+            {isWorld && densityClusters.map((c, idx) => {
+              const radius = Math.min(22, Math.max(6, Math.sqrt(c.total_detections) * 2.8));
+              const color = c.has_co_detection 
+                ? '#BD493C' 
+                : c.viirs_detections > 0 
+                ? '#318C9B' 
+                : '#C27B26';
+
+              return (
+                <CircleMarker
+                  key={`world-map-clust-${idx}`}
+                  center={[c.lat, c.lon]}
+                  radius={radius}
+                  pathOptions={{
+                    fillColor: color,
+                    fillOpacity: 0.75,
+                    color: '#FFFFFF',
+                    weight: 1.5
+                  }}
+                >
+                  <Popup>
+                    <div className="p-2 space-y-1.5 text-xs font-sans text-[#252923]">
+                      <div className="font-bold border-b border-[#E1DED5] pb-1">
+                        {c.total_detections} Fire Detections
+                      </div>
+                      <div className="text-[10px] text-[#777970] font-mono">
+                        Coordinates: {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
+                      </div>
+                      <div className="flex justify-between text-[11px] pt-1">
+                        <span className="text-[#C27B26]">MODIS: {c.modis_detections}</span>
+                        <span className="text-[#318C9B]">VIIRS: {c.viirs_detections}</span>
+                      </div>
+                      {c.has_co_detection && (
+                        <div className="text-[10px] text-[#BD493C] font-semibold">
+                          ✓ Cross-Sensor Co-Detection
+                        </div>
+                      )}
+                      <div className="text-[10px] text-[#777970]">
+                        Mean FRP: {c.mean_frp.toFixed(1)} MW
+                      </div>
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
 
             {/* Harmonized 1km Grid Cells Overlay (EPSG:6933) */}
             {showGrid && gridCells.map((cell) => {
@@ -332,14 +392,18 @@ export const FireMapPage: React.FC = () => {
           <div className="flex items-center space-x-2 pointer-events-auto">
             <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs font-medium text-[#252923]">
               <Flame className="w-3.5 h-3.5 text-[#E65C35]" />
-              <span className="font-bold">{hotspots.length}</span>
-              <span className="text-[11px] text-[#777970]">Hotspots</span>
+              <span className="font-bold">
+                {isWorld ? densityClusters.reduce((acc, c) => acc + c.total_detections, 0).toLocaleString() : hotspots.length.toLocaleString()}
+              </span>
+              <span className="text-[11px] text-[#777970]">{isWorld ? 'Global Detections' : 'Hotspots'}</span>
             </div>
 
             <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs font-medium text-[#252923]">
               <Grid className="w-3.5 h-3.5 text-[#54785E]" />
-              <span className="font-bold">{gridCells.length}</span>
-              <span className="text-[11px] text-[#777970]">1km Cells</span>
+              <span className="font-bold">
+                {isWorld ? densityClusters.length.toLocaleString() : gridCells.length.toLocaleString()}
+              </span>
+              <span className="text-[11px] text-[#777970]">{isWorld ? 'Macro Clusters' : '1km Cells'}</span>
             </div>
 
             {loading && (

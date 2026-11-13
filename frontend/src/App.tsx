@@ -4,11 +4,15 @@ import { AOIProvider } from './context/AOIContext';
 import { ToastProvider } from './context/ToastContext';
 import { Sidebar } from './components/Sidebar';
 import { DashboardPage } from './pages/DashboardPage';
+import { GlobalExplorerPage } from './pages/GlobalExplorerPage';
 import { FireMapPage } from './pages/FireMapPage';
 import { CalendarPage } from './pages/CalendarPage';
+import { TimeMachinePage } from './pages/TimeMachinePage';
 import { ComparisonPage } from './pages/ComparisonPage';
+import { CountryComparisonPage } from './pages/CountryComparisonPage';
 import { TrendsPage } from './pages/TrendsPage';
 import { InsightsPage } from './pages/InsightsPage';
+import { CoverageMatrixPage } from './pages/CoverageMatrixPage';
 import { DataSourcesPage } from './pages/DataSourcesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { AboutPage } from './pages/AboutPage';
@@ -24,11 +28,15 @@ export const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/global-explorer" element={<GlobalExplorerPage />} />
                 <Route path="/fire-map" element={<FireMapPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/time-machine" element={<TimeMachinePage />} />
                 <Route path="/comparison" element={<ComparisonPage />} />
+                <Route path="/country-comparison" element={<CountryComparisonPage />} />
                 <Route path="/trends" element={<TrendsPage />} />
                 <Route path="/insights" element={<InsightsPage />} />
+                <Route path="/coverage" element={<CoverageMatrixPage />} />
                 <Route path="/data-sources" element={<DataSourcesPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

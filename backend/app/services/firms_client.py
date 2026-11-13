@@ -99,7 +99,9 @@ class FirmsClient:
         if not (1 <= day_range <= 5):
             raise FirmsAPIError(f"DAY_RANGE must be between 1 and 5, got {day_range}", status_code=400, error_type="INVALID_DAY_RANGE")
 
-        area_str = f"{west:.4f},{south:.4f},{east:.4f},{north:.4f}"
+        # Determine if this is global worldwide coverage or regional bounding box
+        is_world = (west <= -179.0 and south <= -89.0 and east >= 179.0 and north >= 89.0)
+        area_str = "world" if is_world else f"{west:.4f},{south:.4f},{east:.4f},{north:.4f}"
         cache_file = self._get_cache_path(source, area_str, day_range, date_str)
 
         # Check raw cache

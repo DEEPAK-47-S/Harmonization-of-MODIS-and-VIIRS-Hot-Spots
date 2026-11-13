@@ -3,15 +3,19 @@ import { NavLink } from 'react-router-dom';
 import { 
   Flame, 
   LayoutDashboard, 
+  Globe2,
   Map as MapIcon, 
   Calendar, 
+  Clock,
   GitCompare, 
+  Users,
   TrendingUp, 
   AlertTriangle, 
   Database, 
   Settings,
   BookOpen,
-  Globe
+  Layers,
+  BarChart3
 } from 'lucide-react';
 
 interface NavGroup {
@@ -28,6 +32,7 @@ const navGroups: NavGroup[] = [
     label: 'Overview',
     items: [
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/global-explorer', label: 'Global Explorer', icon: Globe2 },
     ]
   },
   {
@@ -35,7 +40,9 @@ const navGroups: NavGroup[] = [
     items: [
       { to: '/fire-map', label: 'Fire Map', icon: MapIcon },
       { to: '/calendar', label: 'Burning Calendar', icon: Calendar },
+      { to: '/time-machine', label: 'Global Time Machine', icon: Clock },
       { to: '/comparison', label: 'Sensor Comparison', icon: GitCompare },
+      { to: '/country-comparison', label: 'Country Benchmark', icon: BarChart3 },
     ]
   },
   {
@@ -48,6 +55,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Resources',
     items: [
+      { to: '/coverage', label: 'Coverage Matrix', icon: Layers },
       { to: '/data-sources', label: 'Data Sources', icon: Database },
       { to: '/about', label: 'Methodology', icon: BookOpen },
     ]
@@ -100,8 +108,8 @@ export const Sidebar: React.FC = () => {
                         }`
                       }
                     >
-                      <Icon className="w-4 h-4 shrink-0 opacity-70" />
-                      <span>{item.label}</span>
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{item.label}</span>
                     </NavLink>
                   );
                 })}
@@ -111,14 +119,15 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Attribution & Context Footer */}
-      <div className="p-4 border-t border-[#E1DED5] bg-[#FAF8F3] shrink-0 text-left">
-        <div className="flex items-center space-x-1.5 mb-1 text-[11px] font-medium text-[#252923]">
-          <Globe className="w-3.5 h-3.5 text-[#54785E]" />
-          <span>Team Virtual Warriors</span>
+      {/* Footer Team Attribution */}
+      <div className="p-3.5 border-t border-[#E1DED5] bg-[#FAF8F3] shrink-0">
+        <div className="flex items-center space-x-2 mb-1">
+          <span className="w-2 h-2 rounded-full bg-[#54785E]"></span>
+          <span className="text-xs font-medium text-[#252923]">Team Virtual Warriors</span>
         </div>
-        <p className="text-[10px] text-[#777970] leading-relaxed">
-          NASA FIRMS MODIS &amp; VIIRS harmonization research prototype.
+        <p className="text-[10px] text-[#777970] leading-tight">
+          NASA Space Apps Challenge 2026<br />
+          Harmonization of MODIS &amp; VIIRS Hot Spots
         </p>
       </div>
     </aside>
