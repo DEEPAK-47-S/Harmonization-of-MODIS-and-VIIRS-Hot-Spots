@@ -108,7 +108,7 @@ export const DashboardPage: React.FC = () => {
           south: aoi.south,
           east: aoi.east,
           north: aoi.north,
-          limit: isWorld ? 0 : 150,
+          limit: 150,
           include_grid: !isWorld
         }).catch(() => ({ hotspots: [], grid_cells: [] })),
         isWorld ? FirePulseAPI.getGlobalSummary(7).catch(() => null) : Promise.resolve(null),
@@ -306,7 +306,9 @@ export const DashboardPage: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-serif font-semibold text-[#252923]">Active Observations Map</span>
                 <span className="text-[10px] font-mono text-[#777970] bg-[#EBE8DF] px-2 py-0.5 rounded">
-                  {visibleHotspots.length} points visible
+                  {isWorld 
+                    ? `${densityClusters.length} clusters (${densityClusters.reduce((acc, c) => acc + (c.total_detections || c.count || 0), 0).toLocaleString()} fires)` 
+                    : `${visibleHotspots.length} points visible`}
                 </span>
               </div>
 
@@ -403,10 +405,13 @@ export const DashboardPage: React.FC = () => {
 
                 {/* World Mode: Macro Density Clusters */}
                 {isWorld && densityClusters.map((c, idx) => {
-                  const radius = Math.min(20, Math.max(5, Math.sqrt(c.total_detections) * 2.5));
-                  const color = c.has_co_detection 
+                  const detCount = c.total_detections || c.count || 1;
+                  const radius = Math.min(20, Math.max(5, Math.sqrt(detCount) * 2.5));
+                  const isCo = c.has_co_detection;
+                  const hasViirs = (c.viirs_detections || c.viirs_count || 0) > 0;
+                  const color = isCo 
                     ? '#BD493C' 
-                    : c.viirs_detections > 0 
+                    : hasViirs 
                     ? '#318C9B' 
                     : '#C27B26';
 
@@ -425,22 +430,22 @@ export const DashboardPage: React.FC = () => {
                       <Popup>
                         <div className="p-2 space-y-1 text-xs font-sans text-[#252923]">
                           <div className="font-bold border-b pb-1">
-                            {c.total_detections} Total Detections
+                            {detCount} Total Detections
                           </div>
                           <div className="text-[10px] text-[#777970] font-mono">
                             {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
                           </div>
                           <div className="flex justify-between text-[11px] pt-1">
-                            <span className="text-[#C27B26]">MODIS: {c.modis_detections}</span>
-                            <span className="text-[#318C9B]">VIIRS: {c.viirs_detections}</span>
+                            <span className="text-[#C27B26]">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
+                            <span className="text-[#318C9B]">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
                           </div>
-                          {c.has_co_detection && (
+                          {isCo && (
                             <div className="text-[10px] text-[#BD493C] font-semibold">
                               ✓ Cross-Sensor Co-Detection
                             </div>
                           )}
                           <div className="text-[10px] text-[#777970]">
-                            Mean FRP: {c.mean_frp.toFixed(1)} MW
+                            Mean FRP: {(c.mean_frp || 0).toFixed(1)} MW
                           </div>
                         </div>
                       </Popup>

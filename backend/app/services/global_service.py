@@ -268,13 +268,21 @@ class GlobalFireService:
 
             result = []
             for c in clusters.values():
+                modis_cnt = c["modis_count"]
+                viirs_cnt = c["viirs_count"]
+                tot = c["count"]
                 result.append({
                     "lat": c["lat"],
                     "lon": c["lon"],
-                    "count": c["count"],
-                    "modis_count": c["modis_count"],
-                    "viirs_count": c["viirs_count"],
-                    "mean_frp": round(c["total_frp"] / max(1, c["count"]), 1),
+                    "count": tot,
+                    "total_detections": tot,
+                    "point_count": tot,
+                    "modis_count": modis_cnt,
+                    "modis_detections": modis_cnt,
+                    "viirs_count": viirs_cnt,
+                    "viirs_detections": viirs_cnt,
+                    "has_co_detection": modis_cnt > 0 and viirs_cnt > 0,
+                    "mean_frp": round(c["total_frp"] / max(1, tot), 1),
                     "step": c["step"]
                 })
             return result

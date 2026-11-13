@@ -215,8 +215,15 @@ export const FirePulseAPI = {
     north?: number;
     zoom?: number;
   }): Promise<MapDensityResponse> => {
-    const res = await api.get<MapDensityResponse>('/global/map-density', { params });
-    return res.data;
+    const res = await api.get('/global/map-density', { params });
+    const raw = res.data;
+    const clusters: any[] = Array.isArray(raw) ? raw : (raw.clusters || raw.data || []);
+    return {
+      grid_step_deg: raw.grid_step_deg || 2.0,
+      total_cells: clusters.length,
+      clusters: clusters,
+      sample_points: raw.sample_points || []
+    };
   },
 
   getGlobalCoverage: async (): Promise<CoverageMatrix> => {

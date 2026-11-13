@@ -258,6 +258,10 @@ export interface MapDensityCluster {
   has_co_detection: boolean;
   mean_frp: number;
   point_count: number;
+  count?: number;
+  modis_count?: number;
+  viirs_count?: number;
+  step?: number;
 }
 
 export interface MapDensityResponse {
