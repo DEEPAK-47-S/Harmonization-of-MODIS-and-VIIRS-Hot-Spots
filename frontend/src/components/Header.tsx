@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, RefreshCw, Download, Sparkles, ChevronDown } from 'lucide-react';
+import { MapPin, RefreshCw, Download, ChevronDown, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAOI } from '../context/AOIContext';
 import { AOISelectorModal } from './AOISelectorModal';
 import { FirePulseAPI } from '../services/api';
@@ -51,94 +51,71 @@ export const Header: React.FC<Props> = ({ title, subtitle }) => {
 
   return (
     <>
-      <header className="h-16 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-30 shadow-lg">
-        <div className="flex items-center space-x-3">
+      <header className="h-16 border-b border-[#E1DED5] bg-white px-6 flex items-center justify-between sticky top-0 z-20">
+        <div className="flex items-center space-x-3 min-w-0">
           <div>
-            <h1 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2">
-              <span>{title}</span>
+            <h1 className="text-base sm:text-lg font-serif font-semibold text-[#252923] tracking-tight">
+              {title}
             </h1>
-            {subtitle && <p className="text-[11px] text-slate-400 font-medium line-clamp-1">{subtitle}</p>}
+            {subtitle && (
+              <p className="text-xs text-[#777970] font-sans truncate">{subtitle}</p>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-2.5 shrink-0">
           {/* AOI Selector Pill */}
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 text-xs font-semibold text-slate-200 transition shadow-sm hover:border-orange-500/50 group"
+            className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] border border-[#E1DED5] text-xs font-medium text-[#252923] transition-colors"
           >
-            <MapPin className="w-3.5 h-3.5 text-orange-400 group-hover:scale-125 transition-transform" />
-            <span className="font-bold text-white tracking-tight">{aoi.name || 'Custom AOI'}</span>
-            <span className="text-[10px] text-slate-400 font-mono bg-slate-950/80 px-1.5 py-0.5 rounded border border-white/5">
+            <MapPin className="w-3.5 h-3.5 text-[#E65C35]" />
+            <span className="font-semibold">{aoi.name || 'Custom AOI'}</span>
+            <span className="text-[10px] text-[#777970] font-mono hidden sm:inline">
               {formatAOIBounds(aoi)}
             </span>
-            <ChevronDown className="w-3 h-3 text-slate-500 group-hover:text-slate-300" />
+            <ChevronDown className="w-3 h-3 text-[#777970]" />
           </button>
 
           {/* Quick Refresh Button */}
           <button
             onClick={handleRefresh}
-            title="Refresh current data & recalculate grid"
-            className="p-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 text-slate-400 hover:text-white transition hover:border-slate-600"
+            title="Refresh active dataset"
+            className="p-2 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] border border-[#E1DED5] text-[#777970] hover:text-[#252923] transition-colors"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-orange-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#E65C35]' : ''}`} />
           </button>
 
           {/* Quick Export CSV Button */}
           <a
             href={FirePulseAPI.getExportUrl('observations', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
             download
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 text-xs font-semibold text-slate-300 hover:text-white transition hover:border-cyan-500/50"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] border border-[#E1DED5] text-xs font-medium text-[#252923] transition-colors"
             title="Download observations CSV"
           >
-            <Download className="w-3.5 h-3.5 text-cyan-400" />
+            <Download className="w-3.5 h-3.5 text-[#318C9B]" />
             <span>CSV</span>
           </a>
 
-          {/* NASA Live Status Pill */}
+          {/* NASA FIRMS Live Quota Status */}
           <div
             title={
-              apiOnline
-                ? (hasMapKey
-                  ? `NASA FIRMS Connected: ${quotaInfo ? `${quotaInfo.current} / ${quotaInfo.limit} transactions used in current 10m window. Global + US/Canada valid.` : 'Key configured & verified.'}`
-                  : 'Backend online. NASA MAP_KEY not yet configured in backend/.env')
-                : 'Backend API unreachable'
+              quotaInfo
+                ? `NASA FIRMS Rate Limit: ${quotaInfo.current} / ${quotaInfo.limit} requests consumed in 10-min window`
+                : hasMapKey
+                ? 'NASA FIRMS API Key active'
+                : 'NASA FIRMS MAP_KEY required in backend/.env'
             }
-            className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
-              apiOnline === null
-                ? 'bg-slate-950/60 border-slate-800 text-slate-500'
-                : apiOnline
-                ? hasMapKey
-                  ? 'bg-emerald-950/50 border-emerald-700/60 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
-                  : 'bg-amber-950/50 border-amber-700/60 text-amber-300'
-                : 'bg-rose-950/50 border-rose-700/60 text-rose-300'
+            className={`hidden md:flex items-center space-x-1.5 px-2.5 py-1.5 rounded-md text-xs font-mono border ${
+              hasMapKey
+                ? 'bg-[#54785E]/10 border-[#54785E]/30 text-[#54785E]'
+                : 'bg-[#B98B37]/10 border-[#B98B37]/30 text-[#B98B37]'
             }`}
           >
-            {apiOnline === null ? (
-              <span className="w-2 h-2 rounded-full bg-slate-500 animate-pulse" />
-            ) : apiOnline ? (
-              hasMapKey ? (
-                <>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-                  <span className="tracking-wide">NASA LIVE</span>
-                  {quotaInfo && (
-                    <span className="text-[10px] text-emerald-300 font-mono bg-emerald-900/60 px-1.5 py-0.5 rounded-md border border-emerald-700/50">
-                      {quotaInfo.current}/{quotaInfo.limit}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <>
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  <span>KEY NEEDED</span>
-                </>
-              )
-            ) : (
-              <>
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span>OFFLINE</span>
-              </>
-            )}
+            <span className={`w-2 h-2 rounded-full ${hasMapKey ? 'bg-[#54785E]' : 'bg-[#B98B37]'}`}></span>
+            <span className="font-medium text-[11px]">
+              {quotaInfo ? `FIRMS (${quotaInfo.current}/${quotaInfo.limit})` : hasMapKey ? 'FIRMS Connected' : 'FIRMS Key Missing'}
+            </span>
           </div>
         </div>
       </header>

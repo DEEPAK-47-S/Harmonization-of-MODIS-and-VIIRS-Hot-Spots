@@ -5,9 +5,7 @@ import {
   CheckCircle2, 
   AlertTriangle, 
   Info, 
-  RefreshCw, 
-  Satellite, 
-  ShieldCheck 
+  Satellite 
 } from 'lucide-react';
 import { Header } from '../components/Header';
 import { FirePulseAPI } from '../services/api';
@@ -40,142 +38,185 @@ export const DataSourcesPage: React.FC = () => {
   const sourcesList = availability?.sources ? Object.entries(availability.sources) : [];
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-slate-950 overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
       <Header 
-        title="NASA FIRMS Data Sources & Transparency" 
+        title="NASA FIRMS Data Sources" 
         subtitle="Sensor specifications, operational availability, and official EOSDIS attribution"
       />
 
-      <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
-        {/* Attribution & Legal Notice */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-lg space-y-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
-              <Database className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-white">NASA Earth Observing System Data and Information System (EOSDIS)</h2>
-              <p className="text-xs text-slate-400">Fire Information for Resource Management System (FIRMS)</p>
-            </div>
+      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* Editorial Introduction */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
+              Provenance &amp; Specifications
+            </span>
+            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
+              Data sources and sensor health.
+            </h1>
+            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+              Official NASA Earth Observing System Data and Information System (EOSDIS) active-fire streams.
+            </p>
+          </div>
+        </div>
+
+        {/* NASA Official Citation Banner */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-3">
+          <div className="flex items-center space-x-2.5">
+            <Database className="w-5 h-5 text-[#E65C35]" />
+            <h2 className="font-serif font-bold text-base text-[#252923]">
+              NASA EOSDIS Land, Atmosphere Near real-time Capability (LANCE)
+            </h2>
           </div>
 
-          <p className="text-xs text-slate-300 leading-relaxed">
+          <p className="text-xs text-[#252923] leading-relaxed">
             We acknowledge the use of data and/or imagery from NASA's Land, Atmosphere Near real-time Capability for EOS (LANCE) system operated by NASA's Earth Science Data and Information System (ESDIS) with funding provided by NASA/HQ. Active fire observations are retrieved from the official NASA FIRMS Area API.
           </p>
 
-          <div className="flex flex-wrap gap-3 pt-2 text-xs">
+          <div className="flex flex-wrap gap-2 pt-1 text-xs">
             <a 
               href="https://firms.modaps.eosdis.nasa.gov/" 
               target="_blank" 
               rel="noreferrer"
-              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+              className="flex items-center space-x-1 px-3 py-1.5 rounded bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#252923] border border-[#E1DED5] transition-colors"
             >
               <span>FIRMS Portal</span>
-              <ExternalLink className="w-3 h-3 text-slate-400" />
+              <ExternalLink className="w-3 h-3 text-[#777970]" />
             </a>
             <a 
               href="https://firms.modaps.eosdis.nasa.gov/api/" 
               target="_blank" 
               rel="noreferrer"
-              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+              className="flex items-center space-x-1 px-3 py-1.5 rounded bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#252923] border border-[#E1DED5] transition-colors"
             >
               <span>API Documentation</span>
-              <ExternalLink className="w-3 h-3 text-slate-400" />
-            </a>
-            <a 
-              href="https://firms.modaps.eosdis.nasa.gov/api/map_key/" 
-              target="_blank" 
-              rel="noreferrer"
-              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
-            >
-              <span>Register MAP_KEY</span>
-              <ExternalLink className="w-3 h-3 text-slate-400" />
+              <ExternalLink className="w-3 h-3 text-[#777970]" />
             </a>
             <a 
               href="https://firms.modaps.eosdis.nasa.gov/api/data_availability/" 
               target="_blank" 
               rel="noreferrer"
-              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+              className="flex items-center space-x-1 px-3 py-1.5 rounded bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#252923] border border-[#E1DED5] transition-colors"
             >
               <span>Data Availability Endpoint</span>
-              <ExternalLink className="w-3 h-3 text-slate-400" />
+              <ExternalLink className="w-3 h-3 text-[#777970]" />
             </a>
           </div>
         </div>
 
-        {/* Critical Sensor Condition Banner: Suomi-NPP */}
-        <div className="bg-amber-950/20 border border-amber-800/60 p-5 rounded-2xl flex items-start space-x-3.5 shadow-md">
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-          <div className="space-y-1 text-xs">
-            <h4 className="font-bold text-amber-300 text-sm">
-              Critical Sensor Condition: Suomi-NPP Data Delivery Ceased on November 2, 2026
-            </h4>
-            <p className="text-slate-300 leading-relaxed">
-              As reported in official NASA/NOAA updates, Suomi-NPP VIIRS operational data delivery ceased on November 2, 2026. In accordance with science guidelines, FirePulse preserves historical Suomi-NPP observations (2012–2026) for baseline calibration, but prioritizes VIIRS NOAA-20 (JPSS-1), VIIRS NOAA-21 (JPSS-2), and MODIS Terra/Aqua for current and future monitoring.
-            </p>
+        {/* Operational Sensor Condition: Suomi-NPP Notice */}
+        <div className="bg-[#B98B37]/10 border border-[#B98B37]/30 rounded-lg p-5 shadow-card flex items-start space-x-3.5">
+          <AlertTriangle className="w-5 h-5 text-[#B98B37] shrink-0 mt-0.5" />
+          <div className="text-xs text-[#252923] leading-relaxed">
+            <strong className="text-[#252923] font-semibold block mb-0.5">
+              Mission Status: Suomi-NPP Data Delivery Cessation (November 2, 2026)
+            </strong>
+            Operational data delivery for Suomi-NPP ceased on November 2, 2026. While historical S-NPP observations remain fully accessible for multi-year retrospective studies, live Near Real-Time (NRT) ingestion in FirePulse prioritizes <strong>NOAA-20 and NOAA-21 VIIRS</strong> alongside <strong>Terra and Aqua MODIS</strong>.
           </div>
         </div>
 
-        {/* Supported Satellite Sensors Grid */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-base font-bold text-white">Supported Satellite Sensors & Processing Streams</h3>
-              <p className="text-xs text-slate-400">Detailed operational parameters for each instrument and stream</p>
-            </div>
-            <button
-              onClick={fetchMetadata}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 transition"
-              title="Refresh status"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            </button>
+        {/* Supported Data Streams Table */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg shadow-card overflow-hidden">
+          <div className="p-4 border-b border-[#E1DED5] flex items-center justify-between">
+            <h3 className="font-serif font-semibold text-base text-[#252923]">Supported NASA FIRMS Feeds</h3>
+            <span className="text-xs font-mono text-[#777970]">7 active &amp; historical streams</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sourcesList.map(([key, item]: [string, any]) => {
-              const isCeased = item.status === 'CEASED_DELIVERY';
-              const isModis = item.family === 'MODIS';
-
-              return (
-                <div 
-                  key={key} 
-                  className={`bg-slate-950 p-4 rounded-xl border flex flex-col justify-between ${
-                    isCeased ? 'border-amber-900/40 opacity-75' : 'border-slate-800'
-                  }`}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-white">{key}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        isCeased 
-                          ? 'bg-amber-950 text-amber-400 border border-amber-800' 
-                          : 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                      }`}>
-                        {item.status}
-                      </span>
-                    </div>
-
-                    <h4 className="font-semibold text-slate-200 text-xs">{item.name}</h4>
-
-                    <div className="space-y-1 text-[11px] text-slate-400">
-                      <p><span className="text-slate-500">Satellites:</span> {item.satellites?.join(', ')}</p>
-                      <p><span className="text-slate-500">Resolution:</span> {item.resolution}</p>
-                      <p><span className="text-slate-500">Latency:</span> {item.latency}</p>
-                      <p><span className="text-slate-500">Coverage:</span> {item.historical_cutoff}</p>
-                    </div>
-
-                    <p className="text-[11px] text-slate-400 pt-2 border-t border-slate-800/80 italic">
-                      {item.notes}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#FAF8F3] border-b border-[#E1DED5] text-[10px] font-mono uppercase text-[#777970]">
+                  <th className="py-2.5 px-4 font-semibold">Feed Identifier</th>
+                  <th className="py-2.5 px-4 font-semibold">Sensor</th>
+                  <th className="py-2.5 px-4 font-semibold">Satellites</th>
+                  <th className="py-2.5 px-4 font-semibold">Footprint</th>
+                  <th className="py-2.5 px-4 font-semibold">Processing Mode</th>
+                  <th className="py-2.5 px-4 font-semibold">Operational Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E1DED5] font-sans">
+                <tr className="hover:bg-[#FAF8F3] transition-colors">
+                  <td className="py-2.5 px-4 font-mono font-medium text-[#252923]">MODIS_NRT</td>
+                  <td className="py-2.5 px-4 font-semibold text-[#C27B26]">MODIS</td>
+                  <td className="py-2.5 px-4">Terra &amp; Aqua</td>
+                  <td className="py-2.5 px-4 font-mono">1,000 m</td>
+                  <td className="py-2.5 px-4">Near Real-Time (Within 3h)</td>
+                  <td className="py-2.5 px-4 text-[#54785E] font-medium flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Operational</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-[#FAF8F3] transition-colors">
+                  <td className="py-2.5 px-4 font-mono font-medium text-[#252923]">MODIS_SP</td>
+                  <td className="py-2.5 px-4 font-semibold text-[#C27B26]">MODIS</td>
+                  <td className="py-2.5 px-4">Terra &amp; Aqua</td>
+                  <td className="py-2.5 px-4 font-mono">1,000 m</td>
+                  <td className="py-2.5 px-4">Standard Processing (Science Quality)</td>
+                  <td className="py-2.5 px-4 text-[#54785E] font-medium flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Historical Archive</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-[#FAF8F3] transition-colors">
+                  <td className="py-2.5 px-4 font-mono font-medium text-[#252923]">VIIRS_NOAA20_NRT</td>
+                  <td className="py-2.5 px-4 font-semibold text-[#318C9B]">VIIRS</td>
+                  <td className="py-2.5 px-4">NOAA-20 (JPSS-1)</td>
+                  <td className="py-2.5 px-4 font-mono">375 m</td>
+                  <td className="py-2.5 px-4">Near Real-Time</td>
+                  <td className="py-2.5 px-4 text-[#54785E] font-medium flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Operational</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-[#FAF8F3] transition-colors">
+                  <td className="py-2.5 px-4 font-mono font-medium text-[#252923]">VIIRS_NOAA20_SP</td>
+                  <td className="py-2.5 px-4 font-semibold text-[#318C9B]">VIIRS</td>
+                  <td className="py-2.5 px-4">NOAA-20 (JPSS-1)</td>
+                  <td className="py-2.5 px-4 font-mono">375 m</td>
+                  <td className="py-2.5 px-4">Standard Processing</td>
+                  <td className="py-2.5 px-4 text-[#54785E] font-medium flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Historical Archive</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-[#FAF8F3] transition-colors">
+                  <td className="py-2.5 px-4 font-mono font-medium text-[#252923]">VIIRS_NOAA21_NRT</td>
+                  <td className="py-2.5 px-4 font-semibold text-[#318C9B]">VIIRS</td>
+                  <td className="py-2.5 px-4">NOAA-21 (JPSS-2)</td>
+                  <td className="py-2.5 px-4 font-mono">375 m</td>
+                  <td className="py-2.5 px-4">Near Real-Time</td>
+                  <td className="py-2.5 px-4 text-[#54785E] font-medium flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Operational</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-[#FAF8F3] transition-colors">
+                  <td className="py-2.5 px-4 font-mono font-medium text-[#252923]">VIIRS_NOAA21_SP</td>
+                  <td className="py-2.5 px-4 font-semibold text-[#318C9B]">VIIRS</td>
+                  <td className="py-2.5 px-4">NOAA-21 (JPSS-2)</td>
+                  <td className="py-2.5 px-4 font-mono">375 m</td>
+                  <td className="py-2.5 px-4">Standard Processing</td>
+                  <td className="py-2.5 px-4 text-[#54785E] font-medium flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Historical Archive</span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-[#FAF8F3] transition-colors">
+                  <td className="py-2.5 px-4 font-mono font-medium text-[#252923]">VIIRS_SNPP_SP</td>
+                  <td className="py-2.5 px-4 font-semibold text-[#318C9B]">VIIRS</td>
+                  <td className="py-2.5 px-4">Suomi-NPP</td>
+                  <td className="py-2.5 px-4 font-mono">375 m</td>
+                  <td className="py-2.5 px-4">Standard Processing (Historical Only)</td>
+                  <td className="py-2.5 px-4 text-[#777970] font-medium flex items-center space-x-1">
+                    <Info className="w-3.5 h-3.5 text-[#B98B37]" />
+                    <span>Decommissioned (Nov 2026)</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </main>
     </div>
   );
 };
-

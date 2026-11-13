@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  AlertTriangle, 
   ShieldCheck, 
   ShieldAlert, 
   Info, 
-  HelpCircle, 
-  Activity, 
-  Calendar, 
   Sliders,
-  Download 
+  Download,
+  AlertCircle
 } from 'lucide-react';
 import { Header } from '../components/Header';
 import { useAOI } from '../context/AOIContext';
 import { FirePulseAPI } from '../services/api';
-import { AnomalyEvaluation } from '../types';
+import { AnomalyEvaluation, formatAOIBounds } from '../types';
 
 export const InsightsPage: React.FC = () => {
   const { aoi, refreshKey } = useAOI();
@@ -48,79 +45,97 @@ export const InsightsPage: React.FC = () => {
   const hasSufficientHistory = data?.safeguards.sufficient_history ?? false;
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-slate-950 overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
       <Header 
-        title="Unusual Activity & Statistical Anomaly Detection" 
+        title="Unusual Activity & Anomalies" 
         subtitle="Empirical deviation from multi-year seasonal baselines using robust statistical estimators"
       />
 
-      <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
-        {/* Important Scientific Notice */}
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-start space-x-3.5 shadow-md">
-          <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-slate-300 leading-relaxed">
-            <strong className="text-amber-400 font-bold block mb-0.5">
-              Scientific Evaluation Disclaimer: Statistical Retrospective Flags
-            </strong>
-            This module evaluates whether historical daily active-grid-cell counts statistically exceed seasonal baselines using Median Absolute Deviation (MAD) and empirical quantiles.
-            <span className="text-slate-400 block mt-1">
-              FirePulse does NOT forecast or predict future wildfires, and statistical anomaly flags must not be conflated with certified civil protection alerts.
+      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* Editorial Introduction */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
+              Statistical Evaluation / Anomaly Detection
             </span>
+            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
+              Signals worth investigating.
+            </h1>
+            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+              Identify observation days where burning activity statistically exceeded historical baseline quantiles using Median Absolute Deviation (MAD).
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <a
+              href={FirePulseAPI.getExportUrl('grid', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
+              download
+              className="flex items-center space-x-1.5 px-3 py-2 rounded-md bg-white hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors shadow-sm"
+            >
+              <Download className="w-3.5 h-3.5 text-[#318C9B]" />
+              <span>Export Grid CSV</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Scientific Research Disclaimer */}
+        <div className="bg-white border border-[#E1DED5] p-4 rounded-lg flex items-start space-x-3 shadow-card">
+          <Info className="w-4 h-4 text-[#C27B26] shrink-0 mt-0.5" />
+          <div className="text-xs text-[#252923] leading-relaxed">
+            <strong className="text-[#252923] font-semibold block mb-0.5">
+              Research Distinction: Statistical Anomaly &ne; Emergency Warning
+            </strong>
+            This module evaluates whether historical daily active-grid-cell counts statistically exceed regional seasonal baselines. FirePulse does NOT forecast future fires, and statistical anomaly flags must not be treated as a certified civil defense emergency warning.
           </div>
         </div>
 
         {/* Safeguard Status Box */}
-        <div className={`p-5 rounded-2xl border ${
+        <div className={`p-4 rounded-lg border shadow-card ${
           hasSufficientHistory 
-            ? 'bg-emerald-950/20 border-emerald-800/60' 
-            : 'bg-amber-950/20 border-amber-800/60'
+            ? 'bg-[#54785E]/5 border-[#54785E]/30' 
+            : 'bg-[#B98B37]/5 border-[#B98B37]/30'
         }`}>
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center space-x-3">
               {hasSufficientHistory ? (
-                <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0" />
+                <ShieldCheck className="w-5 h-5 text-[#54785E] shrink-0" />
               ) : (
-                <ShieldAlert className="w-6 h-6 text-amber-400 shrink-0" />
+                <ShieldAlert className="w-5 h-5 text-[#B98B37] shrink-0" />
               )}
               <div>
-                <h3 className="text-sm font-bold text-white">
+                <h3 className="font-serif font-semibold text-sm text-[#252923]">
                   {hasSufficientHistory 
                     ? 'Historical Baseline Safeguards Satisfied' 
-                    : 'Insufficient Historical Data for Reliable Anomaly Analysis'}
+                    : 'Insufficient Historical Data for Reliable Anomaly Flagging'}
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Requires at least {data?.safeguards.required_years || 3} distinct observation years to form a statistically robust seasonal baseline.
+                <p className="text-xs text-[#777970] mt-0.5">
+                  Requires at least {data?.safeguards.required_years || 3} distinct observation years to form a statistically robust baseline.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3 text-xs">
-              <span className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
-                Years in DB: <strong className="text-white">{data?.safeguards.distinct_years_count ?? 0} / {data?.safeguards.required_years ?? 3}</strong>
-              </span>
-              <span className={`px-2.5 py-1 rounded-lg font-bold border ${
-                hasSufficientHistory 
-                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
-                  : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-              }`}>
-                {data?.status}
+            <div className="flex items-center space-x-2 text-xs font-mono">
+              <span className="px-2.5 py-1 rounded bg-white border border-[#E1DED5] text-[#252923]">
+                Years in DB: <strong>{data?.safeguards.distinct_years_count ?? 0} / {data?.safeguards.required_years ?? 3}</strong>
               </span>
             </div>
           </div>
         </div>
 
-        {/* Configurable Statistical Thresholds */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center space-x-2 mb-4">
-            <Sliders className="w-4 h-4 text-orange-400" />
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Configurable Statistical Anomaly Thresholds</h3>
+        {/* Anomaly Filter Thresholds */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-5 shadow-card space-y-4">
+          <div className="flex items-center space-x-2 border-b border-[#E1DED5] pb-3">
+            <Sliders className="w-4 h-4 text-[#E65C35]" />
+            <h3 className="font-serif font-semibold text-base text-[#252923]">Statistical Sensitivity Thresholds</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <div className="flex justify-between text-xs font-semibold text-slate-400 mb-2">
-                <span>Empirical Historical Percentile Threshold</span>
-                <span className="text-orange-400 font-mono">≥ {percentileThreshold}%</span>
+              <div className="flex justify-between items-center text-xs mb-1.5">
+                <span className="text-[#777970]">Percentile Cutoff (Empirical Quantile)</span>
+                <span className="font-mono font-semibold text-xs text-[#E65C35] bg-[#FCECE7] px-2 py-0.5 rounded">
+                  P{percentileThreshold}
+                </span>
               </div>
               <input
                 type="range"
@@ -129,15 +144,19 @@ export const InsightsPage: React.FC = () => {
                 step="1"
                 value={percentileThreshold}
                 onChange={(e) => setPercentileThreshold(Number(e.target.value))}
-                className="w-full accent-orange-500 bg-slate-800 h-2 rounded-lg appearance-none cursor-pointer"
+                className="w-full accent-[#E65C35] h-1.5 bg-[#EBE8DF] rounded cursor-pointer"
               />
-              <p className="text-[11px] text-slate-400 mt-1">Flags observations exceeding the top {(100 - percentileThreshold).toFixed(0)}% of seasonal peers</p>
+              <span className="text-[10px] text-[#777970] mt-1 block">
+                Flag days exceeding the {percentileThreshold}th percentile of the regional baseline.
+              </span>
             </div>
 
             <div>
-              <div className="flex justify-between text-xs font-semibold text-slate-400 mb-2">
-                <span>Robust Z-Score Threshold (MAD-derived)</span>
-                <span className="text-orange-400 font-mono">≥ {zScoreThreshold.toFixed(1)} σ</span>
+              <div className="flex justify-between items-center text-xs mb-1.5">
+                <span className="text-[#777970]">Robust Z-Score Threshold (MAD-based)</span>
+                <span className="font-mono font-semibold text-xs text-[#E65C35] bg-[#FCECE7] px-2 py-0.5 rounded">
+                  Z &ge; {zScoreThreshold.toFixed(1)}&sigma;
+                </span>
               </div>
               <input
                 type="range"
@@ -146,93 +165,77 @@ export const InsightsPage: React.FC = () => {
                 step="0.1"
                 value={zScoreThreshold}
                 onChange={(e) => setZScoreThreshold(Number(e.target.value))}
-                className="w-full accent-orange-500 bg-slate-800 h-2 rounded-lg appearance-none cursor-pointer"
+                className="w-full accent-[#E65C35] h-1.5 bg-[#EBE8DF] rounded cursor-pointer"
               />
-              <p className="text-[11px] text-slate-400 mt-1">Calculated via Median Absolute Deviation: (X - median) / (1.4826 * MAD)</p>
+              <span className="text-[10px] text-[#777970] mt-1 block">
+                Normalized deviation score: (x - Median) / (1.4826 &times; MAD).
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Anomalies List / Results */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
+        {/* Flagged Anomaly Results Table */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg shadow-card overflow-hidden">
+          <div className="p-4 border-b border-[#E1DED5] flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-white">Detected Statistically Elevated Activity Days</h3>
-              <p className="text-xs text-slate-400">
-                Days where active 1km grid cell counts exceeded configured thresholds relative to historical reference windows
+              <h3 className="font-serif font-semibold text-base text-[#252923]">
+                Flagged Unusual Observation Days
+              </h3>
+              <p className="text-xs text-[#777970]">
+                Days meeting both percentile and robust Z-score criteria
               </p>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-orange-600/20 text-orange-400 border border-orange-500/30">
-                {data?.anomaly_count ?? 0} Days Flagged
-              </span>
-              <a
-                href={FirePulseAPI.getExportUrl('grid', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
-                download
-                className="flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition text-xs font-semibold"
-                title="Download Grid Activity CSV"
-              >
-                <Download className="w-3.5 h-3.5 text-orange-400" />
-                <span>Export Grid CSV</span>
-              </a>
-            </div>
+            <span className="text-xs font-mono text-[#777970] bg-[#FAF8F3] px-2 py-1 rounded border border-[#E1DED5]">
+              {data?.anomalies?.length || 0} anomalies detected
+            </span>
           </div>
 
-          {!hasSufficientHistory ? (
-            <div className="p-8 text-center bg-slate-950 rounded-xl border border-slate-800/80 space-y-2">
-              <ShieldAlert className="w-8 h-8 text-amber-500 mx-auto" />
-              <h4 className="text-sm font-bold text-white">Insufficient historical data for reliable anomaly analysis.</h4>
-              <p className="text-xs text-slate-400 max-w-lg mx-auto">
-                Statistical anomalies require at least 3 distinct years of observation data in this AOI to compute valid seasonal medians and MAD envelopes. You can ingest historical FIRMS datasets or upload NASA FIRMS archive CSVs in the Settings tab.
-              </p>
-            </div>
-          ) : data && data.anomalies.length > 0 ? (
-            <div className="space-y-3">
-              {data.anomalies.map((anom, idx) => (
-                <div 
-                  key={idx}
-                  className="bg-slate-950 border border-slate-800 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-bold text-white text-sm font-mono">{anom.date_utc}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-600/20 text-red-400 border border-red-500/30">
-                        ANOMALY
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-300">{anom.explanation}</p>
-                    <p className="text-[11px] text-slate-400">Reference: {anom.reference_window} (n={anom.sample_size})</p>
-                  </div>
-
-                  <div className="flex items-center space-x-4 text-xs font-mono">
-                    <div className="text-right">
-                      <span className="text-slate-400 text-[10px] block">Observed</span>
-                      <strong className="text-white text-base">{anom.observed_active_cells}</strong>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-slate-400 text-[10px] block">Median</span>
-                      <span className="text-slate-300">{anom.historical_median}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-slate-400 text-[10px] block">Percentile</span>
-                      <span className="text-orange-400 font-bold">{anom.historical_percentile}%</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-slate-400 text-[10px] block">Robust Z</span>
-                      <span className="text-red-400 font-bold">+{anom.robust_z_score}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-8 text-center bg-slate-950 rounded-xl border border-slate-800/80 text-slate-400 text-xs">
-              No days in the evaluated period exceeded the statistical anomaly thresholds.
-            </div>
-          )}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#FAF8F3] border-b border-[#E1DED5] text-[10px] font-mono uppercase text-[#777970]">
+                  <th className="py-2.5 px-4 font-semibold">Observation Date</th>
+                  <th className="py-2.5 px-4 font-semibold">Active 1km Cells</th>
+                  <th className="py-2.5 px-4 font-semibold">Historical Median</th>
+                  <th className="py-2.5 px-4 font-semibold">Robust Z-Score</th>
+                  <th className="py-2.5 px-4 font-semibold">Percentile Rank</th>
+                  <th className="py-2.5 px-4 font-semibold">Interpretation</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E1DED5] font-sans">
+                {data && data.anomalies && data.anomalies.length > 0 ? (
+                  data.anomalies.map((anom) => (
+                    <tr key={anom.date_utc} className="hover:bg-[#FAF8F3] transition-colors">
+                      <td className="py-3 px-4 font-mono font-medium text-[#252923]">{anom.date_utc} UTC</td>
+                      <td className="py-3 px-4 font-mono font-bold text-[#E65C35]">
+                        {anom.observed_active_cells} cells
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[#777970]">{anom.historical_median?.toFixed(1) || '0'}</td>
+                      <td className="py-3 px-4 font-mono font-bold text-[#BD493C]">
+                        +{anom.robust_z_score?.toFixed(2)}&sigma;
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[#252923]">
+                        Top {(100 - anom.historical_percentile).toFixed(1)}%
+                      </td>
+                      <td className="py-3 px-4 text-xs text-[#777970]">
+                        {anom.explanation || 'Significant empirical surge above regional seasonal median.'}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-xs text-[#777970]">
+                      {!hasSufficientHistory 
+                        ? 'Insufficient historical records to flag anomalies. Need multi-year baseline.' 
+                        : 'No days in this date window exceed the selected statistical thresholds.'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>
   );
 };
-

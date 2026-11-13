@@ -18,7 +18,7 @@ export const App: React.FC = () => {
     <ToastProvider>
       <AOIProvider>
         <BrowserRouter>
-          <div className="flex h-screen w-screen overflow-hidden bg-slate-950 font-sans text-slate-100 antialiased">
+          <div className="flex h-screen w-screen overflow-hidden bg-[#F4F1E9] font-sans text-[#252923] antialiased">
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
               <Routes>

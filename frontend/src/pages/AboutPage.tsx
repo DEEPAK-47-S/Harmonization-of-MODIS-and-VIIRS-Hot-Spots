@@ -1,259 +1,165 @@
 import React from 'react';
 import { 
-  BookOpen, Satellite, Grid, Layers, FlaskConical, ShieldCheck,
-  GitBranch, ExternalLink, Globe, AlertTriangle, BarChart3, Info
+  BookOpen, 
+  Grid, 
+  Layers, 
+  ShieldCheck, 
+  AlertTriangle, 
+  ExternalLink, 
+  Flame,
+  ArrowRight
 } from 'lucide-react';
 import { Header } from '../components/Header';
 
-const Section: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode; color?: string }> = ({
-  icon, title, children, color = 'orange',
-}) => (
-  <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-    <div className="flex items-center space-x-3 mb-4">
-      <div className={`w-9 h-9 rounded-xl bg-${color}-500/10 text-${color}-400 flex items-center justify-center`}>
-        {icon}
-      </div>
-      <h3 className="text-base font-bold text-white">{title}</h3>
-    </div>
-    <div className="text-xs text-slate-300 leading-relaxed space-y-2">{children}</div>
-  </div>
-);
-
 export const AboutPage: React.FC = () => {
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-slate-950 overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
       <Header
-        title="About FirePulse & Scientific Methodology"
-        subtitle="Data harmonization principles, sensor comparison, and research limitations"
+        title="Scientific Methodology"
+        subtitle="Data harmonization principles, mathematical formulation, and remote sensing limitations"
       />
 
-      <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
-        {/* Hero section */}
-        <div className="bg-gradient-to-r from-orange-950/40 via-slate-900 to-slate-900 border border-slate-800 rounded-2xl p-8 shadow-xl">
-          <div className="flex items-start space-x-5">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-orange-600 via-amber-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/20 shrink-0">
-              <span className="text-3xl">🔥</span>
-            </div>
-            <div>
-              <h2 className="text-2xl font-black text-white tracking-tight mb-1">FirePulse</h2>
-              <p className="text-orange-400 font-semibold text-sm mb-3">NASA Space Apps Challenge 2026 — Team: Virtual Warriors</p>
-              <p className="text-slate-300 text-sm leading-relaxed max-w-3xl">
-                FirePulse is an open research prototype that harmonizes active-fire observations from NASA's MODIS (Moderate Resolution Imaging Spectroradiometer) 
-                and VIIRS (Visible Infrared Imaging Radiometer Suite) instruments into a unified, spatially and temporally consistent Burning Activity Calendar. 
-                It is designed to help environmental researchers, fire managers, and Earth science students compare multi-sensor satellite fire data with rigorous scientific transparency.
-              </p>
-              <div className="flex flex-wrap gap-2 mt-4">
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">MODIS Terra/Aqua</span>
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">VIIRS NOAA-20 (JPSS-1)</span>
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">VIIRS NOAA-21 (JPSS-2)</span>
-                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-700/80 text-slate-400 border border-slate-700">VIIRS S-NPP (Historical)</span>
+      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* Editorial Introduction */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
+              Scientific Documentation / Methodology
+            </span>
+            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
+              Harmonization principles &amp; design.
+            </h1>
+            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+              How FirePulse bridges MODIS and VIIRS satellite observations into an equal-area burning intelligence system.
+            </p>
+          </div>
+        </div>
+
+        {/* Hero Paper Abstract Card */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-3">
+          <div className="flex items-center space-x-2 text-xs font-mono text-[#E65C35] font-semibold">
+            <span>NASA Space Apps Challenge 2026</span>
+            <span>•</span>
+            <span>Team Virtual Warriors</span>
+          </div>
+          <h2 className="font-serif font-bold text-xl text-[#252923]">
+            Spatially and Temporally Harmonized Active-Fire Intelligence
+          </h2>
+          <p className="text-xs text-[#252923] leading-relaxed max-w-3xl">
+            FirePulse harmonizes thermal anomalies from NASA's Moderate Resolution Imaging Spectroradiometer (MODIS) 
+            and Visible Infrared Imaging Radiometer Suite (VIIRS) instruments into a unified, spatially and temporally 
+            aggregated Burning Activity Calendar. It provides environmental researchers, land managers, and climate scientists 
+            with a statistically transparent baseline that respects sensor resolution and orbit characteristics.
+          </p>
+        </div>
+
+        {/* VISUAL METHODOLOGY PIPELINE (Requested in Phase 12) */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-4">
+          <h3 className="font-serif font-semibold text-base text-[#252923]">Processing Pipeline Flow</h3>
+          <p className="text-xs text-[#777970]">
+            Every satellite observation passes through a deterministic 7-stage pipeline:
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2 pt-2">
+            {[
+              { step: '1', title: 'Raw Ingestion', desc: 'NASA FIRMS API or validated archive CSV' },
+              { step: '2', title: 'Normalization', desc: 'Disjoint sensor schemas unified to standard types' },
+              { step: '3', title: 'UTC Conversion', desc: 'Zero-padded HHMM to ISO-8601 UTC timestamp' },
+              { step: '4', title: 'EPSG:6933', desc: 'PyProj transformation to equal-area cylindrical grid' },
+              { step: '5', title: '1km Grid Binning', desc: 'floor(x/1000), floor(y/1000) deterministic cell ID' },
+              { step: '6', title: 'Daily Aggregation', desc: 'Co-detection flagging & energy calculations' },
+              { step: '7', title: 'Burning Calendar', desc: 'Dynamic quantile heatmap & anomaly Z-scores' }
+            ].map((p, idx) => (
+              <div key={idx} className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded flex flex-col justify-between text-xs space-y-1">
+                <div>
+                  <span className="font-mono text-[10px] text-[#E65C35] font-bold">Step 0{p.step}</span>
+                  <h4 className="font-semibold text-[#252923] text-xs mt-0.5">{p.title}</h4>
+                </div>
+                <p className="text-[10px] text-[#777970] leading-tight">{p.desc}</p>
               </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Critical disclaimer */}
-        <div className="bg-amber-950/20 border border-amber-800/60 p-5 rounded-2xl flex items-start space-x-3.5">
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-slate-300 leading-relaxed space-y-1">
-            <strong className="text-amber-300 font-bold block text-sm">Important Disclaimer</strong>
-            <p>FirePulse is an independent student project using NASA FIRMS data. It is <strong className="text-white">NOT</strong> an official NASA product, nor a certified civil protection, emergency alert, or wildfire warning system.</p>
-            <p>All statistical outputs are retrospective analytical flags, not predictions. Never use FirePulse outputs for evacuation or emergency response decisions.</p>
-          </div>
-        </div>
-
+        {/* Detailed Methodology Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Spatial Harmonization */}
-          <Section icon={<Grid className="w-5 h-5" />} title="Spatial Harmonization (EPSG:6933 → 1km Grid)" color="orange">
-            <p>
-              MODIS fire pixels have a nominal ground resolution of ~1,000 m, while VIIRS I-band pixels are ~375 m. 
-              Directly adding observation counts would conflate sensor resolution differences with actual fire intensity differences.
-            </p>
-            <p>
-              FirePulse projects all observation coordinates from geographic WGS84 (EPSG:4326) to the 
-              NSIDC EASE-Grid 2.0 equal-area projection (EPSG:6933) using PyProj, then assigns each point 
-              to a fixed 1,000 m × 1,000 m analytical grid cell via integer floor division of its projected coordinates.
-            </p>
-            <p className="text-amber-300 font-semibold">
-              This is centroid-based analytical aggregation, NOT a claim that MODIS and VIIRS pixel footprints are physically identical.
-            </p>
-          </Section>
+          <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-3">
+            <div className="flex items-center space-x-2">
+              <Grid className="w-4 h-4 text-[#E65C35]" />
+              <h3 className="font-serif font-semibold text-base text-[#252923]">
+                Spatial Equal-Area Grid (EPSG:6933)
+              </h3>
+            </div>
+            <div className="text-xs text-[#252923] leading-relaxed space-y-2">
+              <p>
+                Standard Web Mercator (EPSG:3857) projects severe area distortion at higher latitudes (Greenland distortion). Latitude/Longitude degrees (EPSG:4326) also shrink significantly toward the poles.
+              </p>
+              <p>
+                FirePulse projects all geographic coordinates into <strong>EPSG:6933 (WGS 84 / World Cylindrical Equal Area)</strong> using PyProj, then computes integer grid coordinates:
+              </p>
+              <div className="bg-[#FAF8F3] p-2.5 rounded border border-[#E1DED5] font-mono text-[11px] text-[#252923]">
+                cell_x = floor(x_m / 1000)<br />
+                cell_y = floor(y_m / 1000)<br />
+                grid_cell_id = "E6933_1KM_X" + cell_x + "_Y" + cell_y
+              </div>
+              <p className="text-[#777970] text-[11px]">
+                This ensures that every analytical grid cell occupies exactly 1,000,000 m² (1 km²) anywhere on Earth.
+              </p>
+            </div>
+          </div>
 
           {/* Temporal Harmonization */}
-          <Section icon={<Layers className="w-5 h-5" />} title="Temporal Harmonization (UTC Standardization)" color="cyan">
-            <p>
-              Satellite acquisition times are stored and analyzed exclusively in Coordinated Universal Time (UTC). 
-              All acquisition times in HHMM integer format are correctly zero-padded and parsed into full ISO-8601 UTC datetimes.
-            </p>
-            <p>
-              Daily aggregation keys are formed from the UTC acquisition date only, 
-              preventing local-time boundary ambiguities from corrupting multi-sensor comparisons.
-            </p>
-            <p>All calendar views and exported reports explicitly label their timezone as UTC.</p>
-          </Section>
-
-          {/* Confidence handling */}
-          <Section icon={<ShieldCheck className="w-5 h-5" />} title="Sensor Confidence Scale Integrity" color="emerald">
-            <p>
-              <strong className="text-amber-400">MODIS</strong> confidence values are numeric percentages (0–100%). 
-              A value of 0% indicates low confidence; 100% indicates high confidence.
-            </p>
-            <p>
-              <strong className="text-cyan-400">VIIRS</strong> confidence values are categorical: <code className="bg-slate-800 px-1 rounded text-[11px]">'l'</code> (low), 
-              <code className="bg-slate-800 px-1 rounded text-[11px]">'n'</code> (nominal), <code className="bg-slate-800 px-1 rounded text-[11px]">'h'</code> (high).
-            </p>
-            <p className="text-amber-300 font-semibold">
-              FirePulse never converts MODIS confidence percentages into VIIRS categorical labels using invented thresholds. 
-              Each sensor's confidence scale is preserved separately in the database and in all exports.
-            </p>
-          </Section>
-
-          {/* Cross-sensor detection */}
-          <Section icon={<GitBranch className="w-5 h-5" />} title="Cross-Sensor Co-Detection Logic" color="purple">
-            <p>
-              When both MODIS and VIIRS register at least one detection in the same 1km grid cell on the same UTC day, 
-              that cell-day is labeled <strong className="text-purple-400">cross-sensor co-detected</strong>.
-            </p>
-            <p>
-              Co-detection does not imply that sensors observed the same fire simultaneously—orbit timing differences 
-              mean passes can be hours apart. It indicates spatial-temporal agreement within the common grid.
-            </p>
-            <p className="text-amber-300 font-semibold">
-              A single active 1km grid cell is NOT reported as one fire. It is reported as one aggregated observation unit.
-            </p>
-          </Section>
-        </div>
-
-        {/* Anomaly detection methodology */}
-        <Section icon={<BarChart3 className="w-5 h-5" />} title="Statistical Anomaly Detection Methodology" color="orange">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <h4 className="font-bold text-white text-sm">Median Absolute Deviation (MAD)</h4>
-              <p>
-                FirePulse uses the Median Absolute Deviation (MAD) rather than standard deviation for robust anomaly detection,
-                because MAD is less sensitive to extreme outlier values that can distort fire activity baselines.
-              </p>
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-[11px] text-slate-300">
-                Robust Z = (X − median) / (1.4826 × MAD)
-              </div>
-              <p>The 1.4826 scale factor makes the MAD-based estimator consistent with the standard deviation for normally distributed data.</p>
+          <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-3">
+            <div className="flex items-center space-x-2">
+              <Layers className="w-4 h-4 text-[#318C9B]" />
+              <h3 className="font-serif font-semibold text-base text-[#252923]">
+                Temporal Standardization (UTC 24-hr)
+              </h3>
             </div>
-            <div className="space-y-2">
-              <h4 className="font-bold text-white text-sm">Minimum History Requirement</h4>
+            <div className="text-xs text-[#252923] leading-relaxed space-y-2">
               <p>
-                FirePulse requires at least <strong className="text-orange-400">3 distinct calendar years</strong> of observation data 
-                in the selected AOI before generating any anomaly flags.
+                Satellite overpasses capture fire activity at distinct times in the diurnal cycle:
               </p>
+              <ul className="list-disc pl-4 space-y-1 text-[#777970] text-[11px]">
+                <li><strong>MODIS Terra:</strong> ~10:30 AM/PM equatorial crossing</li>
+                <li><strong>MODIS Aqua:</strong> ~01:30 AM/PM equatorial crossing</li>
+                <li><strong>VIIRS NOAA-20:</strong> ~12:45 PM equatorial crossing</li>
+                <li><strong>VIIRS NOAA-21:</strong> ~01:30 PM equatorial crossing</li>
+              </ul>
               <p>
-                This safeguard prevents statistically meaningless flags from single-year or two-year datasets. 
-                If the history requirement is not met, the Unusual Activity page clearly displays a warning and suppresses all anomaly outputs.
-              </p>
-              <p>
-                Only matching calendar-month windows (±30 days same month across years) are used to form each day's reference distribution.
-              </p>
-            </div>
-          </div>
-        </Section>
-
-        {/* Suomi-NPP notice */}
-        <div className="bg-amber-950/20 border border-amber-800/60 p-5 rounded-2xl">
-          <div className="flex items-start space-x-3.5">
-            <Satellite className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-            <div className="text-xs text-slate-300 leading-relaxed space-y-1.5">
-              <h4 className="font-bold text-amber-300 text-sm">Suomi-NPP Data Delivery Ceased: November 2, 2026</h4>
-              <p>
-                The Suomi National Polar-Orbiting Partnership (Suomi-NPP) satellite ceased active-fire data delivery on November 2, 2026,
-                per official NASA/NOAA operations updates. FirePulse preserves all historical Suomi-NPP VIIRS observations (2012–2026)
-                in its database for long-term baseline calibration, but does not query Suomi-NPP as a source for new Near Real-Time observations.
-              </p>
-              <p>
-                Current monitoring prioritizes: <strong className="text-cyan-400">VIIRS NOAA-20 (JPSS-1)</strong>, 
-                <strong className="text-cyan-400"> VIIRS NOAA-21 (JPSS-2)</strong>, and 
-                <strong className="text-amber-400"> MODIS Terra/Aqua</strong>.
+                All timestamps are standardized strictly into <strong>Coordinated Universal Time (UTC)</strong>. Integer HHMM formats are zero-padded and parsed to ISO-8601 UTC timestamps, preventing local boundary shifts from corrupting daily aggregates.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Pipeline overview */}
-        <Section icon={<FlaskConical className="w-5 h-5" />} title="Data Processing Pipeline" color="cyan">
-          <ol className="list-none space-y-3">
-            {[
-              ['1. FIRMS API Fetch', 'Chunked 5-day requests to NASA FIRMS Area API (CSV format). Validates AOI, source, date range, HTTP status, and response columns.'],
-              ['2. Normalization', 'Sensor-specific column mapping (MODIS vs VIIRS field name differences). UTC datetime parsing. Data quality checks (coordinate range, FRP sign, date validity). Hash-based duplicate detection.'],
-              ['3. Spatial Harmonization', 'PyProj EPSG:4326→6933 projection. 1km grid-cell ID assignment via floor division. Original lat/lon preserved.'],
-              ['4. Temporal Harmonization', 'UTC date and hour extraction. Daily aggregation key formation.'],
-              ['5. Observation Aggregation', 'Group by grid_cell_id + acquisition_date_utc. Compute per-sensor detection counts, FRP statistics, and cross-sensor co-detection flags.'],
-              ['6. Analytics & Export', 'Calendar heatmap quantiles, anomaly detection, trend series, and filtered CSV exports.'],
-            ].map(([step, desc]) => (
-              <li key={step} className="flex items-start space-x-3">
-                <span className="text-orange-400 font-bold shrink-0 font-mono text-[11px] mt-0.5">{step}</span>
-                <span className="text-slate-300">{desc}</span>
-              </li>
-            ))}
-          </ol>
-        </Section>
-
-        {/* Attribution */}
-        <Section icon={<Globe className="w-5 h-5" />} title="Data Attribution & References" color="emerald">
-          <p>
-            We acknowledge the use of data from NASA's Land, Atmosphere Near real-time Capability for EOS (LANCE) system operated by 
-            NASA's Earth Science Data and Information System (ESDIS) with funding provided by NASA/HQ.
-          </p>
-          <div className="flex flex-wrap gap-2 pt-2">
-            {[
-              { label: 'NASA FIRMS Portal', href: 'https://firms.modaps.eosdis.nasa.gov/' },
-              { label: 'FIRMS API Documentation', href: 'https://firms.modaps.eosdis.nasa.gov/api/' },
-              { label: 'Register MAP_KEY', href: 'https://firms.modaps.eosdis.nasa.gov/api/map_key/' },
-              { label: 'Data Availability', href: 'https://firms.modaps.eosdis.nasa.gov/api/data_availability/' },
-            ].map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition text-[11px]"
-              >
-                <span>{label}</span>
-                <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
-            ))}
-          </div>
-          <p className="pt-3 text-slate-400 text-[11px] border-t border-slate-800 mt-2">
-            Schroeder, W., Oliva, P., Giglio, L., & Csiszar, I. A. (2014). The New VIIRS 375m active fire detection data product:
-            Algorithm description and initial assessment. Remote Sensing of Environment, 143, 85–96.
-          </p>
-          <p className="text-slate-400 text-[11px]">
-            Giglio, L., Schroeder, W., & Justice, C. O. (2016). The collection 6 MODIS active fire detection algorithm and
-            fire products. Remote Sensing of Environment, 178, 31–41.
-          </p>
-        </Section>
-
-        {/* Tech stack */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <h3 className="text-base font-bold text-white mb-4 flex items-center space-x-2">
-            <Info className="w-5 h-5 text-slate-400" />
-            <span>Technology Stack</span>
+        {/* What Harmonization Does vs Does Not Do */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-4">
+          <h3 className="font-serif font-semibold text-base text-[#252923]">
+            What Harmonization Does — and Does Not Do
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Backend</h4>
-              <ul className="space-y-1 text-xs text-slate-300">
-                <li><span className="text-orange-400 font-semibold">Python 3.12+</span> — Flask, Flask-CORS, SQLAlchemy</li>
-                <li><span className="text-orange-400 font-semibold">PyProj</span> — EPSG:4326 → EPSG:6933 projection</li>
-                <li><span className="text-orange-400 font-semibold">Pandas / NumPy</span> — Data normalization and analytics</li>
-                <li><span className="text-orange-400 font-semibold">SQLite (SQLAlchemy)</span> — Replaceable with PostgreSQL/PostGIS</li>
-                <li><span className="text-orange-400 font-semibold">NASA FIRMS REST API</span> — Active fire data source</li>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1 text-xs">
+            <div className="p-4 bg-[#54785E]/5 border border-[#54785E]/30 rounded space-y-2">
+              <h4 className="font-semibold text-[#54785E]">What FirePulse DOES</h4>
+              <ul className="list-disc pl-4 space-y-1 text-[#252923] text-[11px]">
+                <li>Projects coordinates onto a consistent, equal-area spatial grid (EPSG:6933).</li>
+                <li>Normalizes diverse attribute column structures across MODIS and VIIRS.</li>
+                <li>Identifies when both sensors detect activity in the same 1km cell on the same UTC day.</li>
+                <li>Preserves original raw confidence values, overpass times, and sensor identity.</li>
+                <li>Computes relative empirical quantiles for regional burning calendars.</li>
               </ul>
             </div>
-            <div>
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Frontend</h4>
-              <ul className="space-y-1 text-xs text-slate-300">
-                <li><span className="text-cyan-400 font-semibold">React 18 + Vite + TypeScript</span></li>
-                <li><span className="text-cyan-400 font-semibold">Tailwind CSS</span> — Utility-first dark-mode UI</li>
-                <li><span className="text-cyan-400 font-semibold">React Leaflet</span> — Satellite fire map (CartoDB dark tiles)</li>
-                <li><span className="text-cyan-400 font-semibold">Recharts</span> — Time series, bar, pie, and area charts</li>
-                <li><span className="text-cyan-400 font-semibold">Axios</span> — Typed REST API client with proxy</li>
+
+            <div className="p-4 bg-[#BD493C]/5 border border-[#BD493C]/30 rounded space-y-2">
+              <h4 className="font-semibold text-[#BD493C]">What FirePulse DOES NOT DO</h4>
+              <ul className="list-disc pl-4 space-y-1 text-[#252923] text-[11px]">
+                <li>Never sums raw MODIS and VIIRS counts into a single "number of fires".</li>
+                <li>Does not fabricate data when satellite coverage is unavailable or obstructed by clouds.</li>
+                <li>Does not convert MODIS percentage confidences into VIIRS categorical strings using invented rules.</li>
+                <li>Does not predict future fire spread, direction, or behavior.</li>
+                <li>Never serves as an official civil protection emergency alarm.</li>
               </ul>
             </div>
           </div>
@@ -262,4 +168,3 @@ export const AboutPage: React.FC = () => {
     </div>
   );
 };
-

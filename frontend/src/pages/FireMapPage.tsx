@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   MapContainer, 
   TileLayer, 
@@ -8,20 +8,17 @@ import {
   useMap 
 } from 'react-leaflet';
 import { 
-  Layers, 
-  Filter, 
+  Sliders, 
   Flame, 
   Grid, 
-  Info,
-  Maximize2,
-  Download,
+  Download, 
+  X, 
+  Copy, 
+  Check, 
+  RotateCcw,
+  Layers,
+  MapPin,
   Calendar,
-  X,
-  Sparkles,
-  Sliders,
-  Copy,
-  Check,
-  Compass,
   Satellite
 } from 'lucide-react';
 import { Header } from '../components/Header';
@@ -29,7 +26,7 @@ import { useAOI } from '../context/AOIContext';
 import { FirePulseAPI } from '../services/api';
 import { Observation, GridCell, formatCoord } from '../types';
 
-// Map Auto-Fitter: zooms and centers dynamically to fit loaded detections or AOI bounds
+// Map Auto-Fitter
 const MapFitter: React.FC<{ 
   aoi: { west: number; south: number; east: number; north: number };
   hotspots: Observation[];
@@ -43,20 +40,17 @@ const MapFitter: React.FC<{
       const maxLat = Math.max(...lats);
       const minLon = Math.min(...lons);
       const maxLon = Math.max(...lons);
-      
-      // If single point or very tight cluster, pad slightly
-      const latPad = Math.max(0.08, (maxLat - minLat) * 0.2);
-      const lonPad = Math.max(0.08, (maxLon - minLon) * 0.2);
-      
+      const latPad = Math.max(0.06, (maxLat - minLat) * 0.15);
+      const lonPad = Math.max(0.06, (maxLon - minLon) * 0.15);
       map.fitBounds([
         [minLat - latPad, minLon - lonPad],
         [maxLat + latPad, maxLon + lonPad]
-      ], { padding: [50, 50], maxZoom: 13, animate: true });
+      ], { padding: [40, 40], maxZoom: 13, animate: true });
     } else {
       map.fitBounds([
         [aoi.south, aoi.west],
         [aoi.north, aoi.east]
-      ], { padding: [40, 40], animate: true });
+      ], { padding: [30, 30], animate: true });
     }
   }, [aoi, hotspots, map]);
   return null;
@@ -68,8 +62,8 @@ export const FireMapPage: React.FC = () => {
   const [gridCells, setGridCells] = useState<GridCell[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   
-  // Basemap style: 'dark' (ESRI Dark Gray - No watermark), 'satellite' (ESRI World Imagery), 'osm' (OpenStreetMap)
-  const [basemap, setBasemap] = useState<'dark' | 'satellite' | 'osm'>('dark');
+  // Basemap style: 'light' (ESRI Light Gray), 'satellite' (ESRI World Imagery), 'osm' (OpenStreetMap)
+  const [basemap, setBasemap] = useState<'light' | 'satellite' | 'osm'>('light');
   
   // Filters
   const [sensorFilter, setSensorFilter] = useState<string>('ALL'); // 'ALL' | 'MODIS' | 'VIIRS'
@@ -112,8 +106,14 @@ export const FireMapPage: React.FC = () => {
     }
   };
 
-  const centerLat = (aoi.south + aoi.north) / 2;
-  const centerLon = (aoi.west + aoi.east) / 2;
+  const handleResetFilters = () => {
+    setSensorFilter('ALL');
+    setMinFrp(0);
+    setDateFrom('');
+    setDateTo('');
+    setShowGrid(true);
+    setShowPoints(true);
+  };
 
   const handleCopyCoord = (lat: number, lon: number) => {
     navigator.clipboard.writeText(`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
@@ -121,8 +121,11 @@ export const FireMapPage: React.FC = () => {
     setTimeout(() => setCopiedCoord(false), 1500);
   };
 
+  const centerLat = (aoi.south + aoi.north) / 2;
+  const centerLon = (aoi.west + aoi.east) / 2;
+
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-slate-950 h-screen overflow-hidden select-none">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] h-screen overflow-hidden select-none">
       <Header 
         title="Interactive Fire & Hotspot Map" 
         subtitle="Individual satellite detections and harmonized 1km analytical grid cells (EPSG:6933)"
@@ -137,24 +140,24 @@ export const FireMapPage: React.FC = () => {
             className="h-full w-full"
             zoomControl={false}
           >
-            {/* Tile Layer: ESRI Dark Gray Canvas (Zero Watermark) */}
-            {basemap === 'dark' && (
+            {/* Basemap: ESRI Light Gray Canvas */}
+            {basemap === 'light' && (
               <>
                 <TileLayer
-                  key="esri-dark-base"
-                  attribution='&copy; ESRI Dark Gray Canvas & OpenStreetMap'
-                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+                  key="esri-light-base"
+                  attribution='&copy; ESRI Light Gray Canvas & OpenStreetMap'
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
                   maxZoom={16}
                 />
                 <TileLayer
-                  key="esri-dark-ref"
-                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+                  key="esri-light-ref"
+                  url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
                   maxZoom={16}
                 />
               </>
             )}
 
-            {/* Tile Layer: ESRI World Imagery Satellite (Zero Watermark) */}
+            {/* Basemap: ESRI World Imagery */}
             {basemap === 'satellite' && (
               <>
                 <TileLayer
@@ -171,7 +174,7 @@ export const FireMapPage: React.FC = () => {
               </>
             )}
 
-            {/* Tile Layer: OpenStreetMap Standard */}
+            {/* Basemap: OpenStreetMap Standard */}
             {basemap === 'osm' && (
               <TileLayer
                 key="osm-base"
@@ -181,22 +184,21 @@ export const FireMapPage: React.FC = () => {
               />
             )}
 
-            {/* Auto fitter */}
             <MapFitter aoi={aoi} hotspots={hotspots} />
 
-            {/* AOI Bounding Box outline */}
+            {/* AOI Bounding Box */}
             <Rectangle
               bounds={[
                 [aoi.south, aoi.west],
                 [aoi.north, aoi.east]
               ]}
               pathOptions={{
-                color: '#f97316',
-                weight: 2,
+                color: '#E65C35',
+                weight: 1.5,
                 fill: true,
-                fillColor: '#f97316',
-                fillOpacity: 0.03,
-                dashArray: '6, 6'
+                fillColor: '#E65C35',
+                fillOpacity: 0.04,
+                dashArray: '5, 5'
               }}
             />
 
@@ -204,14 +206,9 @@ export const FireMapPage: React.FC = () => {
             {showGrid && gridCells.map((cell) => {
               const bounds = cell.cell_bounds_wgs84;
               if (!bounds) return null;
-              
               const isCoDetected = cell.cross_sensor_presence;
-              const isModisOnly = cell.sensors_present === 'MODIS';
-              
-              // Gen-Z glowing color palette
-              const strokeColor = isCoDetected ? '#c084fc' : (isModisOnly ? '#f59e0b' : '#38bdf8');
-              const fillColor = isCoDetected ? '#a855f7' : (isModisOnly ? '#f59e0b' : '#0284c7');
-              const fillOpacity = isCoDetected ? 0.45 : 0.25;
+              const strokeColor = isCoDetected ? '#54785E' : '#E65C35';
+              const fillColor = isCoDetected ? '#54785E' : '#E65C35';
 
               return (
                 <Rectangle
@@ -222,47 +219,33 @@ export const FireMapPage: React.FC = () => {
                   ]}
                   pathOptions={{
                     color: strokeColor,
-                    weight: isCoDetected ? 2 : 1.2,
+                    weight: isCoDetected ? 1.5 : 1,
                     fillColor: fillColor,
-                    fillOpacity: fillOpacity,
+                    fillOpacity: isCoDetected ? 0.35 : 0.18,
                   }}
                 >
                   <Popup>
-                    <div className="text-xs space-y-2 p-1 min-w-[210px]">
-                      <div className="flex items-center justify-between border-b border-slate-700/80 pb-1.5">
-                        <div className="flex items-center space-x-1.5">
-                          <Grid className="w-3.5 h-3.5 text-orange-400" />
-                          <span className="font-extrabold text-white text-xs">1km Analytical Grid</span>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                          isCoDetected 
-                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm' 
-                            : 'bg-slate-800 text-slate-300 border border-slate-700'
-                        }`}>
+                    <div className="text-xs space-y-1.5 p-0.5 font-sans">
+                      <div className="flex items-center justify-between border-b border-[#E1DED5] pb-1">
+                        <span className="font-serif font-semibold text-[#252923]">1km Analytical Cell</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#FAF8F3] text-[#252923] border border-[#E1DED5]">
                           {cell.sensors_present}
                         </span>
                       </div>
-                      
-                      <p className="text-[11px] font-mono text-slate-400 bg-slate-950/70 p-1 rounded border border-white/5 truncate">
+                      <div className="font-mono text-[10px] text-[#777970] truncate">
                         ID: {cell.grid_cell_id}
-                      </p>
-                      
-                      <div className="space-y-1 text-slate-300 text-[11px]">
-                        <p><span className="text-slate-400">Date:</span> <strong className="text-white">{cell.activity_date_utc} UTC</strong></p>
-                        <p><span className="text-amber-400">MODIS Detections:</span> <strong>{cell.modis_detection_count}</strong></p>
-                        <p><span className="text-cyan-400">VIIRS Detections:</span> <strong>{cell.viirs_detection_count}</strong></p>
-                        {cell.modis_frp_mean !== undefined && (
-                          <p><span className="text-slate-400">MODIS Mean FRP:</span> {cell.modis_frp_mean.toFixed(1)} MW</p>
-                        )}
-                        {cell.viirs_frp_mean !== undefined && (
-                          <p><span className="text-slate-400">VIIRS Mean FRP:</span> {cell.viirs_frp_mean.toFixed(1)} MW</p>
+                      </div>
+                      <div className="space-y-0.5 text-[11px] text-[#252923]">
+                        <div>Date: <strong className="font-mono">{cell.activity_date_utc} UTC</strong></div>
+                        <div>MODIS Detections: <strong>{cell.modis_detection_count}</strong></div>
+                        <div>VIIRS Detections: <strong>{cell.viirs_detection_count}</strong></div>
+                        {(cell.modis_frp_mean || cell.viirs_frp_mean) !== undefined && (
+                          <div>Mean FRP: <strong>{(cell.modis_frp_mean || cell.viirs_frp_mean || 0).toFixed(1)} MW</strong></div>
                         )}
                       </div>
-
-                      {cell.cross_sensor_presence && (
-                        <div className="p-1.5 rounded-lg bg-purple-950/40 border border-purple-800/60 text-[10px] text-purple-300 font-bold flex items-center space-x-1">
-                          <Sparkles className="w-3 h-3 text-purple-400" />
-                          <span>Cross-Sensor Co-Detected Cell</span>
+                      {isCoDetected && (
+                        <div className="p-1 rounded bg-[#54785E]/10 border border-[#54785E]/30 text-[10px] text-[#54785E] font-medium">
+                          Cross-Sensor Co-Detected Cell
                         </div>
                       )}
                     </div>
@@ -274,9 +257,9 @@ export const FireMapPage: React.FC = () => {
             {/* Hotspot Observation Points */}
             {showPoints && hotspots.map((obs) => {
               const isModis = obs.sensor_family === 'MODIS';
-              const color = isModis ? '#f59e0b' : '#00f0ff';
+              const color = isModis ? '#C27B26' : '#318C9B';
               const frp = obs.frp_mw || 1;
-              const radius = Math.min(13, Math.max(5, Math.sqrt(frp) * 1.8));
+              const radius = Math.min(12, Math.max(4.5, Math.sqrt(frp) * 1.5));
 
               return (
                 <CircleMarker
@@ -287,60 +270,50 @@ export const FireMapPage: React.FC = () => {
                     click: () => setSelectedObs(obs)
                   }}
                   pathOptions={{
-                    color: isModis ? '#fbbf24' : '#38bdf8',
+                    color: '#FFFFFF',
                     fillColor: color,
                     fillOpacity: 0.85,
-                    weight: frp > 30 ? 2.5 : 1.5,
+                    weight: 1.5,
                   }}
                 >
                   <Popup>
-                    <div className="text-xs space-y-2 p-1 min-w-[220px]">
-                      <div className="flex items-center justify-between border-b border-slate-700/80 pb-1.5">
-                        <div className="flex items-center space-x-1.5">
-                          <Flame className={`w-4 h-4 ${isModis ? 'text-amber-400' : 'text-cyan-400'}`} />
-                          <span className="font-extrabold text-white">
-                            {obs.sensor_family} Fire Hotspot
-                          </span>
+                    <div className="text-xs space-y-1.5 p-0.5 font-sans min-w-[200px]">
+                      <div className="flex items-center justify-between border-b border-[#E1DED5] pb-1">
+                        <div className="flex items-center space-x-1 font-semibold text-[#252923]">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                          <span>{obs.sensor_family}</span>
                         </div>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-200 font-bold border border-slate-700">
+                        <span className="text-[10px] font-mono px-1.5 rounded bg-[#FAF8F3] text-[#777970] border border-[#E1DED5]">
                           {obs.satellite}
                         </span>
                       </div>
-                      
-                      <div className="space-y-1 text-slate-300 text-[11px]">
-                        <p className="flex justify-between">
-                          <span className="text-slate-400">Position:</span>
-                          <span className="font-mono text-white">{formatCoord(obs.latitude, true)}, {formatCoord(obs.longitude, false)}</span>
-                        </p>
-                        <p className="flex justify-between">
-                          <span className="text-slate-400">Time (UTC):</span>
-                          <strong className="text-white">{obs.acquisition_date_utc} {obs.acquisition_datetime_utc ? obs.acquisition_datetime_utc.slice(11, 16) : ''}</strong>
-                        </p>
-                        <p className="flex justify-between">
-                          <span className="text-slate-400">Thermal Energy:</span>
-                          <span className="font-extrabold text-orange-400">{obs.frp_mw} MW</span>
-                        </p>
-                        {obs.brightness_temperature_kelvin && (
-                          <p className="flex justify-between">
-                            <span className="text-slate-400">Brightness:</span>
-                            <span className="text-white">{obs.brightness_temperature_kelvin} K</span>
-                          </p>
-                        )}
-                        <p className="flex justify-between">
-                          <span className="text-slate-400">Confidence:</span>
-                          <span className="font-semibold text-white">{obs.confidence_raw} ({obs.confidence_type})</span>
-                        </p>
-                        <p className="flex justify-between">
-                          <span className="text-slate-400">Pass:</span>
-                          <span>{obs.daynight === 'D' ? 'Day Overpass' : 'Night Overpass'}</span>
-                        </p>
+                      <div className="space-y-0.5 text-[11px] text-[#252923]">
+                        <div className="flex justify-between">
+                          <span className="text-[#777970]">Coords:</span>
+                          <span className="font-mono">{formatCoord(obs.latitude, true)}, {formatCoord(obs.longitude, false)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#777970]">UTC Time:</span>
+                          <span className="font-mono">{obs.acquisition_date_utc} {obs.acquisition_datetime_utc?.slice(11, 16)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#777970]">Thermal FRP:</span>
+                          <span className="font-semibold text-[#E65C35]">{obs.frp_mw} MW</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#777970]">Brightness:</span>
+                          <span>{obs.brightness_temperature_kelvin} K</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-[#777970]">Confidence:</span>
+                          <span>{obs.confidence_raw} ({obs.confidence_type})</span>
+                        </div>
                       </div>
-
-                      <div className="pt-1.5 border-t border-slate-800 text-[10px] text-slate-400 font-mono flex justify-between items-center">
-                        <span className="truncate max-w-[140px]">Grid: {obs.grid_cell_id}</span>
+                      <div className="pt-1 border-t border-[#E1DED5] flex justify-between items-center text-[10px]">
+                        <span className="font-mono text-[#777970] truncate max-w-[120px]">{obs.grid_cell_id}</span>
                         <button
                           onClick={() => setSelectedObs(obs)}
-                          className="text-orange-400 hover:text-orange-300 font-semibold"
+                          className="text-[#E65C35] font-semibold hover:underline"
                         >
                           Inspect &rarr;
                         </button>
@@ -353,113 +326,111 @@ export const FireMapPage: React.FC = () => {
           </MapContainer>
         </div>
 
-        {/* Top Floating Action Pill Bar (Gen-Z Clean Design) */}
+        {/* Top Editorial Floating Bar */}
         <div className="absolute top-4 left-6 right-6 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
           {/* Left stats pills */}
           <div className="flex items-center space-x-2 pointer-events-auto">
-            <div className="flex items-center space-x-2 px-3.5 py-2 rounded-2xl glass-panel shadow-xl text-xs font-bold text-white">
-              <Flame className="w-4 h-4 text-orange-500 animate-pulse" />
-              <span>{hotspots.length}</span>
-              <span className="text-[11px] text-slate-400 font-normal">Hotspots</span>
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs font-medium text-[#252923]">
+              <Flame className="w-3.5 h-3.5 text-[#E65C35]" />
+              <span className="font-bold">{hotspots.length}</span>
+              <span className="text-[11px] text-[#777970]">Hotspots</span>
             </div>
 
-            <div className="flex items-center space-x-2 px-3.5 py-2 rounded-2xl glass-panel shadow-xl text-xs font-bold text-white">
-              <Grid className="w-4 h-4 text-purple-400" />
-              <span>{gridCells.length}</span>
-              <span className="text-[11px] text-slate-400 font-normal">1km Cells</span>
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs font-medium text-[#252923]">
+              <Grid className="w-3.5 h-3.5 text-[#54785E]" />
+              <span className="font-bold">{gridCells.length}</span>
+              <span className="text-[11px] text-[#777970]">1km Cells</span>
             </div>
 
             {loading && (
-              <div className="flex items-center space-x-2 px-3 py-1.5 rounded-2xl bg-orange-600/30 border border-orange-500/50 backdrop-blur-md text-xs font-semibold text-orange-300 animate-pulse">
-                <span>Updating satellite points...</span>
+              <div className="px-3 py-1.5 rounded-md bg-[#FAF8F3] border border-[#E1DED5] text-xs font-medium text-[#777970] animate-pulse">
+                Fetching satellite observations...
               </div>
             )}
           </div>
 
           {/* Right quick toggles: Basemap & Controls Button */}
           <div className="flex items-center space-x-2 pointer-events-auto">
-            {/* Basemap Switcher Pill */}
-            <div className="flex items-center p-1 rounded-2xl glass-panel shadow-xl text-xs">
+            {/* Basemap Switcher */}
+            <div className="flex items-center p-0.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs">
               <button
                 type="button"
-                onClick={() => setBasemap('dark')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition ${
-                  basemap === 'dark' 
-                    ? 'bg-slate-800 text-orange-400 shadow-sm' 
-                    : 'text-slate-400 hover:text-white'
+                onClick={() => setBasemap('light')}
+                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
+                  basemap === 'light' ? 'bg-[#FAF8F3] text-[#E65C35] font-semibold' : 'text-[#777970] hover:text-[#252923]'
                 }`}
               >
-                🌌 Cyber Dark
+                Light
               </button>
               <button
                 type="button"
                 onClick={() => setBasemap('satellite')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition ${
-                  basemap === 'satellite' 
-                    ? 'bg-slate-800 text-cyan-400 shadow-sm' 
-                    : 'text-slate-400 hover:text-white'
+                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
+                  basemap === 'satellite' ? 'bg-[#FAF8F3] text-[#318C9B] font-semibold' : 'text-[#777970] hover:text-[#252923]'
                 }`}
               >
-                🛰️ Satellite
+                Satellite
               </button>
               <button
                 type="button"
                 onClick={() => setBasemap('osm')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition ${
-                  basemap === 'osm' 
-                    ? 'bg-slate-800 text-emerald-400 shadow-sm' 
-                    : 'text-slate-400 hover:text-white'
+                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
+                  basemap === 'osm' ? 'bg-[#FAF8F3] text-[#54785E] font-semibold' : 'text-[#777970] hover:text-[#252923]'
                 }`}
               >
-                🗺️ Street
+                Street
               </button>
             </div>
 
             {/* Toggle Drawer Button */}
             <button
               onClick={() => setControlsOpen(!controlsOpen)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-2xl font-bold text-xs transition glass-panel shadow-xl ${
-                controlsOpen ? 'text-orange-400 border-orange-500/40 bg-orange-950/20' : 'text-slate-300 hover:text-white'
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition border shadow-card ${
+                controlsOpen 
+                  ? 'bg-[#FCECE7] text-[#E65C35] border-[#E65C35]/30' 
+                  : 'bg-white text-[#252923] border-[#E1DED5] hover:bg-[#FAF8F3]'
               }`}
             >
-              <Sliders className="w-3.5 h-3.5 text-orange-400" />
-              <span>{controlsOpen ? 'Hide Controls' : 'Map Controls'}</span>
+              <Sliders className="w-3.5 h-3.5 text-[#E65C35]" />
+              <span>{controlsOpen ? 'Hide Filters' : 'Map Filters'}</span>
             </button>
           </div>
         </div>
 
-        {/* Floating Collapsible Map Control Panel (Gen-Z Glass Drawer) */}
+        {/* Collapsible Left Filter Drawer (Editorial Clean Style) */}
         {controlsOpen && (
-          <div className="absolute top-20 left-6 z-20 w-84 max-w-[calc(100vw-3rem)] glass-panel border border-white/10 rounded-3xl p-5 shadow-2xl space-y-4 animate-in slide-in-from-left duration-200">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+          <div className="absolute top-16 left-6 z-20 w-80 max-w-[calc(100vw-3rem)] bg-white border border-[#E1DED5] rounded-lg p-4 shadow-float space-y-4 animate-in slide-in-from-left duration-150">
+            <div className="flex items-center justify-between border-b border-[#E1DED5] pb-2.5">
               <div className="flex items-center space-x-2">
-                <Sliders className="w-4 h-4 text-orange-400" />
-                <h3 className="text-xs font-black text-white uppercase tracking-wider">Map Layer Controls</h3>
+                <Sliders className="w-3.5 h-3.5 text-[#E65C35]" />
+                <h3 className="font-serif font-semibold text-sm text-[#252923]">Filter Observations</h3>
               </div>
               <button
                 onClick={() => setControlsOpen(false)}
-                className="text-slate-400 hover:text-white transition p-1 rounded-lg hover:bg-slate-800/60"
+                className="text-[#777970] hover:text-[#252923] p-1 rounded hover:bg-[#FAF8F3]"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
             {/* Sensor Filter */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 mb-2 uppercase tracking-wider">Satellite Sensor Filter</label>
-              <div className="grid grid-cols-3 gap-1.5 bg-slate-950/70 p-1 rounded-2xl border border-white/5">
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-[#777970] mb-1.5 font-semibold">
+                Sensor Instrument
+              </label>
+              <div className="grid grid-cols-3 gap-1 bg-[#FAF8F3] p-1 rounded border border-[#E1DED5]">
                 {[
-                  { id: 'ALL', label: 'All Sensors' },
-                  { id: 'MODIS', label: 'MODIS 1km' },
-                  { id: 'VIIRS', label: 'VIIRS 375m' }
+                  { id: 'ALL', label: 'All' },
+                  { id: 'MODIS', label: 'MODIS' },
+                  { id: 'VIIRS', label: 'VIIRS' }
                 ].map((s) => (
                   <button
                     key={s.id}
                     onClick={() => setSensorFilter(s.id)}
-                    className={`py-1.5 rounded-xl text-xs font-black transition ${
+                    className={`py-1 rounded text-xs font-medium transition ${
                       sensorFilter === s.id 
-                        ? 'bg-orange-600 text-white shadow-md shadow-orange-600/30' 
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-white text-[#E65C35] shadow-sm font-semibold' 
+                        : 'text-[#777970] hover:text-[#252923]'
                     }`}
                   >
                     {s.label}
@@ -468,11 +439,11 @@ export const FireMapPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Min FRP slider with gradient track */}
+            {/* Min FRP slider */}
             <div>
-              <div className="flex items-center justify-between text-xs font-bold mb-2">
-                <span className="text-slate-400">Min Thermal Power (FRP)</span>
-                <span className="text-orange-400 font-mono bg-orange-950/60 px-2 py-0.5 rounded-md border border-orange-800/60">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="text-[#777970]">Min Thermal Power (FRP)</span>
+                <span className="font-mono text-[11px] font-semibold text-[#E65C35] bg-[#FCECE7] px-1.5 py-0.5 rounded">
                   &ge; {minFrp} MW
                 </span>
               </div>
@@ -483,9 +454,9 @@ export const FireMapPage: React.FC = () => {
                 step="5"
                 value={minFrp}
                 onChange={(e) => setMinFrp(Number(e.target.value))}
-                className="w-full accent-orange-500 bg-slate-800 h-2 rounded-lg appearance-none cursor-pointer"
+                className="w-full accent-[#E65C35] h-1.5 bg-[#EBE8DF] rounded cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+              <div className="flex justify-between text-[10px] text-[#777970] mt-0.5 font-mono">
                 <span>0 MW</span>
                 <span>50 MW</span>
                 <span>100 MW</span>
@@ -493,172 +464,178 @@ export const FireMapPage: React.FC = () => {
             </div>
 
             {/* Date Range Filter */}
-            <div className="space-y-2 pt-2 border-t border-white/10">
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Date Window (UTC)</label>
+            <div className="space-y-2 pt-2 border-t border-[#E1DED5]">
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-[#777970] font-semibold">
+                Date Range (UTC)
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <span className="text-[10px] text-slate-500 block mb-0.5">Start Date</span>
+                  <span className="text-[10px] text-[#777970] block mb-0.5">Start</span>
                   <input
                     type="date"
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
-                    className="w-full bg-slate-950/80 border border-slate-700/60 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500 font-mono"
+                    className="w-full bg-[#FAF8F3] border border-[#E1DED5] rounded px-2 py-1 text-xs text-[#252923] focus:outline-none focus:border-[#E65C35] font-mono"
                   />
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-500 block mb-0.5">End Date</span>
+                  <span className="text-[10px] text-[#777970] block mb-0.5">End</span>
                   <input
                     type="date"
                     value={dateTo}
                     onChange={(e) => setDateTo(e.target.value)}
-                    className="w-full bg-slate-950/80 border border-slate-700/60 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500 font-mono"
+                    className="w-full bg-[#FAF8F3] border border-[#E1DED5] rounded px-2 py-1 text-xs text-[#252923] focus:outline-none focus:border-[#E65C35] font-mono"
                   />
                 </div>
               </div>
             </div>
 
             {/* Layer Toggles */}
-            <div className="space-y-2.5 pt-2 border-t border-white/10 text-xs">
-              <label className="flex items-center space-x-2.5 text-slate-300 cursor-pointer">
+            <div className="space-y-2 pt-2 border-t border-[#E1DED5] text-xs">
+              <label className="flex items-center space-x-2 text-[#252923] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={showPoints}
                   onChange={(e) => setShowPoints(e.target.checked)}
-                  className="rounded-md accent-orange-500 bg-slate-900 border-slate-700 w-4 h-4 cursor-pointer"
+                  className="rounded text-[#E65C35] focus:ring-0 w-3.5 h-3.5"
                 />
-                <span className="font-semibold">Satellite Hotspot Points (MODIS / VIIRS)</span>
+                <span>Satellite Hotspot Points</span>
               </label>
-              <label className="flex items-center space-x-2.5 text-slate-300 cursor-pointer">
+              <label className="flex items-center space-x-2 text-[#252923] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={showGrid}
                   onChange={(e) => setShowGrid(e.target.checked)}
-                  className="rounded-md accent-orange-500 bg-slate-900 border-slate-700 w-4 h-4 cursor-pointer"
+                  className="rounded text-[#E65C35] focus:ring-0 w-3.5 h-3.5"
                 />
-                <span className="font-semibold">Harmonized 1km Grid (EPSG:6933)</span>
+                <span>Harmonized 1km Grid (EPSG:6933)</span>
               </label>
             </div>
 
-            {/* Clean Legend */}
-            <div className="pt-2 border-t border-white/10 space-y-2 text-xs">
-              <span className="font-bold text-slate-400 uppercase tracking-wider block text-[10px]">Legend</span>
-              <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-300">
-                <div className="flex items-center space-x-2">
-                  <span className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]"></span>
-                  <span>MODIS (1,000m)</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_6px_#38bdf8]"></span>
-                  <span>VIIRS (375m)</span>
-                </div>
-                <div className="flex items-center space-x-2 col-span-2">
-                  <span className="w-3.5 h-3.5 rounded bg-purple-500/30 border border-purple-400 shadow-[0_0_6px_#c084fc]"></span>
-                  <span>Cross-Sensor Co-Detected 1km Cell</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Export Buttons */}
-            <div className="pt-3 border-t border-white/10 flex gap-2">
-              <a
-                href={FirePulseAPI.getExportUrl('observations', {
-                  west: aoi.west,
-                  south: aoi.south,
-                  east: aoi.east,
-                  north: aoi.north,
-                  sensor: sensorFilter === 'ALL' ? undefined : sensorFilter,
-                  date_from: dateFrom || undefined,
-                  date_to: dateTo || undefined
-                })}
-                download
-                className="flex-1 flex items-center justify-center space-x-1.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition hover:border-cyan-500/50"
-                title="Download filtered hotspots CSV"
+            {/* Reset Filters & Export */}
+            <div className="pt-2 border-t border-[#E1DED5] flex items-center justify-between text-xs">
+              <button
+                onClick={handleResetFilters}
+                className="flex items-center space-x-1 text-[#777970] hover:text-[#252923]"
               >
-                <Download className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Points CSV</span>
-              </a>
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset Filters</span>
+              </button>
               <a
-                href={FirePulseAPI.getExportUrl('grid', {
-                  west: aoi.west,
-                  south: aoi.south,
-                  east: aoi.east,
-                  north: aoi.north,
-                  date_from: dateFrom || undefined,
-                  date_to: dateTo || undefined
-                })}
+                href={FirePulseAPI.getExportUrl('observations', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
                 download
-                className="flex-1 flex items-center justify-center space-x-1.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition hover:border-orange-500/50"
-                title="Download harmonized grid cells CSV"
+                className="flex items-center space-x-1 text-[#318C9B] font-medium hover:underline"
               >
-                <Download className="w-3.5 h-3.5 text-orange-400" />
-                <span>1km Grid CSV</span>
+                <Download className="w-3 h-3" />
+                <span>Download CSV</span>
               </a>
             </div>
           </div>
         )}
 
-        {/* Selected Hotspot Inspector Slide-over Card */}
+        {/* Slide-over Hotspot Inspector Drawer (Right Side) */}
         {selectedObs && (
-          <div className="absolute bottom-6 right-6 z-20 w-84 max-w-[calc(100vw-3rem)] glass-panel border border-white/10 rounded-3xl p-5 shadow-2xl space-y-3 animate-in slide-in-from-bottom duration-200">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-              <div className="flex items-center space-x-2">
-                <Flame className={`w-5 h-5 ${selectedObs.sensor_family === 'MODIS' ? 'text-amber-400' : 'text-cyan-400'}`} />
+          <div className="absolute top-4 right-6 bottom-4 z-20 w-88 max-w-[calc(100vw-3rem)] bg-white border border-[#E1DED5] rounded-lg p-5 shadow-float flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-150">
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="flex items-start justify-between border-b border-[#E1DED5] pb-3">
                 <div>
-                  <h4 className="text-sm font-black text-white">{selectedObs.sensor_family} Observation</h4>
-                  <span className="text-[10px] text-slate-400 font-semibold">{selectedObs.satellite} Satellite</span>
+                  <span className="text-[10px] font-mono uppercase text-[#777970]">Inspection Panel</span>
+                  <h3 className="font-serif font-semibold text-lg text-[#252923] flex items-center gap-1.5 mt-0.5">
+                    <span 
+                      className="w-2.5 h-2.5 rounded-full" 
+                      style={{ backgroundColor: selectedObs.sensor_family === 'MODIS' ? '#C27B26' : '#318C9B' }}
+                    ></span>
+                    <span>{selectedObs.sensor_family} Observation</span>
+                  </h3>
                 </div>
-              </div>
-              <button
-                onClick={() => setSelectedObs(null)}
-                className="text-slate-400 hover:text-white transition p-1 rounded-lg hover:bg-slate-800"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Key Fire Metrics */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-slate-950/70 p-3 rounded-2xl border border-white/5">
-                <span className="text-[10px] text-slate-400 block font-semibold uppercase">Thermal Power (FRP)</span>
-                <span className="text-lg font-black text-orange-400">{selectedObs.frp_mw} <span className="text-xs font-normal text-slate-400">MW</span></span>
-              </div>
-              <div className="bg-slate-950/70 p-3 rounded-2xl border border-white/5">
-                <span className="text-[10px] text-slate-400 block font-semibold uppercase">Brightness Temp</span>
-                <span className="text-lg font-black text-white">{selectedObs.brightness_temperature_kelvin || '—'} <span className="text-xs font-normal text-slate-400">K</span></span>
-              </div>
-            </div>
-
-            {/* Details List */}
-            <div className="space-y-1.5 text-xs text-slate-300">
-              <div className="flex justify-between items-center py-1 border-b border-white/5">
-                <span className="text-slate-400">Acquisition Time</span>
-                <strong className="text-white font-mono">{selectedObs.acquisition_date_utc} {selectedObs.acquisition_datetime_utc ? selectedObs.acquisition_datetime_utc.slice(11, 16) : ''} UTC</strong>
-              </div>
-              <div className="flex justify-between items-center py-1 border-b border-white/5">
-                <span className="text-slate-400">Confidence Scale</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-white border border-slate-700">
-                  {selectedObs.confidence_raw} ({selectedObs.confidence_type})
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-1 border-b border-white/5">
-                <span className="text-slate-400">Overpass Period</span>
-                <span>{selectedObs.daynight === 'D' ? '☀️ Daytime Pass' : '🌙 Nighttime Pass'}</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-400">GPS Coordinates</span>
                 <button
-                  onClick={() => handleCopyCoord(selectedObs.latitude, selectedObs.longitude)}
-                  className="flex items-center space-x-1 text-slate-300 hover:text-white font-mono text-[11px] bg-slate-950/60 px-2 py-0.5 rounded border border-white/5"
-                  title="Click to copy coordinates"
+                  onClick={() => setSelectedObs(null)}
+                  className="text-[#777970] hover:text-[#252923] p-1 rounded hover:bg-[#FAF8F3]"
                 >
-                  <span>{selectedObs.latitude.toFixed(4)}°, {selectedObs.longitude.toFixed(4)}°</span>
-                  {copiedCoord ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-400" />}
+                  <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Coordinates Pill */}
+              <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-[#777970] block">WGS84 Coordinates</span>
+                  <span className="font-mono text-xs text-[#252923] font-semibold">
+                    {formatCoord(selectedObs.latitude, true)}, {formatCoord(selectedObs.longitude, false)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleCopyCoord(selectedObs.latitude, selectedObs.longitude)}
+                  className="p-1.5 rounded border border-[#E1DED5] bg-white text-[#777970] hover:text-[#252923] transition"
+                  title="Copy GPS coordinates"
+                >
+                  {copiedCoord ? <Check className="w-3.5 h-3.5 text-[#54785E]" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* Key Scientific Attributes */}
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
+                  <span className="text-[#777970]">Satellite Platform:</span>
+                  <span className="font-semibold text-[#252923]">{selectedObs.satellite} ({selectedObs.instrument})</span>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
+                  <span className="text-[#777970]">UTC Timestamp:</span>
+                  <span className="font-mono text-[#252923]">
+                    {selectedObs.acquisition_date_utc} {selectedObs.acquisition_datetime_utc?.slice(11, 16)} UTC
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
+                  <span className="text-[#777970]">Fire Radiative Power:</span>
+                  <span className="font-mono font-bold text-[#E65C35]">
+                    {selectedObs.frp_mw?.toFixed(1)} MW
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
+                  <span className="text-[#777970]">Brightness Temperature:</span>
+                  <span className="font-mono text-[#252923]">
+                    {selectedObs.brightness_temperature_kelvin ? `${selectedObs.brightness_temperature_kelvin.toFixed(1)} K` : 'N/A'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
+                  <span className="text-[#777970]">Detection Confidence:</span>
+                  <span className="font-semibold text-[#252923]">
+                    {selectedObs.confidence_raw} ({selectedObs.confidence_type})
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
+                  <span className="text-[#777970]">Overpass Category:</span>
+                  <span className="text-[#252923]">
+                    {selectedObs.daynight === 'D' ? 'Daytime (Solar Heated)' : 'Nighttime (Cool Background)'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Grid Association */}
+              <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md space-y-1">
+                <span className="text-[10px] font-mono uppercase text-[#777970]">Assigned 1km Cell ID</span>
+                <div className="font-mono text-[11px] font-semibold text-[#252923] truncate">
+                  {selectedObs.grid_cell_id}
+                </div>
+                <p className="text-[10px] text-[#777970] leading-tight">
+                  Projected via EPSG:6933 into an equal-area 1,000m x 1,000m analytical grid cell.
+                </p>
+              </div>
             </div>
 
-            <div className="p-2 rounded-xl bg-slate-950/70 border border-white/5 text-[10px] text-slate-400 font-mono truncate">
-              Analytical Cell: <strong className="text-purple-400">{selectedObs.grid_cell_id}</strong>
+            <div className="pt-3 border-t border-[#E1DED5]">
+              <button
+                onClick={() => setSelectedObs(null)}
+                className="w-full py-2 rounded bg-[#FAF8F3] hover:bg-[#EBE8DF] border border-[#E1DED5] text-xs font-semibold text-[#252923] transition"
+              >
+                Close Inspector
+              </button>
             </div>
           </div>
         )}

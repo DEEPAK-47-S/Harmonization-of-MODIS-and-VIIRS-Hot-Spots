@@ -5,9 +5,6 @@ import {
   Flame, 
   Layers, 
   Info, 
-  BarChart2, 
-  TrendingUp, 
-  ShieldAlert,
   Download 
 } from 'lucide-react';
 import { 
@@ -56,213 +53,243 @@ export const ComparisonPage: React.FC = () => {
   };
 
   const overlapPieData = data ? [
-    { name: 'Co-Detected (Both)', value: data.overlap.co_detected_cell_days, color: '#c084fc' },
-    { name: 'VIIRS Only', value: data.overlap.viirs_only_cell_days, color: '#38bdf8' },
-    { name: 'MODIS Only', value: data.overlap.modis_only_cell_days, color: '#f59e0b' },
+    { name: 'Co-Detected (Both)', value: data.overlap.co_detected_cell_days, color: '#54785E' },
+    { name: 'VIIRS Only', value: data.overlap.viirs_only_cell_days, color: '#318C9B' },
+    { name: 'MODIS Only', value: data.overlap.modis_only_cell_days, color: '#C27B26' },
   ].filter(d => d.value > 0) : [];
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-slate-950 overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
       <Header 
-        title="MODIS vs VIIRS Sensor Comparison" 
+        title="Sensor Comparison" 
         subtitle="Comparing sensor footprint resolution, thermal detection sensitivity, and spatial co-occurrence"
       />
 
-      <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
-        {/* Critical Scientific Caveat Banner */}
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-start space-x-3.5 shadow-md">
-          <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-slate-300 leading-relaxed">
-            <strong className="text-amber-400 font-bold block mb-1">
-              Scientific Principle: Resolution & Observation Timing Impact
+      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* Editorial Introduction */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
+              Analytical Comparison / MODIS vs VIIRS
+            </span>
+            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
+              Two sensors. One clearer picture.
+            </h1>
+            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+              Differing sensor footprints, equatorial overpass times, and detection algorithms mean raw observation counts cannot be directly summed.
+            </p>
+          </div>
+        </div>
+
+        {/* Scientific Principle Notice */}
+        <div className="bg-white border border-[#E1DED5] p-4 rounded-lg flex items-start space-x-3 shadow-card">
+          <Info className="w-4 h-4 text-[#C27B26] shrink-0 mt-0.5" />
+          <div className="text-xs text-[#252923] leading-relaxed">
+            <strong className="text-[#252923] font-semibold block mb-0.5">
+              Remote Sensing Caveat: Resolution vs Incident Counts
             </strong>
-            MODIS operates at a 1,000 m nominal resolution, while VIIRS features 375 m I-bands capable of resolving smaller and cooler thermal anomalies. Detections also differ due to differing orbit tracks, equatorial crossing times, scan angles, and cloud obscuration.
-            <span className="text-amber-300 font-semibold block mt-1">
-              Never interpret differences in raw observation counts as a direct difference in the physical number of wildfires.
+            MODIS operates at a 1,000 m nominal nadir footprint, while VIIRS features 375 m I-bands capable of resolving smaller and cooler fires. Because a 1km MODIS pixel contains approximately 7.11 VIIRS pixels, VIIRS naturally yields multiple detections for a single burning perimeter.
+            <span className="text-[#C27B26] font-medium block mt-1">
+              Never treat raw observation differences as a direct measure of physical wildfire occurrences.
             </span>
           </div>
         </div>
 
-        {/* Side-by-Side Sensor Attribute Cards */}
+        {/* Side-by-Side Sensor Attribute Sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* MODIS Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden shadow-lg border-t-4 border-t-amber-500">
-            <div className="flex items-center justify-between mb-4">
+          {/* MODIS Column (Amber Identity) */}
+          <div className="bg-white border-t-4 border-t-[#C27B26] border-x border-b border-[#E1DED5] rounded-lg p-5 shadow-card space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E1DED5] pb-3">
               <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
+                <div className="w-7 h-7 rounded bg-[#C27B26]/10 text-[#C27B26] flex items-center justify-center font-bold text-xs">
                   M
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-white">MODIS Active Fire</h3>
-                  <p className="text-[11px] text-slate-400">Terra & Aqua Satellites</p>
+                  <h3 className="font-serif font-bold text-base text-[#252923]">MODIS Active Fire</h3>
+                  <p className="text-[11px] text-[#777970]">Terra &amp; Aqua Satellites</p>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-[#C27B26]/10 text-[#C27B26] border border-[#C27B26]/30">
                 1,000 m Nominal
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span className="text-[11px] text-slate-400 block">Total Detections</span>
-                <span className="text-xl font-bold text-amber-400">{data?.modis.observation_count ?? 0}</span>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-[#FAF8F3] p-3 rounded border border-[#E1DED5]">
+                <span className="text-[10px] font-mono uppercase text-[#777970] block">Detections</span>
+                <span className="text-xl font-bold font-serif text-[#C27B26]">{data?.modis.observation_count ?? 0}</span>
               </div>
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span className="text-[11px] text-slate-400 block">Mean FRP</span>
-                <span className="text-xl font-bold text-white">{data?.modis.frp_mean ?? 0} <span className="text-xs font-normal text-slate-400">MW</span></span>
+              <div className="bg-[#FAF8F3] p-3 rounded border border-[#E1DED5]">
+                <span className="text-[10px] font-mono uppercase text-[#777970] block">Mean FRP</span>
+                <span className="text-xl font-bold font-serif text-[#252923]">
+                  {data?.modis.frp_mean ?? 0} <span className="text-[10px] font-normal font-sans text-[#777970]">MW</span>
+                </span>
               </div>
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span className="text-[11px] text-slate-400 block">Max FRP</span>
-                <span className="text-xl font-bold text-white">{data?.modis.frp_max ?? 0} <span className="text-xs font-normal text-slate-400">MW</span></span>
+              <div className="bg-[#FAF8F3] p-3 rounded border border-[#E1DED5]">
+                <span className="text-[10px] font-mono uppercase text-[#777970] block">Max FRP</span>
+                <span className="text-xl font-bold font-serif text-[#252923]">
+                  {data?.modis.frp_max ?? 0} <span className="text-[10px] font-normal font-sans text-[#777970]">MW</span>
+                </span>
               </div>
             </div>
 
-            <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-1.5">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Confidence Distribution (Percentage)</span>
-              <div className="flex items-center justify-between text-slate-300">
+            <div className="p-3 bg-[#FAF8F3] rounded border border-[#E1DED5] text-xs space-y-1">
+              <span className="text-[10px] font-mono uppercase text-[#777970] font-semibold block">Confidence Scale (0–100%)</span>
+              <div className="flex items-center justify-between text-[#252923] pt-0.5 font-mono text-[11px]">
                 <span>Low (&lt;30%): <strong>{data?.modis.confidence_distribution.low ?? 0}</strong></span>
                 <span>Nominal (30-80%): <strong>{data?.modis.confidence_distribution.nominal ?? 0}</strong></span>
                 <span>High (&gt;80%): <strong>{data?.modis.confidence_distribution.high ?? 0}</strong></span>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-800/80 flex justify-end">
+            <div className="pt-2 flex justify-end">
               <a
                 href={FirePulseAPI.getExportUrl('observations', { sensor: 'MODIS', west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
                 download
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold transition"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#C27B26] border border-[#E1DED5] text-xs font-semibold transition"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Export MODIS Observations CSV</span>
+                <span>Export MODIS CSV</span>
               </a>
             </div>
           </div>
 
-          {/* VIIRS Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden shadow-lg border-t-4 border-t-cyan-500">
-            <div className="flex items-center justify-between mb-4">
+          {/* VIIRS Column (Teal Identity) */}
+          <div className="bg-white border-t-4 border-t-[#318C9B] border-x border-b border-[#E1DED5] rounded-lg p-5 shadow-card space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E1DED5] pb-3">
               <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
+                <div className="w-7 h-7 rounded bg-[#318C9B]/10 text-[#318C9B] flex items-center justify-center font-bold text-xs">
                   V
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-white">VIIRS Active Fire</h3>
-                  <p className="text-[11px] text-slate-400">NOAA-20 & NOAA-21 (JPSS)</p>
+                  <h3 className="font-serif font-bold text-base text-[#252923]">VIIRS Active Fire</h3>
+                  <p className="text-[11px] text-[#777970]">NOAA-20, NOAA-21 &amp; S-NPP</p>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-[#318C9B]/10 text-[#318C9B] border border-[#318C9B]/30">
                 375 m Nominal (I-Bands)
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span className="text-[11px] text-slate-400 block">Total Detections</span>
-                <span className="text-xl font-bold text-cyan-400">{data?.viirs.observation_count ?? 0}</span>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-[#FAF8F3] p-3 rounded border border-[#E1DED5]">
+                <span className="text-[10px] font-mono uppercase text-[#777970] block">Detections</span>
+                <span className="text-xl font-bold font-serif text-[#318C9B]">{data?.viirs.observation_count ?? 0}</span>
               </div>
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span className="text-[11px] text-slate-400 block">Mean FRP</span>
-                <span className="text-xl font-bold text-white">{data?.viirs.frp_mean ?? 0} <span className="text-xs font-normal text-slate-400">MW</span></span>
+              <div className="bg-[#FAF8F3] p-3 rounded border border-[#E1DED5]">
+                <span className="text-[10px] font-mono uppercase text-[#777970] block">Mean FRP</span>
+                <span className="text-xl font-bold font-serif text-[#252923]">
+                  {data?.viirs.frp_mean ?? 0} <span className="text-[10px] font-normal font-sans text-[#777970]">MW</span>
+                </span>
               </div>
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                <span className="text-[11px] text-slate-400 block">Max FRP</span>
-                <span className="text-xl font-bold text-white">{data?.viirs.frp_max ?? 0} <span className="text-xs font-normal text-slate-400">MW</span></span>
+              <div className="bg-[#FAF8F3] p-3 rounded border border-[#E1DED5]">
+                <span className="text-[10px] font-mono uppercase text-[#777970] block">Max FRP</span>
+                <span className="text-xl font-bold font-serif text-[#252923]">
+                  {data?.viirs.frp_max ?? 0} <span className="text-[10px] font-normal font-sans text-[#777970]">MW</span>
+                </span>
               </div>
             </div>
 
-            <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs space-y-1.5">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Confidence Distribution (Categorical)</span>
-              <div className="flex items-center justify-between text-slate-300">
+            <div className="p-3 bg-[#FAF8F3] rounded border border-[#E1DED5] text-xs space-y-1">
+              <span className="text-[10px] font-mono uppercase text-[#777970] font-semibold block">Confidence Scale (Categorical)</span>
+              <div className="flex items-center justify-between text-[#252923] pt-0.5 font-mono text-[11px]">
                 <span>Low ('l'): <strong>{data?.viirs.confidence_distribution.low ?? 0}</strong></span>
                 <span>Nominal ('n'): <strong>{data?.viirs.confidence_distribution.nominal ?? 0}</strong></span>
                 <span>High ('h'): <strong>{data?.viirs.confidence_distribution.high ?? 0}</strong></span>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-800/80 flex justify-end">
+            <div className="pt-2 flex justify-end">
               <a
                 href={FirePulseAPI.getExportUrl('observations', { sensor: 'VIIRS', west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
                 download
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs font-semibold transition"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#318C9B] border border-[#E1DED5] text-xs font-semibold transition"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Export VIIRS Observations CSV</span>
+                <span>Export VIIRS CSV</span>
               </a>
             </div>
           </div>
         </div>
 
-        {/* Spatial Resolution Footprint Infographic */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
+        {/* Spatial Footprint Discrepancy & Area Ratio Infographic */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E1DED5] pb-3">
             <div>
-              <h3 className="text-base font-bold text-white">Spatial Footprint Discrepancy & Area Ratio</h3>
-              <p className="text-xs text-slate-400">Comparing pixel area resolution between MODIS (1,000m) and VIIRS (375m I-Bands)</p>
+              <h3 className="font-serif font-semibold text-base text-[#252923]">
+                Spatial Footprint Discrepancy &amp; Area Ratio
+              </h3>
+              <p className="text-xs text-[#777970]">
+                Geometric comparison of sensor nadir pixel footprints
+              </p>
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">
-              Area Ratio: ~7.11 to 1
+            <span className="px-2.5 py-1 rounded text-xs font-mono font-semibold bg-[#FAF8F3] text-[#E65C35] border border-[#E1DED5]">
+              Area Ratio: 1 MODIS &approx; 7.11 VIIRS
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center pt-2">
             {/* Visual Box Diagram */}
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col items-center justify-center">
-              <span className="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wider">Pixel Scale Diagram</span>
-              <div className="relative w-44 h-44 border-2 border-dashed border-amber-500/80 bg-amber-500/5 rounded-lg flex flex-wrap p-1 gap-1 items-start justify-start">
-                <span className="absolute -top-3 left-2 bg-slate-950 px-1 text-[10px] font-bold text-amber-400">
+            <div className="bg-[#FAF8F3] p-4 rounded border border-[#E1DED5] flex flex-col items-center justify-center">
+              <span className="text-[10px] font-mono uppercase text-[#777970] mb-3 font-semibold">Pixel Scale Diagram</span>
+              <div className="relative w-40 h-40 border-2 border-dashed border-[#C27B26] bg-[#C27B26]/5 rounded flex flex-wrap p-1 gap-1 items-start justify-start">
+                <span className="absolute -top-2.5 left-2 bg-white px-1 text-[9px] font-mono font-bold text-[#C27B26] border border-[#E1DED5] rounded">
                   MODIS: 1,000 m
                 </span>
                 {Array.from({ length: 7 }).map((_, i) => (
                   <div
                     key={i}
-                    className="w-12 h-12 border border-sky-400 bg-sky-500/20 rounded flex items-center justify-center text-[10px] font-mono text-sky-300 font-bold"
-                    title="VIIRS 375m I-Band footprint"
+                    className="w-11 h-11 border border-[#318C9B] bg-[#318C9B]/15 rounded flex items-center justify-center text-[9px] font-mono text-[#318C9B] font-bold"
                   >
                     375m
                   </div>
                 ))}
-                <div className="w-12 h-12 border border-sky-400/40 border-dashed rounded flex items-center justify-center text-[9px] text-sky-400/60 font-mono">
+                <div className="w-11 h-11 border border-[#318C9B]/40 border-dashed rounded flex items-center justify-center text-[8px] text-[#318C9B] font-mono">
                   +0.11
                 </div>
               </div>
-              <span className="text-[10px] text-slate-500 mt-3 font-mono">1 MODIS Pixel &approx; 7.11 VIIRS Pixels</span>
+              <span className="text-[10px] font-mono text-[#777970] mt-3">Area: 1.00 km² vs 0.14 km²</span>
             </div>
 
-            {/* Explanation & Math Breakdown */}
-            <div className="md:col-span-2 space-y-3 text-xs text-slate-300">
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center">
+            {/* Math Breakdown */}
+            <div className="md:col-span-2 space-y-3 text-xs text-[#252923]">
+              <div className="p-3 bg-[#FAF8F3] rounded border border-[#E1DED5] flex justify-between items-center">
                 <div>
-                  <strong className="text-amber-400 block">MODIS (Terra & Aqua) Footprint Area</strong>
-                  <span className="text-[11px] text-slate-400">1,000 m &times; 1,000 m nominal nadir resolution</span>
+                  <strong className="text-[#C27B26] block">MODIS Footprint Ground Area</strong>
+                  <span className="text-[11px] text-[#777970]">1,000 m &times; 1,000 m nominal nadir resolution</span>
                 </div>
-                <span className="font-mono font-bold text-white text-sm">1,000,000 m&sup2; (1.00 km&sup2;)</span>
+                <span className="font-mono font-semibold text-sm">1,000,000 m² (1.00 km²)</span>
               </div>
 
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex justify-between items-center">
+              <div className="p-3 bg-[#FAF8F3] rounded border border-[#E1DED5] flex justify-between items-center">
                 <div>
-                  <strong className="text-cyan-400 block">VIIRS (NOAA-20/21) Footprint Area</strong>
-                  <span className="text-[11px] text-slate-400">375 m &times; 375 m nominal I-Band resolution</span>
+                  <strong className="text-[#318C9B] block">VIIRS Footprint Ground Area</strong>
+                  <span className="text-[11px] text-[#777970]">375 m &times; 375 m nominal I-Band resolution</span>
                 </div>
-                <span className="font-mono font-bold text-white text-sm">140,625 m&sup2; (0.14 km&sup2;)</span>
+                <span className="font-mono font-semibold text-sm">140,625 m² (0.14 km²)</span>
               </div>
 
-              <p className="text-slate-400 leading-relaxed text-[11px]">
-                Because each VIIRS detection observes only 14% of a MODIS pixel's ground area, a single wildfire perimeter is frequently recorded as multiple adjacent VIIRS detections, whereas MODIS records a single detection. This is why FirePulse performs <strong className="text-white">analytical aggregation onto a common 1km grid (EPSG:6933)</strong> rather than summing raw sensor counts.
+              <p className="text-[#777970] leading-relaxed text-[11px]">
+                Because each VIIRS detection observes only 14% of a MODIS pixel's ground area, a single wildfire perimeter is frequently recorded as multiple adjacent VIIRS detections, whereas MODIS records a single detection. This is why FirePulse performs <strong className="text-[#252923]">analytical aggregation onto a common 1km grid (EPSG:6933)</strong> rather than summing raw sensor counts.
               </p>
             </div>
           </div>
         </div>
 
         {/* 1km Common Grid Overlap Analysis */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <h3 className="text-base font-bold text-white mb-1">Common 1km Analytical Grid Overlap Analysis</h3>
-          <p className="text-xs text-slate-400 mb-6">
-            Spatial aggregation into fixed 1km x 1km equal-area cells (EPSG:6933) to determine cross-sensor co-occurrence
-          </p>
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-4">
+          <div>
+            <h3 className="font-serif font-semibold text-base text-[#252923]">
+              Common 1km Analytical Grid Overlap Analysis
+            </h3>
+            <p className="text-xs text-[#777970]">
+              Spatial aggregation into fixed 1km x 1km equal-area cells (EPSG:6933) to determine cross-sensor co-occurrence
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center pt-2">
             {/* Donut Chart */}
-            <div className="h-56 flex flex-col items-center justify-center">
+            <div className="h-52 flex flex-col items-center justify-center">
               {overlapPieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -272,119 +299,68 @@ export const ComparisonPage: React.FC = () => {
                       nameKey="name"
                       cx="50%"
                       cy="50%"
-                      innerRadius={50}
-                      outerRadius={75}
-                      paddingAngle={4}
+                      innerRadius={45}
+                      outerRadius={70}
+                      paddingAngle={3}
                     >
                       {overlapPieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '10px' }}
+                      contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E1DED5', borderRadius: '6px', fontSize: '11px', color: '#252923' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <span className="text-xs text-slate-500">No overlap records</span>
+                <span className="text-xs text-[#777970]">No overlap records</span>
               )}
             </div>
 
             {/* Overlap Metrics Breakdown */}
-            <div className="lg:col-span-2 space-y-3">
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <span className="w-3 h-3 rounded-full bg-purple-400"></span>
+            <div className="lg:col-span-2 space-y-2.5">
+              <div className="p-3 rounded bg-[#FAF8F3] border border-[#E1DED5] flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#54785E]"></span>
                   <div>
-                    <span className="font-semibold text-white text-xs block">Cross-Sensor Co-Detected Cell-Days</span>
-                    <span className="text-[11px] text-slate-400">Observed by both MODIS and VIIRS on the same UTC day</span>
+                    <span className="font-semibold text-xs text-[#252923] block">Cross-Sensor Co-Detected Cell-Days</span>
+                    <span className="text-[11px] text-[#777970]">Jointly detected by MODIS and VIIRS</span>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-lg font-bold text-purple-400">{data?.overlap.co_detected_cell_days ?? 0}</span>
-                  <span className="text-[10px] text-slate-400 block font-mono">({data?.overlap.co_detection_rate_pct ?? 0}%)</span>
-                </div>
+                <span className="font-mono font-bold text-[#54785E] text-base">
+                  {data?.overlap.co_detected_cell_days ?? 0}
+                </span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <span className="w-3 h-3 rounded-full bg-sky-400"></span>
+              <div className="p-3 rounded bg-[#FAF8F3] border border-[#E1DED5] flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#318C9B]"></span>
                   <div>
-                    <span className="font-semibold text-white text-xs block">VIIRS Only Active Cells</span>
-                    <span className="text-[11px] text-slate-400">Detected by VIIRS 375m but not recorded by MODIS 1km</span>
+                    <span className="font-semibold text-xs text-[#252923] block">VIIRS-Only Cell-Days</span>
+                    <span className="text-[11px] text-[#777970]">Thermal anomaly detected only by VIIRS</span>
                   </div>
                 </div>
-                <span className="text-lg font-bold text-sky-400">{data?.overlap.viirs_only_cell_days ?? 0}</span>
+                <span className="font-mono font-bold text-[#318C9B] text-base">
+                  {data?.overlap.viirs_only_cell_days ?? 0}
+                </span>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <span className="w-3 h-3 rounded-full bg-amber-400"></span>
+              <div className="p-3 rounded bg-[#FAF8F3] border border-[#E1DED5] flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#C27B26]"></span>
                   <div>
-                    <span className="font-semibold text-white text-xs block">MODIS Only Active Cells</span>
-                    <span className="text-[11px] text-slate-400">Detected by MODIS Terra/Aqua only</span>
+                    <span className="font-semibold text-xs text-[#252923] block">MODIS-Only Cell-Days</span>
+                    <span className="text-[11px] text-[#777970]">Thermal anomaly detected only by MODIS</span>
                   </div>
                 </div>
-                <span className="text-lg font-bold text-amber-400">{data?.overlap.modis_only_cell_days ?? 0}</span>
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <a
-                  href={FirePulseAPI.getExportUrl('grid', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
-                  download
-                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs font-semibold transition"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Export Harmonized 1km Grid CSV</span>
-                </a>
+                <span className="font-mono font-bold text-[#C27B26] text-base">
+                  {data?.overlap.modis_only_cell_days ?? 0}
+                </span>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Daily Time Series Comparison */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
-          <h3 className="text-base font-bold text-white mb-1">Daily Observation Comparison Timeline</h3>
-          <p className="text-xs text-slate-400 mb-4">
-            Side-by-side detection counts over time across the selected Area of Interest
-          </p>
-
-          <div className="h-64 w-full">
-            {data && data.timeline.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data.timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
-                    labelStyle={{ color: '#f8fafc', fontWeight: 'bold' }}
-                  />
-                  <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                  <Line type="monotone" dataKey="viirs_detections" name="VIIRS (375m)" stroke="#0284c7" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="modis_detections" name="MODIS (1km)" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="co_detected_cells" name="Co-Detected Cells" stroke="#c084fc" strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-slate-500 text-sm">
-                No observations to compare in this range.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Scientific Methodology Notes */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-2">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Scientific Reference & Methodology Notes</h4>
-          {data?.scientific_notes.map((note, idx) => (
-            <p key={idx} className="text-xs text-slate-300 flex items-start space-x-2">
-              <span className="text-orange-400 font-bold shrink-0">•</span>
-              <span>{note}</span>
-            </p>
-          ))}
         </div>
       </main>
     </div>
   );
 };
-

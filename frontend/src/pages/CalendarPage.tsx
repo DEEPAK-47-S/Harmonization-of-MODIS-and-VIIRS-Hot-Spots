@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Calendar as CalendarIcon, 
   ChevronLeft, 
   ChevronRight, 
   Layers, 
   Flame, 
   Grid, 
-  Clock, 
-  Info,
-  CheckCircle2,
-  X,
-  Satellite,
-  Download
+  X, 
+  Download,
+  Calendar as CalendarIcon,
+  Info
 } from 'lucide-react';
 import { Header } from '../components/Header';
 import { useAOI } from '../context/AOIContext';
@@ -19,11 +16,11 @@ import { FirePulseAPI } from '../services/api';
 import { CalendarResponse, CalendarDayItem } from '../types';
 
 const METRIC_OPTIONS = [
-  { id: 'active_grid_cells', label: 'Active 1km Grid Cells', desc: 'Distinct 1km cells with satellite detections' },
-  { id: 'modis_observations', label: 'MODIS Observations', desc: 'Raw detections from Terra & Aqua' },
-  { id: 'viirs_observations', label: 'VIIRS Observations', desc: 'Raw detections from NOAA-20 & NOAA-21' },
-  { id: 'cross_sensor_co_detections', label: 'Co-Detected Cell-Days', desc: 'Cells observed by both MODIS and VIIRS on same UTC day' },
-  { id: 'mean_frp', label: 'Mean Fire Radiative Power (MW)', desc: 'Average thermal energy emitted' },
+  { id: 'active_grid_cells', label: 'Active 1km Cells', desc: 'Distinct 1km cells with satellite detections' },
+  { id: 'modis_observations', label: 'MODIS Detections', desc: 'Raw detections from Terra & Aqua' },
+  { id: 'viirs_observations', label: 'VIIRS Detections', desc: 'Raw detections from NOAA-20 & NOAA-21' },
+  { id: 'cross_sensor_co_detections', label: 'Co-Detected Cells', desc: 'Cells observed by both MODIS and VIIRS on same day' },
+  { id: 'mean_frp', label: 'Mean FRP (MW)', desc: 'Average thermal radiative energy' },
 ];
 
 const MONTH_NAMES = [
@@ -112,67 +109,47 @@ export const CalendarPage: React.FC = () => {
     calendarData.days.forEach(d => dayMap.set(d.date, d));
   }
 
-  // Get color for activity level
-  const getLevelColor = (level: number) => {
+  // Activity level styling (Editorial warm ivory & fire orange palette)
+  const getLevelStyle = (level: number) => {
     switch (level) {
-      case 1: return 'bg-amber-950/60 border-amber-800/80 text-amber-300';
-      case 2: return 'bg-amber-700/60 border-amber-600 text-white';
-      case 3: return 'bg-orange-600 border-orange-500 text-white';
-      case 4: return 'bg-orange-700 border-orange-600 text-white font-bold shadow-sm shadow-orange-700/40';
-      case 5: return 'bg-red-700 border-red-500 text-white font-extrabold shadow-md shadow-red-700/50';
-      default: return 'bg-slate-900/60 border-slate-800 text-slate-500 hover:border-slate-700';
+      case 1:
+        return 'bg-[#FCECE7] text-[#252923] border-[#E1DED5] hover:border-[#E65C35]';
+      case 2:
+        return 'bg-[#F7D6CB] text-[#252923] border-[#E1DED5] hover:border-[#E65C35] font-medium';
+      case 3:
+        return 'bg-[#F29E85] text-[#252923] border-[#E1DED5] hover:border-[#E65C35] font-semibold';
+      case 4:
+        return 'bg-[#E65C35] text-white border-[#E65C35] hover:brightness-95 font-bold shadow-sm';
+      case 5:
+        return 'bg-[#BD493C] text-white border-[#BD493C] hover:brightness-95 font-bold shadow-sm';
+      default:
+        return 'bg-white text-[#777970] border-[#E1DED5] hover:bg-[#FAF8F3] hover:border-[#CEC9BD]';
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-slate-950 overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
       <Header 
         title="Burning Activity Calendar" 
-        subtitle="Harmonized daily thermal activity calendar based on spatial 1km grid cells"
+        subtitle="Spatially harmonized daily calendar based on EPSG:6933 1km analytical cells"
       />
 
-      <main className="p-6 space-y-6 max-w-7xl mx-auto w-full">
-        {/* Top Controls: Month/Year navigation & Metric selector */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-wrap items-center justify-between gap-4">
-          {/* Month & Year Navigator */}
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={handlePrevMonth}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
-              title="Previous Month"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
+      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+        {/* Editorial Introduction */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
+              Temporal Aggregation / Calendar
+            </span>
+            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
+              The Burning Activity Calendar
+            </h1>
+            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+              A consistent view of observed activity across sensors. Heatmap colors represent dynamic relative quantiles across the selected region.
+            </p>
+          </div>
 
-            <div className="text-center px-3 flex flex-col items-center">
-              <div className="flex items-center space-x-2">
-                <span className="text-lg font-black text-white tracking-tight">
-                  {MONTH_NAMES[selectedMonth - 1]}
-                </span>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className="bg-slate-950 border border-slate-700 hover:border-orange-500 rounded-lg px-2 py-0.5 text-xs font-mono text-orange-400 font-bold cursor-pointer transition focus:outline-none"
-                >
-                  {[2026, 2025, 2024, 2023, 2022, 2021, 2020].map((y) => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
-              </div>
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">
-                Timezone: UTC
-              </span>
-            </div>
-
-            <button
-              onClick={handleNextMonth}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
-              title="Next Month"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-
-            {/* Export Monthly Grid Data */}
+          <div className="flex items-center space-x-2 shrink-0">
             <a
               href={FirePulseAPI.getExportUrl('grid', {
                 date_from: `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-01`,
@@ -183,25 +160,66 @@ export const CalendarPage: React.FC = () => {
                 north: aoi.north
               })}
               download
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition text-xs font-semibold"
+              className="flex items-center space-x-1.5 px-3 py-2 rounded-md bg-white hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors shadow-sm"
               title="Download Monthly Harmonized Grid CSV"
             >
-              <Download className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Export CSV</span>
+              <Download className="w-3.5 h-3.5 text-[#318C9B]" />
+              <span>Export Monthly CSV</span>
             </a>
+          </div>
+        </div>
+
+        {/* Navigation & Metric Selector Strip */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-4 shadow-card flex flex-wrap items-center justify-between gap-4">
+          {/* Month & Year Controls */}
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handlePrevMonth}
+              className="p-1.5 rounded border border-[#E1DED5] bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#777970] hover:text-[#252923] transition-colors"
+              title="Previous Month"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center space-x-2">
+              <span className="font-serif font-bold text-base text-[#252923]">
+                {MONTH_NAMES[selectedMonth - 1]}
+              </span>
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="bg-[#FAF8F3] border border-[#E1DED5] rounded px-2 py-0.5 text-xs font-mono font-semibold text-[#252923] focus:outline-none"
+              >
+                {[2026, 2025, 2024, 2023, 2022, 2021, 2020].map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+              <span className="text-[10px] font-mono text-[#777970] bg-[#FAF8F3] px-1.5 py-0.5 rounded border border-[#E1DED5]">
+                UTC
+              </span>
+            </div>
+
+            <button
+              onClick={handleNextMonth}
+              className="p-1.5 rounded border border-[#E1DED5] bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#777970] hover:text-[#252923] transition-colors"
+              title="Next Month"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Metric Selector Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+          <div className="flex flex-wrap items-center gap-1 bg-[#FAF8F3] p-1 rounded-md border border-[#E1DED5]">
             {METRIC_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => setSelectedMetric(opt.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
                   selectedMetric === opt.id
-                    ? 'bg-orange-600 text-white shadow-md shadow-orange-600/20'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-white text-[#E65C35] font-semibold shadow-sm'
+                    : 'text-[#777970] hover:text-[#252923]'
                 }`}
+                title={opt.desc}
               >
                 {opt.label}
               </button>
@@ -209,31 +227,19 @@ export const CalendarPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Calendar Heatmap Grid */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-lg">
+        {/* CALENDAR HEATMAP MATRIX */}
+        <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-base font-bold text-white">Daily Heatmap Distribution</h3>
-              <p className="text-xs text-slate-400">
-                Colors are scaled dynamically using empirical quantiles within the selected period (not arbitrary fixed values)
-              </p>
-            </div>
-
-            {/* Heatmap Legend */}
-            <div className="flex items-center space-x-1.5 text-xs">
-              <span className="text-slate-400 mr-1 text-[11px]">Activity:</span>
-              <span className="w-4 h-4 rounded bg-slate-900/60 border border-slate-800 text-[10px] flex items-center justify-center text-slate-500">0</span>
-              <span className="w-4 h-4 rounded bg-amber-950/60 border border-amber-800 text-[10px] flex items-center justify-center text-amber-300">1</span>
-              <span className="w-4 h-4 rounded bg-amber-700/60 border border-amber-600 text-[10px] flex items-center justify-center text-white">2</span>
-              <span className="w-4 h-4 rounded bg-orange-600 border border-orange-500 text-[10px] flex items-center justify-center text-white">3</span>
-              <span className="w-4 h-4 rounded bg-orange-700 border border-orange-600 text-[10px] flex items-center justify-center text-white">4</span>
-              <span className="w-4 h-4 rounded bg-red-700 border border-red-500 text-[10px] flex items-center justify-center text-white font-bold">5</span>
-              <span className="text-slate-400 ml-1 text-[11px]">Intense</span>
-            </div>
+            <h3 className="font-serif font-semibold text-lg text-[#252923]">
+              {MONTH_NAMES[selectedMonth - 1]} {selectedYear}
+            </h3>
+            <span className="text-xs text-[#777970] font-mono">
+              Metric: {METRIC_OPTIONS.find(m => m.id === selectedMetric)?.label}
+            </span>
           </div>
 
-          {/* Weekday Headers */}
-          <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+          {/* Day of Week Headers */}
+          <div className="grid grid-cols-7 gap-2 mb-2 text-center text-[10px] font-mono uppercase text-[#777970] font-semibold">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -245,154 +251,178 @@ export const CalendarPage: React.FC = () => {
 
           {/* Days Grid */}
           <div className="grid grid-cols-7 gap-2">
-            {/* Empty offset cells before 1st day of month */}
+            {/* Empty offset spaces */}
             {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
-              <div key={`empty-${idx}`} className="h-24 rounded-xl border border-transparent bg-transparent opacity-0 pointer-events-none" />
+              <div key={`empty-${idx}`} className="h-24 md:h-28 rounded border border-transparent bg-transparent"></div>
             ))}
 
-            {/* Days in Month */}
+            {/* Days of current month */}
             {Array.from({ length: daysInMonth }).map((_, idx) => {
               const dayNum = idx + 1;
               const dateStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-              const dayData = dayMap.get(dateStr);
-              const activityLevel = dayData ? dayData.activity_level : 0;
-              const metricVal = dayData ? dayData.metric_value : 0;
+              const dayItem = dayMap.get(dateStr);
+              const level = dayItem ? dayItem.activity_level : 0;
+              const value = dayItem ? dayItem.metric_value : 0;
               const isSelected = selectedDay === dateStr;
 
               return (
-                <button
+                <div
                   key={dateStr}
                   onClick={() => handleDayClick(dateStr)}
-                  className={`h-24 p-2.5 rounded-xl border text-left flex flex-col justify-between transition-all duration-150 group relative ${getLevelColor(activityLevel)} ${
-                    isSelected ? 'ring-2 ring-orange-400 ring-offset-2 ring-offset-slate-950 scale-[1.02]' : ''
-                  }`}
+                  className={`h-24 md:h-28 p-2 rounded border transition-all cursor-pointer flex flex-col justify-between ${
+                    getLevelStyle(level)
+                  } ${isSelected ? 'ring-2 ring-[#E65C35]' : ''}`}
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="text-sm font-bold font-mono">{dayNum}</span>
-                    {dayData && dayData.cross_sensor_co_detections > 0 && (
-                      <span className="text-[10px] px-1 py-0.5 rounded bg-purple-900/60 text-purple-300 font-bold border border-purple-700/60" title="Cross-sensor co-detected cells present">
-                        Co-Det
-                      </span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold">{dayNum}</span>
+                    {dayItem && dayItem.cross_sensor_co_detections > 0 && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#54785E]" title="Cross-sensor co-detection present"></span>
                     )}
                   </div>
 
-                  {dayData ? (
-                    <div className="space-y-0.5">
-                      <div className="text-base font-extrabold leading-tight">
-                        {metricVal}
+                  {dayItem && value > 0 ? (
+                    <div className="space-y-0.5 text-right font-mono">
+                      <div className="text-sm font-bold">
+                        {selectedMetric === 'mean_frp' ? `${value.toFixed(1)} MW` : Math.round(value).toLocaleString()}
                       </div>
-                      <div className="text-[10px] opacity-80 truncate flex items-center justify-between">
-                        <span>M: {dayData.modis_observations}</span>
-                        <span>V: {dayData.viirs_observations}</span>
+                      <div className="text-[10px] opacity-75">
+                        {dayItem.modis_observations} M / {dayItem.viirs_observations} V
                       </div>
                     </div>
                   ) : (
-                    <span className="text-[11px] opacity-40">No activity</span>
+                    <div className="text-right text-[10px] opacity-40 font-mono">
+                      —
+                    </div>
                   )}
-                </button>
+                </div>
               );
             })}
           </div>
-        </div>
 
-        {/* Selected Day Granular Detail Panel */}
-        {selectedDay && (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative animate-in fade-in duration-200">
-            <button
-              onClick={() => setSelectedDay(null)}
-              className="absolute top-5 right-5 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center space-x-2.5 mb-4 border-b border-slate-800 pb-3">
-              <CalendarIcon className="w-5 h-5 text-orange-400" />
-              <div>
-                <h3 className="text-base font-bold text-white">
-                  Observation Details for {selectedDay} (UTC)
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Granular spatial breakdown of harmonized grid cells and sensor passes
-                </p>
+          {/* Heatmap Legend */}
+          <div className="mt-6 pt-4 border-t border-[#E1DED5] flex flex-wrap items-center justify-between gap-3 text-xs text-[#777970]">
+            <div className="flex items-center space-x-2">
+              <span className="text-[11px] font-medium text-[#252923]">Activity Quantile:</span>
+              <div className="flex items-center space-x-1.5">
+                <span className="flex items-center space-x-1">
+                  <span className="w-3 h-3 rounded bg-white border border-[#E1DED5]"></span>
+                  <span className="text-[10px]">None</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-3 h-3 rounded bg-[#FCECE7] border border-[#E1DED5]"></span>
+                  <span className="text-[10px]">Q1</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-3 h-3 rounded bg-[#F7D6CB] border border-[#E1DED5]"></span>
+                  <span className="text-[10px]">Q2</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-3 h-3 rounded bg-[#F29E85] border border-[#E1DED5]"></span>
+                  <span className="text-[10px]">Q3</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-3 h-3 rounded bg-[#E65C35]"></span>
+                  <span className="text-[10px]">Q4</span>
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-3 h-3 rounded bg-[#BD493C]"></span>
+                  <span className="text-[10px]">High</span>
+                </span>
               </div>
             </div>
 
-            {loadingDay ? (
-              <div className="py-12 text-center text-slate-400 text-sm">
-                Loading observations...
+            <div className="flex items-center space-x-1 text-[11px]">
+              <span className="w-2 h-2 rounded-full bg-[#54785E]"></span>
+              <span>Green dot indicates MODIS + VIIRS co-detection</span>
+            </div>
+          </div>
+        </div>
+
+        {/* SELECTED DAY DETAIL PANEL (When a day is clicked) */}
+        {selectedDay && (
+          <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-4 animate-in fade-in duration-150">
+            <div className="flex items-start justify-between border-b border-[#E1DED5] pb-3">
+              <div>
+                <span className="text-[10px] font-mono uppercase text-[#777970]">Granular Inspection</span>
+                <h3 className="font-serif font-bold text-xl text-[#252923] mt-0.5">
+                  Activity on {selectedDay} (UTC)
+                </h3>
               </div>
-            ) : dayDetails ? (
-              <div className="space-y-6">
-                {/* Day Summary KPIs */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                    <span className="text-xs text-slate-400 block mb-1">Active 1km Cells</span>
-                    <span className="text-xl font-bold text-white">{dayDetails.summary.active_grid_cells}</span>
+              <button
+                onClick={() => setSelectedDay(null)}
+                className="text-[#777970] hover:text-[#252923] p-1 rounded hover:bg-[#FAF8F3]"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {loadingDay ? (
+              <div className="py-8 text-center text-xs text-[#777970] animate-pulse">
+                Loading daily analytical breakdown...
+              </div>
+            ) : dayDetails && dayDetails.summary ? (
+              <div className="space-y-4">
+                {/* 4 Stat Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded">
+                    <span className="text-[10px] font-mono uppercase text-[#777970]">Active 1km Cells</span>
+                    <div className="text-xl font-bold font-serif text-[#252923] mt-0.5">
+                      {dayDetails.summary.active_grid_cells_count}
+                    </div>
                   </div>
-                  <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                    <span className="text-xs text-amber-400 block mb-1">MODIS Detections</span>
-                    <span className="text-xl font-bold text-amber-400">{dayDetails.summary.total_modis_observations}</span>
+                  <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded">
+                    <span className="text-[10px] font-mono uppercase text-[#C27B26]">MODIS Detections</span>
+                    <div className="text-xl font-bold font-serif text-[#252923] mt-0.5">
+                      {dayDetails.summary.modis_observations_count}
+                    </div>
                   </div>
-                  <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                    <span className="text-xs text-cyan-400 block mb-1">VIIRS Detections</span>
-                    <span className="text-xl font-bold text-cyan-400">{dayDetails.summary.total_viirs_observations}</span>
+                  <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded">
+                    <span className="text-[10px] font-mono uppercase text-[#318C9B]">VIIRS Detections</span>
+                    <div className="text-xl font-bold font-serif text-[#252923] mt-0.5">
+                      {dayDetails.summary.viirs_observations_count}
+                    </div>
                   </div>
-                  <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                    <span className="text-xs text-purple-400 block mb-1">Co-Detected Cells</span>
-                    <span className="text-xl font-bold text-purple-400">{dayDetails.summary.cross_sensor_co_detected_cells}</span>
+                  <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded">
+                    <span className="text-[10px] font-mono uppercase text-[#54785E]">Co-Detected Cells</span>
+                    <div className="text-xl font-bold font-serif text-[#252923] mt-0.5">
+                      {dayDetails.summary.cross_sensor_co_detected_count}
+                    </div>
                   </div>
                 </div>
 
-                {/* Grid Cells List */}
-                <div>
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                    Active 1km Grid Cells ({dayDetails.grid_cells.length})
-                  </h4>
-                  {dayDetails.grid_cells.length > 0 ? (
-                    <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+                {/* Granular grid cells list */}
+                {dayDetails.grid_cells && dayDetails.grid_cells.length > 0 ? (
+                  <div>
+                    <h4 className="text-xs font-semibold text-[#252923] mb-2">
+                      Active Equal-Area 1km Cells on this Date ({dayDetails.grid_cells.length} cells)
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-56 overflow-y-auto">
                       {dayDetails.grid_cells.map((cell: any) => (
-                        <div 
-                          key={cell.grid_cell_id}
-                          className="bg-slate-950 p-3 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs"
-                        >
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="font-mono font-bold text-white">{cell.grid_cell_id}</span>
-                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                cell.cross_sensor_presence ? 'bg-purple-900/60 text-purple-300' : 'bg-slate-800 text-slate-300'
-                              }`}>
-                                {cell.sensors_present}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-400 mt-0.5">
-                              Centroid: {cell.cell_center_lat}°N, {cell.cell_center_lon}°E
-                            </p>
+                        <div key={cell.grid_cell_id} className="p-2.5 bg-[#FAF8F3] border border-[#E1DED5] rounded text-xs">
+                          <div className="font-mono text-[10px] text-[#777970] truncate">{cell.grid_cell_id}</div>
+                          <div className="flex justify-between items-center mt-1">
+                            <span className="font-semibold text-[#252923]">{cell.sensors_present}</span>
+                            <span className="font-mono text-[#E65C35]">{cell.total_detections} det.</span>
                           </div>
-
-                          <div className="text-right space-y-0.5">
-                            <span className="text-slate-300">
-                              MODIS: <strong className="text-amber-400">{cell.modis_detection_count}</strong> | VIIRS: <strong className="text-cyan-400">{cell.viirs_detection_count}</strong>
-                            </span>
-                            {cell.modis_frp_mean !== null && (
-                              <p className="text-[11px] text-slate-400">MODIS FRP: {cell.modis_frp_mean} MW</p>
-                            )}
-                            {cell.viirs_frp_mean !== null && (
-                              <p className="text-[11px] text-slate-400">VIIRS FRP: {cell.viirs_frp_mean} MW</p>
-                            )}
-                          </div>
+                          {cell.mean_frp_mw && (
+                            <div className="text-[10px] text-[#777970] mt-0.5">Mean FRP: {cell.mean_frp_mw.toFixed(1)} MW</div>
+                          )}
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-xs text-slate-500 py-3">No active cells recorded on this date.</p>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#777970] italic">No active cells recorded for this specific date.</p>
+                )}
               </div>
-            ) : null}
+            ) : (
+              <div className="py-6 text-center text-xs text-[#777970]">
+                No satellite observations were detected on {selectedDay} in this Area of Interest.
+              </div>
+            )}
           </div>
         )}
       </main>
     </div>
   );
 };
-
