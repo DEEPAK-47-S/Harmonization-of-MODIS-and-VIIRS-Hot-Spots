@@ -82,6 +82,21 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
     handleApply(customBounds);
   };
 
+  const extractBounds = (b: any): { west: number; south: number; east: number; north: number } => {
+    if (Array.isArray(b)) {
+      return { west: b[0], south: b[1], east: b[2], north: b[3] };
+    }
+    if (b && typeof b === 'object') {
+      return {
+        west: b.west ?? -180,
+        south: b.south ?? -90,
+        east: b.east ?? 180,
+        north: b.north ?? 90
+      };
+    }
+    return { west: -180, south: -90, east: 180, north: 90 };
+  };
+
   const continentPresets = AOI_PRESETS.filter(p => !p.name?.includes('Tamil Nadu') && !p.name?.includes('California'));
 
   const filteredCountries = countries.filter(c => 
@@ -216,12 +231,13 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
               ) : (
                 <div className="grid grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1">
                   {filteredCountries.map((c) => {
+                    const b = extractBounds(c.bounds);
                     const countryAoi: AOIBounds = {
                       name: `${c.name} (${c.iso3})`,
-                      west: c.bounds[0],
-                      south: c.bounds[1],
-                      east: c.bounds[2],
-                      north: c.bounds[3]
+                      west: b.west,
+                      south: b.south,
+                      east: b.east,
+                      north: b.north
                     };
                     const isSelected = aoi.name === countryAoi.name;
 

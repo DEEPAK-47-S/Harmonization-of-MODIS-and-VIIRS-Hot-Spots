@@ -173,21 +173,25 @@ export const formatAOIBounds = (aoi: AOIBounds): string => {
 };
 
 export interface ContinentItem {
+  id?: string;
   key: string;
   name: string;
-  observations_count: number;
-  active_cells_count: number;
-  mean_frp_mw: number;
-  bounds: [number, number, number, number]; // [west, south, east, north]
+  code?: string;
+  observations_count?: number;
+  count?: number;
+  active_cells_count?: number;
+  mean_frp_mw?: number;
+  bounds: [number, number, number, number] | { west: number; south: number; east: number; north: number };
 }
 
 export interface CountryItem {
   iso3: string;
   name: string;
   continent: string;
-  center_lat: number;
-  center_lon: number;
-  bounds: [number, number, number, number];
+  center_lat?: number;
+  center_lon?: number;
+  center?: [number, number];
+  bounds: [number, number, number, number] | { west: number; south: number; east: number; north: number };
   observations_count?: number;
   active_cells_count?: number;
 }
@@ -221,7 +225,7 @@ export interface CountryAnalytics {
     continent: string;
     center_lat: number;
     center_lon: number;
-    bounds: [number, number, number, number];
+    bounds: [number, number, number, number] | { west: number; south: number; east: number; north: number };
   };
   kpi: {
     total_observations: number;

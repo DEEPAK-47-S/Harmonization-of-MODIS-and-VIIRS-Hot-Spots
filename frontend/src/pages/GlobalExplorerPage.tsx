@@ -91,13 +91,29 @@ export const GlobalExplorerPage: React.FC = () => {
     }
   };
 
+  const extractBounds = (b: any): { west: number; south: number; east: number; north: number } => {
+    if (Array.isArray(b)) {
+      return { west: b[0], south: b[1], east: b[2], north: b[3] };
+    }
+    if (b && typeof b === 'object') {
+      return {
+        west: b.west ?? -180,
+        south: b.south ?? -90,
+        east: b.east ?? 180,
+        north: b.north ?? 90
+      };
+    }
+    return { west: -180, south: -90, east: 180, north: 90 };
+  };
+
   const handleSetAOIToCountry = (c: CountryItem | CountryAnalytics['country']) => {
+    const b = extractBounds(c.bounds);
     const newAoi: AOIBounds = {
       name: `${c.name} (${c.iso3})`,
-      west: c.bounds[0],
-      south: c.bounds[1],
-      east: c.bounds[2],
-      north: c.bounds[3]
+      west: b.west,
+      south: b.south,
+      east: b.east,
+      north: b.north
     };
     setAOI(newAoi);
     triggerRefresh();
@@ -226,19 +242,22 @@ export const GlobalExplorerPage: React.FC = () => {
             >
               All Continents
             </button>
-            {continents.map((cont) => (
-              <button
-                key={cont.key}
-                onClick={() => setSelectedContinent(cont.key)}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
-                  selectedContinent.toLowerCase() === cont.key.toLowerCase()
-                    ? 'bg-[#E65C35] text-white shadow-sm'
-                    : 'bg-[#FAF8F3] text-[#777970] hover:text-[#252923] hover:bg-[#EBE8DF]'
-                }`}
-              >
-                {cont.name}
-              </button>
-            ))}
+            {continents.map((cont) => {
+              const cKey = cont.key || cont.id || cont.name;
+              return (
+                <button
+                  key={cKey}
+                  onClick={() => setSelectedContinent(cKey)}
+                  className={`px-3 py-1.5 rounded text-xs font-medium transition-all ${
+                    selectedContinent.toLowerCase() === cKey.toLowerCase()
+                      ? 'bg-[#E65C35] text-white shadow-sm'
+                      : 'bg-[#FAF8F3] text-[#777970] hover:text-[#252923] hover:bg-[#EBE8DF]'
+                  }`}
+                >
+                  {cont.name}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -282,7 +301,7 @@ export const GlobalExplorerPage: React.FC = () => {
                         <span className="text-[10px] font-mono px-1 py-0.2 bg-[#EBE8DF] rounded text-[#777970]">{c.iso3}</span>
                       </div>
                       <div className="text-[10px] text-[#777970] font-mono capitalize">
-                        {c.continent} • {formatCoord(c.center_lat, true)}, {formatCoord(c.center_lon, false)}
+                        {c.continent} • {formatCoord(c.center_lat || 0, true)}, {formatCoord(c.center_lon || 0, false)}
                       </div>
                     </div>
                     <ChevronRight className={`w-3.5 h-3.5 ${isSelected ? 'text-[#E65C35]' : 'text-[#A0A29A]'}`} />
@@ -310,7 +329,7 @@ export const GlobalExplorerPage: React.FC = () => {
                     </div>
                     <p className="text-xs text-[#777970] font-mono mt-0.5">
                       Continent: <span className="capitalize">{countryAnalytics.country.continent}</span> • 
-                      Center: {formatCoord(countryAnalytics.country.center_lat, true)}, {formatCoord(countryAnalytics.country.center_lon, false)}
+                      Center: {formatCoord(countryAnalytics.country.center_lat || 0, true)}, {formatCoord(countryAnalytics.country.center_lon || 0, false)}
                     </p>
                   </div>
 

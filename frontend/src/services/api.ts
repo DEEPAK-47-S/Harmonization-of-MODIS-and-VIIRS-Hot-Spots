@@ -231,8 +231,9 @@ export const FirePulseAPI = {
     east?: number;
     north?: number;
   }): Promise<{ frames: TimeMachineFrame[]; total_days: number }> => {
-    const res = await api.get<{ frames: TimeMachineFrame[]; total_days: number }>('/global/timemachine', { params });
-    return res.data;
+    const res = await api.get('/global/timemachine', { params });
+    const frames = Array.isArray(res.data) ? res.data : (res.data.frames || res.data.data || []);
+    return { frames, total_days: frames.length };
   },
 
   getCountryComparison: async (countries: string[]): Promise<{

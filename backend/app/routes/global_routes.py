@@ -87,7 +87,11 @@ def get_time_machine():
         date_from=date_from, date_to=date_to,
         west=west, south=south, east=east, north=north
     )
-    return jsonify(frames)
+    return jsonify({
+        "frames": frames,
+        "total_days": len(frames),
+        "data": frames
+    })
 
 @global_bp.route("/global/comparison", methods=["GET"])
 def get_multi_country_comparison():
@@ -100,10 +104,32 @@ def get_multi_country_comparison():
     date_from = request.args.get("date_from")
     date_to = request.args.get("date_to")
 
-    results = []
+    formatted_countries = []
+    raw_results = []
     for iso3 in iso_list:
         data = GlobalFireService.get_country_analytics(iso3, date_from=date_from, date_to=date_to)
         if data:
-            results.append(data)
+            raw_results.append(data)
+            c = data["country"]
+            k = data["kpi"]
+            modis_cnt = k.get("modis_observations", 0)
+            viirs_cnt = k.get("viirs_observations", 0)
+            ratio = round(viirs_cnt / modis_cnt, 2) if modis_cnt > 0 else 0.0
 
-    return jsonify({"comparison": results})
+            formatted_countries.append({
+                "iso3": c.get("iso3", iso3),
+                "name": c.get("name", iso3),
+                "continent": c.get("continent", "Global"),
+                "total_observations": k.get("total_observations", 0),
+                "modis_observations": modis_cnt,
+                "viirs_observations": viirs_cnt,
+                "active_cells": k.get("active_grid_cells", 0),
+                "mean_frp": k.get("mean_frp_mw", 0.0),
+                "detection_ratio": ratio
+            })
+
+    return jsonify({
+        "countries": formatted_countries,
+        "comparison": raw_results,
+        "metrics": {"total_compared": len(formatted_countries)}
+    })

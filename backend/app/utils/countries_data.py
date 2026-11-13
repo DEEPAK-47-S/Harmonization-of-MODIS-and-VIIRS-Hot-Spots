@@ -238,10 +238,29 @@ COUNTRIES: Dict[str, Dict[str, Any]] = {
 }
 
 def get_country_by_iso3(iso3: str) -> Optional[Dict[str, Any]]:
-    return COUNTRIES.get(iso3.upper())
+    c = COUNTRIES.get(iso3.upper())
+    if not c:
+        return None
+    item = dict(c)
+    if "center" in item and len(item["center"]) >= 2:
+        item["center_lat"] = item["center"][0]
+        item["center_lon"] = item["center"][1]
+    return item
 
 def get_countries_list() -> List[Dict[str, Any]]:
-    return sorted(list(COUNTRIES.values()), key=lambda c: c["name"])
+    res = []
+    for c in COUNTRIES.values():
+        item = dict(c)
+        if "center" in item and len(item["center"]) >= 2:
+            item["center_lat"] = item["center"][0]
+            item["center_lon"] = item["center"][1]
+        res.append(item)
+    return sorted(res, key=lambda x: x["name"])
 
 def get_continents_list() -> List[Dict[str, Any]]:
-    return CONTINENTS
+    res = []
+    for cont in CONTINENTS:
+        item = dict(cont)
+        item["key"] = item["id"]
+        res.append(item)
+    return res

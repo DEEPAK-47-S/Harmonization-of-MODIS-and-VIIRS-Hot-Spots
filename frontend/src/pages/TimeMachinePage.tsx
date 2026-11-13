@@ -97,12 +97,12 @@ export const TimeMachinePage: React.FC = () => {
   const getTileUrl = () => {
     switch (mapStyle) {
       case 'dark':
-        return 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+        return 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
       case 'satellite':
-        return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{n}';
+        return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
       case 'light':
       default:
-        return 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+        return 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
     }
   };
 
@@ -200,7 +200,7 @@ export const TimeMachinePage: React.FC = () => {
             <div className="text-right">
               <span className="text-[10px] font-mono uppercase text-[#777970]">Timeline Frame</span>
               <div className="text-sm font-mono font-semibold text-[#252923]">
-                Day {currentIndex + 1} of {frames.length}
+                {frames.length > 0 ? `Day ${currentIndex + 1} of ${frames.length}` : 'No frames recorded'}
               </div>
             </div>
           </div>
@@ -212,11 +212,12 @@ export const TimeMachinePage: React.FC = () => {
               min={0}
               max={Math.max(0, frames.length - 1)}
               value={currentIndex}
+              disabled={frames.length <= 1}
               onChange={(e) => {
                 setIsPlaying(false);
                 setCurrentIndex(Number(e.target.value));
               }}
-              className="w-full accent-[#E65C35] cursor-pointer h-2 bg-[#FAF8F3] border border-[#E1DED5] rounded-lg"
+              className="w-full accent-[#E65C35] cursor-pointer h-2 bg-[#FAF8F3] border border-[#E1DED5] rounded-lg disabled:opacity-40"
             />
             <div className="flex justify-between text-[10px] font-mono text-[#777970]">
               <span>{frames[0]?.date_utc || 'Start'}</span>
@@ -231,25 +232,25 @@ export const TimeMachinePage: React.FC = () => {
               <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
                 <div className="text-[10px] font-mono text-[#777970] uppercase">Detections Today</div>
                 <div className="text-lg font-serif font-bold text-[#252923]">
-                  {currentFrame.total_observations.toLocaleString()}
+                  {(currentFrame.total_observations || 0).toLocaleString()}
                 </div>
               </div>
               <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
                 <div className="text-[10px] font-mono text-[#C27B26] uppercase">MODIS (1km)</div>
                 <div className="text-lg font-serif font-bold text-[#C27B26]">
-                  {currentFrame.modis_count.toLocaleString()}
+                  {(currentFrame.modis_count || 0).toLocaleString()}
                 </div>
               </div>
               <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
                 <div className="text-[10px] font-mono text-[#318C9B] uppercase">VIIRS (375m)</div>
                 <div className="text-lg font-serif font-bold text-[#318C9B]">
-                  {currentFrame.viirs_count.toLocaleString()}
+                  {(currentFrame.viirs_count || 0).toLocaleString()}
                 </div>
               </div>
               <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
                 <div className="text-[10px] font-mono text-[#54785E] uppercase">1km Active Cells</div>
                 <div className="text-lg font-serif font-bold text-[#54785E]">
-                  {currentFrame.active_cells.toLocaleString()}
+                  {(currentFrame.active_cells || 0).toLocaleString()}
                 </div>
               </div>
             </div>

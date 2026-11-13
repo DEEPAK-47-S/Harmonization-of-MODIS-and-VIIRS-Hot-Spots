@@ -155,12 +155,12 @@ export const CountryComparisonPage: React.FC = () => {
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between items-center bg-[#FAF8F3] p-2 rounded">
                     <span className="text-[#777970]">Observations</span>
-                    <span className="font-mono font-bold text-[#252923]">{country.total_observations.toLocaleString()}</span>
+                    <span className="font-mono font-bold text-[#252923]">{(country.total_observations || 0).toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center bg-[#FAF8F3] p-2 rounded">
                     <span className="text-[#C27B26]">MODIS (1km)</span>
-                    <span className="font-mono font-bold text-[#C27B26]">{country.modis_observations.toLocaleString()}</span>
+                    <span className="font-mono font-bold text-[#C27B26]">{(country.modis_observations || 0).toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center bg-[#FAF8F3] p-2 rounded">
@@ -171,20 +171,20 @@ export const CountryComparisonPage: React.FC = () => {
                   <div className="flex justify-between items-center bg-[#FAF8F3] p-2 rounded">
                     <span className="text-[#E65C35]">VIIRS / MODIS Ratio</span>
                     <span className="font-mono font-bold text-[#E65C35]">
-                      {country.detection_ratio > 0 ? `${country.detection_ratio.toFixed(2)}x` : '—'}
+                      {country.detection_ratio && country.detection_ratio > 0 ? `${Number(country.detection_ratio).toFixed(2)}x` : '—'}
                     </span>
                   </div>
 
                   <div className="flex justify-between items-center bg-[#FAF8F3] p-2 rounded">
                     <span className="text-[#777970]">Mean FRP</span>
-                    <span className="font-mono font-bold text-[#252923]">{country.mean_frp.toFixed(1)} MW</span>
+                    <span className="font-mono font-bold text-[#252923]">{country.mean_frp != null ? Number(country.mean_frp).toFixed(1) : '0.0'} MW</span>
                   </div>
                 </div>
               </div>
 
               <div className="pt-2 border-t border-[#E1DED5] text-[10px] text-[#777970] flex justify-between">
                 <span>Active 1km Cells:</span>
-                <span className="font-bold text-[#252923]">{country.active_cells}</span>
+                <span className="font-bold text-[#252923]">{country.active_cells || 0}</span>
               </div>
             </div>
           ))}
