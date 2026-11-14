@@ -69,3 +69,32 @@ def get_calendar_day():
     finally:
         db.close()
 
+@calendar_bp.route("/calendar/matrix", methods=["GET"])
+def get_calendar_matrix():
+    """
+    Retrieve Year x Month burning activity heatmap matrix (Rows: Years, Columns: Jan-Dec)
+    with historical medians and anomaly indicators.
+    Query params:
+    - metric: 'active_grid_cells', 'modis_observations', 'viirs_observations', 'cross_sensor_co_detections', 'mean_frp'
+    - west, south, east, north
+    """
+    metric = request.args.get("metric", "active_grid_cells")
+    west = request.args.get("west", type=float)
+    south = request.args.get("south", type=float)
+    east = request.args.get("east", type=float)
+    north = request.args.get("north", type=float)
+
+    db = SessionLocal()
+    try:
+        matrix_data = CalendarService.get_multi_year_matrix(
+            db=db,
+            metric=metric,
+            west=west,
+            south=south,
+            east=east,
+            north=north
+        )
+        return jsonify(matrix_data), 200
+    finally:
+        db.close()
+

@@ -213,3 +213,145 @@ class CalendarService:
             "grid_cells": [g.to_dict() for g in grid_cells],
             "observations": [o.to_dict() for o in obs_records]
         }
+
+    @classmethod
+    def get_multi_year_matrix(
+        cls,
+        db: Session,
+        metric: str = "active_grid_cells",
+        west: Optional[float] = None,
+        south: Optional[float] = None,
+        east: Optional[float] = None,
+        north: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """
+        Build a Year x Month matrix (Rows: Years, Columns: Jan-Dec) for the Burning Activity Calendar heatmap.
+        Also calculates historical baseline medians per month to highlight anomalies.
+        """
+        query = db.query(
+            func.substr(DailyGridActivity.activity_date_utc, 1, 4).label("year_str"),
+            func.substr(DailyGridActivity.activity_date_utc, 6, 2).label("month_str"),
+            func.count(DailyGridActivity.id).label("active_grid_cells"),
+            func.sum(DailyGridActivity.modis_detection_count).label("modis_observations"),
+            func.sum(DailyGridActivity.viirs_detection_count).label("viirs_observations"),
+            func.sum(case((DailyGridActivity.cross_sensor_presence == True, 1), else_=0)).label("cross_sensor_co_detections"),
+            func.avg(DailyGridActivity.modis_frp_mean).label("modis_mean_frp"),
+            func.avg(DailyGridActivity.viirs_frp_mean).label("viirs_mean_frp"),
+        )
+
+        if west is not None:
+            query = query.filter(DailyGridActivity.cell_center_lon >= west)
+        if east is not None:
+            query = query.filter(DailyGridActivity.cell_center_lon <= east)
+        if south is not None:
+            query = query.filter(DailyGridActivity.cell_center_lat >= south)
+        if north is not None:
+            query = query.filter(DailyGridActivity.cell_center_lat <= north)
+
+        query = query.group_by("year_str", "month_str")
+        rows = query.all()
+
+        # Gather data into dictionary
+        cell_dict = {}
+        distinct_years = set()
+        month_values_collector = {m: [] for m in range(1, 13)}
+
+        for r in rows:
+            yr = int(r.year_str)
+            mo = int(r.month_str)
+            distinct_years.add(yr)
+
+            active_cells = int(r.active_grid_cells or 0)
+            modis_count = int(r.modis_observations or 0)
+            viirs_count = int(r.viirs_observations or 0)
+            co_det = int(r.cross_sensor_co_detections or 0)
+            
+            frp_vals = [f for f in (r.modis_mean_frp, r.viirs_mean_frp) if f is not None]
+            avg_frp = round(float(sum(frp_vals) / len(frp_vals)), 1) if frp_vals else 0.0
+
+            if metric == "modis_observations":
+                val = modis_count
+            elif metric == "viirs_observations":
+                val = viirs_count
+            elif metric == "cross_sensor_co_detections":
+                val = co_det
+            elif metric == "mean_frp":
+                val = avg_frp
+            else:
+                val = active_cells
+
+            if yr not in cell_dict:
+                cell_dict[yr] = {}
+
+            cell_dict[yr][mo] = {
+                "year": yr,
+                "month": mo,
+                "value": val,
+                "active_grid_cells": active_cells,
+                "modis_observations": modis_count,
+                "viirs_observations": viirs_count,
+                "cross_sensor_co_detections": co_det,
+                "mean_frp": avg_frp,
+                "has_data": True
+            }
+            if val > 0:
+                month_values_collector[mo].append(val)
+
+        # Calculate monthly historical medians
+        monthly_medians = {}
+        for m in range(1, 13):
+            vals = month_values_collector[m]
+            if vals:
+                monthly_medians[m] = round(float(np.median(vals)), 1)
+            else:
+                monthly_medians[m] = 0.0
+
+        # Sort years descending
+        years_list = sorted(list(distinct_years), reverse=True)
+        if not years_list:
+            years_list = [datetime.utcnow().year]
+
+        # Build full grid including empty months
+        matrix = []
+        for yr in years_list:
+            row_months = []
+            for m in range(1, 13):
+                existing = cell_dict.get(yr, {}).get(m)
+                baseline = monthly_medians.get(m, 0.0)
+                if existing:
+                    diff = round(existing["value"] - baseline, 1)
+                    ratio = round(existing["value"] / baseline, 2) if baseline > 0 else (1.0 if existing["value"] == 0 else 2.0)
+                    row_months.append({
+                        **existing,
+                        "historical_median": baseline,
+                        "anomaly_delta": diff,
+                        "anomaly_ratio": ratio,
+                        "is_anomaly": diff > 0 and ratio >= 1.5
+                    })
+                else:
+                    row_months.append({
+                        "year": yr,
+                        "month": m,
+                        "value": 0,
+                        "active_grid_cells": 0,
+                        "modis_observations": 0,
+                        "viirs_observations": 0,
+                        "cross_sensor_co_detections": 0,
+                        "mean_frp": 0.0,
+                        "has_data": False,
+                        "historical_median": baseline,
+                        "anomaly_delta": -baseline,
+                        "anomaly_ratio": 0.0,
+                        "is_anomaly": False
+                    })
+            matrix.append({
+                "year": yr,
+                "months": row_months
+            })
+
+        return {
+            "metric": metric,
+            "years": years_list,
+            "matrix": matrix,
+            "monthly_medians": monthly_medians
+        }

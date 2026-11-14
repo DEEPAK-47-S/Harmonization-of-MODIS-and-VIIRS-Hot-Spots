@@ -103,6 +103,34 @@ export interface CalendarResponse {
   days: CalendarDayItem[];
 }
 
+export interface CalendarMatrixMonthItem {
+  year: number;
+  month: number;
+  value: number;
+  active_grid_cells: number;
+  modis_observations: number;
+  viirs_observations: number;
+  cross_sensor_co_detections: number;
+  mean_frp: number;
+  has_data: boolean;
+  historical_median: number;
+  anomaly_delta: number;
+  anomaly_ratio: number;
+  is_anomaly: boolean;
+}
+
+export interface CalendarMatrixRow {
+  year: number;
+  months: CalendarMatrixMonthItem[];
+}
+
+export interface CalendarMatrixResponse {
+  metric: string;
+  years: number[];
+  matrix: CalendarMatrixRow[];
+  monthly_medians: Record<string, number>;
+}
+
 export interface SensorComparisonData {
   modis: {
     observation_count: number;

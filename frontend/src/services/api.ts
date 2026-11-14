@@ -141,6 +141,17 @@ export const FirePulseAPI = {
     return res.data;
   },
 
+  getCalendarMatrix: async (params?: {
+    metric?: string;
+    west?: number;
+    south?: number;
+    east?: number;
+    north?: number;
+  }): Promise<import('../types').CalendarMatrixResponse> => {
+    const res = await api.get<import('../types').CalendarMatrixResponse>('/calendar/matrix', { params });
+    return res.data;
+  },
+
   // Comparison
   getComparison: async (params?: {
     date_from?: string;
