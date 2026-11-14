@@ -63,56 +63,49 @@ class Config:
         }
     ]
 
-    # Database setup
-    _default_db = BASE_DIR / "firepulse.db"
-    if not _default_db.exists() and (WORKSPACE_DIR / "firepulse.db").exists():
-        _default_db = WORKSPACE_DIR / "firepulse.db"
-
-    _gz_db = BASE_DIR / "firepulse.db.gz"
-    if not _gz_db.exists() and (WORKSPACE_DIR / "backend" / "firepulse.db.gz").exists():
-        _gz_db = WORKSPACE_DIR / "backend" / "firepulse.db.gz"
-
-    # Serverless runtime (Vercel / AWS Lambda) writable path support
-    if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
-        _tmp_db = Path("/tmp/firepulse.db")
-        if not _tmp_db.exists():
-            if _gz_db.exists():
-                import gzip
-                import shutil
-                try:
-                    with gzip.open(_gz_db, "rb") as f_in, open(_tmp_db, "wb") as f_out:
-                        shutil.copyfileobj(f_in, f_out)
-                except Exception:
-                    pass
-            elif _default_db.exists():
-                import shutil
-                try:
-                    shutil.copyfile(_default_db, _tmp_db)
-                except Exception:
-                    pass
-        if _tmp_db.exists():
-            _default_db = _tmp_db
+    # Detect serverless environment (Vercel / AWS Lambda)
+    IS_SERVERLESS = bool(os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+    
+    if IS_SERVERLESS:
+        _tmp_base = Path("/tmp/firepulse")
+        try:
+            _tmp_base.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            _tmp_base = Path("/tmp")
+        
+        _default_db = _tmp_base / "firepulse.db"
+        DATA_RAW_DIR = _tmp_base / "data" / "raw"
+        DATA_PROCESSED_DIR = _tmp_base / "data" / "processed"
+        DATA_EXPORTS_DIR = _tmp_base / "data" / "exports"
     else:
-        # Local environment auto-decompress if needed
-        if not _default_db.exists() and _gz_db.exists():
-            import gzip
-            import shutil
-            try:
-                with gzip.open(_gz_db, "rb") as f_in, open(_default_db, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-            except Exception:
-                pass
+        _default_db = BASE_DIR / "firepulse.db"
+        if not _default_db.exists() and (WORKSPACE_DIR / "firepulse.db").exists():
+            _default_db = WORKSPACE_DIR / "firepulse.db"
+        
+        DATA_RAW_DIR = WORKSPACE_DIR / "data" / "raw"
+        DATA_PROCESSED_DIR = WORKSPACE_DIR / "data" / "processed"
+        DATA_EXPORTS_DIR = WORKSPACE_DIR / "data" / "exports"
 
-    DB_PATH = _default_db
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
+    # Ensure storage directories exist
+    try:
+        DATA_RAW_DIR.mkdir(parents=True, exist_ok=True)
+        DATA_PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+        DATA_EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        pass
+
+    # Synchronize DB_PATH and SQLALCHEMY_DATABASE_URI
+    _db_url_env = os.getenv("DATABASE_URL")
+    if _db_url_env and _db_url_env.startswith("sqlite:///"):
+        DB_PATH = Path(_db_url_env.replace("sqlite:///", ""))
+        SQLALCHEMY_DATABASE_URI = _db_url_env
+    else:
+        DB_PATH = _default_db
+        SQLALCHEMY_DATABASE_URI = _db_url_env or f"sqlite:///{DB_PATH}"
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Operational constraints
     MAX_DAYS_PER_QUERY = int(os.getenv("MAX_DAYS_PER_QUERY", "5"))
     FIRMS_RATE_LIMIT_DELAY = float(os.getenv("FIRMS_RATE_LIMIT_DELAY_SECONDS", "0.5"))
-    
-    # Storage paths
-    DATA_RAW_DIR = WORKSPACE_DIR / "data" / "raw"
-    DATA_PROCESSED_DIR = WORKSPACE_DIR / "data" / "processed"
-    DATA_EXPORTS_DIR = WORKSPACE_DIR / "data" / "exports"
 

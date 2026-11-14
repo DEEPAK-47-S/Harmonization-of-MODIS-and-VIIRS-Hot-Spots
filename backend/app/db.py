@@ -29,8 +29,12 @@ def init_db():
 
         if count is None:
             import glob, gzip, sqlite3, logging
+            from pathlib import Path
             logger = logging.getLogger("firepulse")
+            
             db_file = str(Config.DB_PATH)
+            Path(db_file).parent.mkdir(parents=True, exist_ok=True)
+            
             conn = sqlite3.connect(db_file)
 
             # Check for chunked seeds first (backend/seeds/seed_chunk_*.bin)
@@ -45,7 +49,13 @@ def init_db():
                     with open(cf, "rb") as f:
                         compressed_bytes.extend(f.read())
                 sql_text = gzip.decompress(compressed_bytes).decode("utf-8")
-                conn.executescript(sql_text)
+                # Make all table & index creations safe if Base.metadata.create_all already created schema
+                safe_sql = (
+                    sql_text.replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS ")
+                            .replace("CREATE INDEX ", "CREATE INDEX IF NOT EXISTS ")
+                            .replace("CREATE UNIQUE INDEX ", "CREATE UNIQUE INDEX IF NOT EXISTS ")
+                )
+                conn.executescript(safe_sql)
                 conn.close()
                 logger.info(f"Auto-seeded database from {len(chunk_files)} seed chunks.")
                 return
@@ -56,12 +66,18 @@ def init_db():
                 seed_sql = Config.WORKSPACE_DIR / "backend" / "seed_dump.sql.gz"
             if seed_sql.exists():
                 with gzip.open(seed_sql, "rt", encoding="utf-8") as f:
-                    conn.executescript(f.read())
+                    raw_sql = f.read()
+                safe_sql = (
+                    raw_sql.replace("CREATE TABLE ", "CREATE TABLE IF NOT EXISTS ")
+                           .replace("CREATE INDEX ", "CREATE INDEX IF NOT EXISTS ")
+                           .replace("CREATE UNIQUE INDEX ", "CREATE UNIQUE INDEX IF NOT EXISTS ")
+                )
+                conn.executescript(safe_sql)
                 conn.close()
                 logger.info("Auto-seeded production NASA observations & grid baselines from seed_dump.sql.gz.")
     except Exception as e:
         import logging
-        logging.getLogger("firepulse").warning(f"auto_seed note: {e}")
+        logging.getLogger("firepulse").error(f"auto_seed error: {e}", exc_info=True)
 
 def get_db():
     """Yield a database session context."""
