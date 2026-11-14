@@ -240,33 +240,36 @@ def create_deck():
     set_slide_background(slide3)
     add_header(slide3, 3, "System Architecture & Processing Workflow", "Deterministic multi-stage pipeline from NASA satellite telemetry to interactive analytics.")
 
-    # 4 Sequential Architecture Stages (Top row)
-    stages = [
-        ("STAGE 1: INGESTION", "Official NASA FIRMS API", "• Area CSV chunking (1–5 days)\n• Active streams: MODIS_NRT, VIIRS_NOAA20/21\n• S-NPP archive cutoff safeguard\n• SHA-256 raw cache on disk", ORANGE),
-        ("STAGE 2: NORMALIZATION", "Schema Harmonization", "• Validate coordinates [-90,90], [-180,180]\n• Parse UTC date & 4-digit HHMM time\n• Validate FRP >= 0 & brightness temp\n• Idempotent deduplication hashing", AMBER),
-        ("STAGE 3: HARMONIZATION", "EPSG:6933 1km Equal-Area", "• Equal-Area Cylindrical Projection\n• Deterministic grid binning (cell_1km_X_Y)\n• Sensor cross-verification\n• Compute mean/max FRP per cell", CYAN),
-        ("STAGE 4: ANALYTICS", "Burning Calendar & Baseline", "• Multi-year matrix (Years x Months)\n• Historical median & quantile baselines\n• Median Absolute Deviation (MAD) anomaly\n• CSV & GeoJSON export streams", GREEN)
-    ]
-
-    col_w = Inches(2.7)
-    gap = Inches(0.3)
-    left_start = Inches(0.8)
-
-    for i, (stitle, ssub, sbody, scolor) in enumerate(stages):
-        c_left = left_start + i * (col_w + gap)
-        add_card(slide3, c_left, Inches(1.8), col_w, Inches(2.6), stitle, scolor)
-        tb = slide3.shapes.add_textbox(c_left + Inches(0.15), Inches(2.35), col_w - Inches(0.3), Inches(1.9))
-        tf = tb.text_frame
-        tf.word_wrap = True
-        p = tf.paragraphs[0]
-        p.text = ssub + "\n"
-        p.font.size = Pt(10)
-        p.font.bold = True
-        p.font.color.rgb = DARK_TEXT
-        p2 = tf.add_paragraph()
-        p2.text = sbody
-        p2.font.size = Pt(9.5)
-        p2.font.color.rgb = MUTED_TEXT
+    diag_path = "FirePulse_Working_Diagram.png"
+    if os.path.exists(diag_path):
+        # Insert the high-resolution generated working diagram image
+        slide3.shapes.add_picture(diag_path, Inches(0.8), Inches(1.6), width=Inches(11.733))
+    else:
+        # Fallback to structured cards if image not found
+        stages = [
+            ("STAGE 1: INGESTION", "Official NASA FIRMS API", "• Area CSV chunking (1–5 days)\n• Active streams: MODIS_NRT, VIIRS_NOAA20/21\n• S-NPP archive cutoff safeguard\n• SHA-256 raw cache on disk", ORANGE),
+            ("STAGE 2: NORMALIZATION", "Schema Harmonization", "• Validate coordinates [-90,90], [-180,180]\n• Parse UTC date & 4-digit HHMM time\n• Validate FRP >= 0 & brightness temp\n• Idempotent deduplication hashing", AMBER),
+            ("STAGE 3: HARMONIZATION", "EPSG:6933 1km Equal-Area", "• Equal-Area Cylindrical Projection\n• Deterministic grid binning (cell_1km_X_Y)\n• Sensor cross-verification\n• Compute mean/max FRP per cell", CYAN),
+            ("STAGE 4: ANALYTICS", "Burning Calendar & Baseline", "• Multi-year matrix (Years x Months)\n• Historical median & quantile baselines\n• Median Absolute Deviation (MAD) anomaly\n• CSV & GeoJSON export streams", GREEN)
+        ]
+        col_w = Inches(2.7)
+        gap = Inches(0.3)
+        left_start = Inches(0.8)
+        for i, (stitle, ssub, sbody, scolor) in enumerate(stages):
+            c_left = left_start + i * (col_w + gap)
+            add_card(slide3, c_left, Inches(1.8), col_w, Inches(2.6), stitle, scolor)
+            tb = slide3.shapes.add_textbox(c_left + Inches(0.15), Inches(2.35), col_w - Inches(0.3), Inches(1.9))
+            tf = tb.text_frame
+            tf.word_wrap = True
+            p = tf.paragraphs[0]
+            p.text = ssub + "\n"
+            p.font.size = Pt(10)
+            p.font.bold = True
+            p.font.color.rgb = DARK_TEXT
+            p2 = tf.add_paragraph()
+            p2.text = sbody
+            p2.font.size = Pt(9.5)
+            p2.font.color.rgb = MUTED_TEXT
 
     # Bottom Diagram: Full-Stack Dataflow Box
     add_card(slide3, Inches(0.8), Inches(4.7), Inches(11.733), Inches(2.2), "END-TO-END DATAFLOW PIPELINE", DARK_TEXT)
