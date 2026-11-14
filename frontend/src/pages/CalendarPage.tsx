@@ -158,39 +158,39 @@ export const CalendarPage: React.FC = () => {
   const getLevelStyle = (level: number) => {
     switch (level) {
       case 1:
-        return 'bg-[#FCECE7] text-[#252923] border-[#E1DED5] hover:border-[#E65C35]';
+        return 'bg-[#FCECE7] text-slate-900 border-slate-200 hover:border-orange-500';
       case 2:
-        return 'bg-[#F7D6CB] text-[#252923] border-[#E1DED5] hover:border-[#E65C35] font-medium';
+        return 'bg-[#F7D6CB] text-slate-900 border-slate-200 hover:border-orange-500 font-medium';
       case 3:
-        return 'bg-[#F29E85] text-[#252923] border-[#E1DED5] hover:border-[#E65C35] font-semibold';
+        return 'bg-[#F29E85] text-slate-900 border-slate-200 hover:border-orange-500 font-semibold';
       case 4:
-        return 'bg-[#E65C35] text-white border-[#E65C35] hover:brightness-95 font-bold shadow-sm';
+        return 'bg-orange-600 text-white border-orange-500 hover:brightness-95 font-bold shadow-sm';
       case 5:
-        return 'bg-[#BD493C] text-white border-[#BD493C] hover:brightness-95 font-bold shadow-sm';
+        return 'bg-red-600 text-white border-red-400 hover:brightness-95 font-bold shadow-sm';
       default:
-        return 'bg-white text-[#777970] border-[#E1DED5] hover:bg-[#FAF8F3] hover:border-[#CEC9BD]';
+        return 'bg-white text-slate-500 border-slate-200 hover:bg-white hover:border-[#CEC9BD]';
     }
   };
 
   // Matrix cell background based on ratio to baseline
   const getMatrixCellStyle = (item: CalendarMatrixMonthItem) => {
     if (!item.has_data || item.value === 0) {
-      return 'bg-white/60 text-[#777970]/40 border-[#E1DED5]';
+      return 'bg-white/60 text-slate-500/40 border-slate-200';
     }
     const val = item.value;
     const median = item.historical_median;
     if (item.is_anomaly) {
-      return 'bg-[#BD493C] text-white font-bold border-[#A53A2E] shadow-sm';
+      return 'bg-red-600 text-white font-bold border-[#A53A2E] shadow-sm';
     }
     if (median > 0) {
       const ratio = val / median;
-      if (ratio > 1.25) return 'bg-[#E65C35] text-white font-semibold border-[#D44F29]';
-      if (ratio > 0.8) return 'bg-[#F29E85] text-[#252923] font-medium border-[#E1DED5]';
-      return 'bg-[#FCECE7] text-[#252923] border-[#E1DED5]';
+      if (ratio > 1.25) return 'bg-orange-600 text-white font-semibold border-[#D44F29]';
+      if (ratio > 0.8) return 'bg-[#F29E85] text-slate-900 font-medium border-slate-200';
+      return 'bg-[#FCECE7] text-slate-900 border-slate-200';
     }
-    if (val > 100) return 'bg-[#E65C35] text-white font-bold border-[#E65C35]';
-    if (val > 10) return 'bg-[#F7D6CB] text-[#252923] font-semibold border-[#E1DED5]';
-    return 'bg-[#FCECE7] text-[#252923] border-[#E1DED5]';
+    if (val > 100) return 'bg-orange-600 text-white font-bold border-orange-500';
+    if (val > 10) return 'bg-[#F7D6CB] text-slate-900 font-semibold border-slate-200';
+    return 'bg-[#FCECE7] text-slate-900 border-slate-200';
   };
 
   return (
@@ -483,13 +483,13 @@ export const CalendarPage: React.FC = () => {
                   </div>
 
                   <div className="flex items-center space-x-3 text-[11px] font-mono">
-                    <span className="text-[#C27B26]">MODIS: {hoveredCell.modis_observations.toLocaleString()}</span>
+                    <span className="text-amber-700">MODIS: {hoveredCell.modis_observations.toLocaleString()}</span>
                     <span>•</span>
-                    <span className="text-[#318C9B]">VIIRS: {hoveredCell.viirs_observations.toLocaleString()}</span>
+                    <span className="text-sky-600">VIIRS: {hoveredCell.viirs_observations.toLocaleString()}</span>
                     <span>•</span>
-                    <span className="text-[#54785E]">Co-Detected: {hoveredCell.cross_sensor_co_detections.toLocaleString()}</span>
+                    <span className="text-emerald-700">Co-Detected: {hoveredCell.cross_sensor_co_detections.toLocaleString()}</span>
                     {hoveredCell.is_anomaly && (
-                      <span className="px-2 py-0.5 rounded bg-[#BD493C] text-white font-bold text-[10px]">
+                      <span className="px-2 py-0.5 rounded bg-red-600 text-white font-bold text-[10px]">
                         Anomaly (+{hoveredCell.anomaly_delta.toLocaleString()})
                       </span>
                     )}
@@ -500,32 +500,32 @@ export const CalendarPage: React.FC = () => {
 
             {/* Scientific Harmonization Principle Card */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
-                <div className="flex items-center space-x-2 text-[#E65C35] mb-1">
+              <div className="bg-white border border-slate-200 p-4 rounded-lg shadow-sm">
+                <div className="flex items-center space-x-2 text-orange-600 mb-1">
                   <Grid className="w-4 h-4" />
-                  <span className="font-serif font-semibold text-xs text-[#252923]">EPSG:6933 1km Equal-Area</span>
+                  <span className="font-sans font-semibold text-xs text-slate-900">EPSG:6933 1km Equal-Area</span>
                 </div>
-                <p className="text-[11px] text-[#777970] leading-relaxed">
+                <p className="text-[11px] text-slate-500 leading-relaxed">
                   Raw pixel counts differ by satellite footprint (MODIS 1km vs VIIRS 375m). All monthly counts above are harmonized into standardized 1km² analytical cell-days to ensure scientific comparability.
                 </p>
               </div>
 
-              <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
-                <div className="flex items-center space-x-2 text-[#318C9B] mb-1">
+              <div className="bg-white border border-slate-200 p-4 rounded-lg shadow-sm">
+                <div className="flex items-center space-x-2 text-sky-600 mb-1">
                   <TrendingUp className="w-4 h-4" />
-                  <span className="font-serif font-semibold text-xs text-[#252923]">Calendar Baseline Anomaly</span>
+                  <span className="font-sans font-semibold text-xs text-slate-900">Calendar Baseline Anomaly</span>
                 </div>
-                <p className="text-[11px] text-[#777970] leading-relaxed">
+                <p className="text-[11px] text-slate-500 leading-relaxed">
                   Fire seasonality is naturally periodic. Each month is evaluated against historical medians of that same calendar month rather than annual averages, eliminating seasonal bias.
                 </p>
               </div>
 
-              <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
-                <div className="flex items-center space-x-2 text-[#54785E] mb-1">
+              <div className="bg-white border border-slate-200 p-4 rounded-lg shadow-sm">
+                <div className="flex items-center space-x-2 text-emerald-700 mb-1">
                   <Layers className="w-4 h-4" />
-                  <span className="font-serif font-semibold text-xs text-[#252923]">Sensor Transition Provenance</span>
+                  <span className="font-sans font-semibold text-xs text-slate-900">Sensor Transition Provenance</span>
                 </div>
-                <p className="text-[11px] text-[#777970] leading-relaxed">
+                <p className="text-[11px] text-slate-500 leading-relaxed">
                   Observations preserve full instrument origin: MODIS Terra (2000+), Aqua (2002+), VIIRS S-NPP (2012–2026), NOAA-20 (2018+), and NOAA-21 (2023+).
                 </p>
               </div>
@@ -535,18 +535,18 @@ export const CalendarPage: React.FC = () => {
 
         {/* VIEW MODE 2: MONTHLY DAY-BY-DAY CALENDAR */}
         {viewMode === 'month' && (
-          <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card">
+          <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-serif font-semibold text-lg text-[#252923]">
+              <h3 className="font-sans font-semibold text-lg text-slate-900">
                 {MONTH_NAMES[selectedMonth - 1]} {selectedYear} (Daily Breakdown)
               </h3>
-              <span className="text-xs text-[#777970] font-mono">
+              <span className="text-xs text-slate-500 font-mono">
                 Metric: {METRIC_OPTIONS.find(m => m.id === selectedMetric)?.label}
               </span>
             </div>
 
             {/* Day of Week Headers */}
-            <div className="grid grid-cols-7 gap-2 mb-2 text-center text-[10px] font-mono uppercase text-[#777970] font-semibold">
+            <div className="grid grid-cols-7 gap-2 mb-2 text-center text-[10px] font-mono uppercase text-slate-500 font-semibold">
               <span>Sun</span>
               <span>Mon</span>
               <span>Tue</span>
@@ -583,7 +583,7 @@ export const CalendarPage: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-xs font-bold">{dayNum}</span>
                       {dayItem && dayItem.cross_sensor_co_detections > 0 && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#54785E]" title="Cross-sensor co-detection present"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" title="Cross-sensor co-detection present"></span>
                       )}
                     </div>
 
@@ -607,32 +607,32 @@ export const CalendarPage: React.FC = () => {
             </div>
 
             {/* Heatmap Legend */}
-            <div className="mt-6 pt-4 border-t border-[#E1DED5] flex flex-wrap items-center justify-between gap-3 text-xs text-[#777970]">
+            <div className="mt-6 pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
               <div className="flex items-center space-x-2">
-                <span className="text-[11px] font-medium text-[#252923]">Activity Quantile:</span>
+                <span className="text-[11px] font-medium text-slate-900">Activity Quantile:</span>
                 <div className="flex items-center space-x-1.5">
                   <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-white border border-[#E1DED5]"></span>
+                    <span className="w-3 h-3 rounded bg-white border border-slate-200"></span>
                     <span className="text-[10px]">None</span>
                   </span>
                   <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#FCECE7] border border-[#E1DED5]"></span>
+                    <span className="w-3 h-3 rounded bg-[#FCECE7] border border-slate-200"></span>
                     <span className="text-[10px]">Q1</span>
                   </span>
                   <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#F7D6CB] border border-[#E1DED5]"></span>
+                    <span className="w-3 h-3 rounded bg-[#F7D6CB] border border-slate-200"></span>
                     <span className="text-[10px]">Q2</span>
                   </span>
                   <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#F29E85] border border-[#E1DED5]"></span>
+                    <span className="w-3 h-3 rounded bg-[#F29E85] border border-slate-200"></span>
                     <span className="text-[10px]">Q3</span>
                   </span>
                   <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#E65C35]"></span>
+                    <span className="w-3 h-3 rounded bg-orange-600"></span>
                     <span className="text-[10px]">Q4</span>
                   </span>
                   <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#BD493C]"></span>
+                    <span className="w-3 h-3 rounded bg-red-600"></span>
                     <span className="text-[10px]">High</span>
                   </span>
                 </div>
@@ -640,7 +640,7 @@ export const CalendarPage: React.FC = () => {
 
               <div className="flex items-center space-x-3 text-[11px]">
                 <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-[#54785E]"></span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
                   <span>Cross-Sensor Co-Detection</span>
                 </span>
                 <span>•</span>
@@ -652,54 +652,54 @@ export const CalendarPage: React.FC = () => {
 
         {/* DAY DRILLDOWN INSPECTION CARD */}
         {selectedDay && (
-          <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E1DED5] pb-3">
+          <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center space-x-2">
-                <CalendarIcon className="w-4 h-4 text-[#E65C35]" />
-                <h3 className="font-serif font-semibold text-lg text-[#252923]">
+                <CalendarIcon className="w-4 h-4 text-orange-600" />
+                <h3 className="font-sans font-semibold text-lg text-slate-900">
                   Granular Activity Inspection: {selectedDay} (UTC)
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedDay(null)}
-                className="p-1 rounded text-[#777970] hover:text-[#252923] hover:bg-[#FAF8F3]"
+                className="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {loadingDay ? (
-              <div className="py-12 text-center text-xs text-[#777970] animate-pulse">
+              <div className="py-12 text-center text-xs text-slate-500 animate-pulse">
                 Loading observations and analytical grid cells...
               </div>
             ) : dayDetails && dayDetails.summary ? (
               <div className="space-y-6">
                 {/* Day KPI Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                    <div className="text-[10px] font-mono text-[#777970] uppercase">Active 1km Cells</div>
-                    <div className="text-xl font-serif font-bold text-[#252923] mt-0.5">
+                  <div className="bg-white p-3 rounded-md border border-slate-200">
+                    <div className="text-[10px] font-mono text-slate-500 uppercase">Active 1km Cells</div>
+                    <div className="text-xl font-sans font-bold text-slate-900 mt-0.5">
                       {dayDetails.summary.active_grid_cells.toLocaleString()}
                     </div>
                   </div>
 
-                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                    <div className="text-[10px] font-mono text-[#C27B26] uppercase">MODIS Observations</div>
-                    <div className="text-xl font-serif font-bold text-[#C27B26] mt-0.5">
+                  <div className="bg-white p-3 rounded-md border border-slate-200">
+                    <div className="text-[10px] font-mono text-amber-700 uppercase">MODIS Observations</div>
+                    <div className="text-xl font-sans font-bold text-amber-700 mt-0.5">
                       {dayDetails.summary.total_modis_observations.toLocaleString()}
                     </div>
                   </div>
 
-                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                    <div className="text-[10px] font-mono text-[#318C9B] uppercase">VIIRS Observations</div>
-                    <div className="text-xl font-serif font-bold text-[#318C9B] mt-0.5">
+                  <div className="bg-white p-3 rounded-md border border-slate-200">
+                    <div className="text-[10px] font-mono text-sky-600 uppercase">VIIRS Observations</div>
+                    <div className="text-xl font-sans font-bold text-sky-600 mt-0.5">
                       {dayDetails.summary.total_viirs_observations.toLocaleString()}
                     </div>
                   </div>
 
-                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                    <div className="text-[10px] font-mono text-[#54785E] uppercase">Co-Detected Cells</div>
-                    <div className="text-xl font-serif font-bold text-[#54785E] mt-0.5">
+                  <div className="bg-white p-3 rounded-md border border-slate-200">
+                    <div className="text-[10px] font-mono text-emerald-700 uppercase">Co-Detected Cells</div>
+                    <div className="text-xl font-sans font-bold text-emerald-700 mt-0.5">
                       {dayDetails.summary.cross_sensor_co_detected_cells.toLocaleString()}
                     </div>
                   </div>
@@ -708,30 +708,30 @@ export const CalendarPage: React.FC = () => {
                 {/* Granular grid cells list */}
                 {dayDetails.grid_cells && dayDetails.grid_cells.length > 0 ? (
                   <div>
-                    <h4 className="text-xs font-semibold text-[#252923] mb-2">
+                    <h4 className="text-xs font-semibold text-slate-900 mb-2">
                       Active Equal-Area 1km Cells on this Date ({dayDetails.grid_cells.length} cells)
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-56 overflow-y-auto">
                       {dayDetails.grid_cells.map((cell: any) => (
-                        <div key={cell.grid_cell_id} className="p-2.5 bg-[#FAF8F3] border border-[#E1DED5] rounded text-xs">
-                          <div className="font-mono text-[10px] text-[#777970] truncate">{cell.grid_cell_id}</div>
+                        <div key={cell.grid_cell_id} className="p-2.5 bg-white border border-slate-200 rounded text-xs">
+                          <div className="font-mono text-[10px] text-slate-500 truncate">{cell.grid_cell_id}</div>
                           <div className="flex justify-between items-center mt-1">
-                            <span className="font-semibold text-[#252923]">{cell.sensors_present}</span>
-                            <span className="font-mono text-[#E65C35]">{cell.total_detections} det.</span>
+                            <span className="font-semibold text-slate-900">{cell.sensors_present}</span>
+                            <span className="font-mono text-orange-600">{cell.total_detections} det.</span>
                           </div>
                           {cell.mean_frp_mw !== null && cell.mean_frp_mw !== undefined && (
-                            <div className="text-[10px] text-[#777970] mt-0.5">Mean FRP: {Number(cell.mean_frp_mw).toFixed(1)} MW</div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">Mean FRP: {Number(cell.mean_frp_mw).toFixed(1)} MW</div>
                           )}
                         </div>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#777970] italic">No active cells recorded for this specific date.</p>
+                  <p className="text-xs text-slate-500 italic">No active cells recorded for this specific date.</p>
                 )}
               </div>
             ) : (
-              <div className="py-6 text-center text-xs text-[#777970]">
+              <div className="py-6 text-center text-xs text-slate-500">
                 No satellite observations were detected on {selectedDay} in this Area of Interest.
               </div>
             )}

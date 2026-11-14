@@ -274,20 +274,20 @@ export const GlobalExplorerPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* LEFT: COUNTRY LIST */}
-          <div className="lg:col-span-4 bg-white border border-[#E1DED5] rounded-lg p-4 shadow-card space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E1DED5] pb-3">
-              <h3 className="font-serif font-semibold text-sm text-[#252923]">Country Directory</h3>
-              <span className="text-[10px] font-mono text-[#777970] uppercase">Select to Inspect</span>
+          <div className="lg:col-span-4 bg-white border border-slate-200 rounded-lg p-4 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="font-sans font-semibold text-sm text-slate-900">Country Directory</h3>
+              <span className="text-[10px] font-mono text-slate-500 uppercase">Select to Inspect</span>
             </div>
 
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-[#777970]" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search by country or ISO code..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#FAF8F3] border border-[#E1DED5] rounded text-[#252923] placeholder-[#A0A29A] focus:outline-none focus:border-[#E65C35]"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded text-slate-900 placeholder-[#A0A29A] focus:outline-none focus:border-orange-500"
               />
             </div>
 
@@ -300,20 +300,20 @@ export const GlobalExplorerPage: React.FC = () => {
                     onClick={() => setSelectedIso3(c.iso3)}
                     className={`w-full text-left p-2.5 rounded-md text-xs border transition-all flex items-center justify-between ${
                       isSelected
-                        ? 'border-[#E65C35] bg-[#FCECE7] text-[#252923]'
-                        : 'border-[#E1DED5] bg-white hover:bg-[#FAF8F3] text-[#252923]'
+                        ? 'border-orange-500 bg-[#FCECE7] text-slate-900'
+                        : 'border-slate-200 bg-white hover:bg-white text-slate-900'
                     }`}
                   >
                     <div>
                       <div className="font-semibold text-xs flex items-center space-x-1.5">
                         <span>{c.name}</span>
-                        <span className="text-[10px] font-mono px-1 py-0.2 bg-[#EBE8DF] rounded text-[#777970]">{c.iso3}</span>
+                        <span className="text-[10px] font-mono px-1 py-0.2 bg-slate-100 rounded text-slate-500">{c.iso3}</span>
                       </div>
-                      <div className="text-[10px] text-[#777970] font-mono capitalize">
+                      <div className="text-[10px] text-slate-500 font-mono capitalize">
                         {c.continent} • {formatCoord(c.center_lat || 0, true)}, {formatCoord(c.center_lon || 0, false)}
                       </div>
                     </div>
-                    <ChevronRight className={`w-3.5 h-3.5 ${isSelected ? 'text-[#E65C35]' : 'text-[#A0A29A]'}`} />
+                    <ChevronRight className={`w-3.5 h-3.5 ${isSelected ? 'text-orange-600' : 'text-[#A0A29A]'}`} />
                   </button>
                 );
               })}
@@ -323,20 +323,20 @@ export const GlobalExplorerPage: React.FC = () => {
           {/* RIGHT: DETAILED COUNTRY INSPECTOR */}
           <div className="lg:col-span-8 space-y-6">
             {countryAnalytics ? (
-              <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-6">
+              <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm space-y-6">
                 
                 {/* Country Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E1DED5] pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-xl font-serif font-bold text-[#252923]">
+                      <span className="text-xl font-sans font-bold text-slate-900">
                         {countryAnalytics.country.name}
                       </span>
-                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#FAF8F3] border border-[#E1DED5] font-semibold text-[#252923]">
+                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-white border border-slate-200 font-semibold text-slate-900">
                         {countryAnalytics.country.iso3}
                       </span>
                     </div>
-                    <p className="text-xs text-[#777970] font-mono mt-0.5">
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">
                       Continent: <span className="capitalize">{countryAnalytics.country.continent}</span> • 
                       Center: {formatCoord(countryAnalytics.country.center_lat || 0, true)}, {formatCoord(countryAnalytics.country.center_lon || 0, false)}
                     </p>
@@ -344,7 +344,7 @@ export const GlobalExplorerPage: React.FC = () => {
 
                   <button
                     onClick={() => handleSetAOIToCountry(countryAnalytics.country)}
-                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#E65C35] hover:bg-[#D44F29] text-white text-xs font-semibold rounded-md shadow-sm transition-colors shrink-0"
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-orange-600 hover:bg-[#D44F29] text-white text-xs font-semibold rounded-md shadow-sm transition-colors shrink-0"
                   >
                     <MapPin className="w-3.5 h-3.5" />
                     <span>Focus Dashboard on {countryAnalytics.country.name}</span>
@@ -353,59 +353,59 @@ export const GlobalExplorerPage: React.FC = () => {
 
                 {/* Country KPI Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                    <div className="text-[10px] font-mono uppercase text-[#777970]">Total Observations</div>
-                    <div className="text-lg font-serif font-bold text-[#252923] mt-0.5">
+                  <div className="bg-white p-3 rounded-md border border-slate-200">
+                    <div className="text-[10px] font-mono uppercase text-slate-500">Total Observations</div>
+                    <div className="text-lg font-sans font-bold text-slate-900 mt-0.5">
                       {(countryAnalytics.kpi?.total_observations ?? 0).toLocaleString()}
                     </div>
-                    <div className="text-[10px] text-[#777970]">Active hot spots</div>
+                    <div className="text-[10px] text-slate-500">Active hot spots</div>
                   </div>
 
-                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                    <div className="text-[10px] font-mono uppercase text-[#C27B26]">MODIS (1km)</div>
-                    <div className="text-lg font-serif font-bold text-[#C27B26] mt-0.5">
+                  <div className="bg-white p-3 rounded-md border border-slate-200">
+                    <div className="text-[10px] font-mono uppercase text-amber-700">MODIS (1km)</div>
+                    <div className="text-lg font-sans font-bold text-amber-700 mt-0.5">
                       {(countryAnalytics.kpi?.modis_observations ?? 0).toLocaleString()}
                     </div>
-                    <div className="text-[10px] text-[#777970]">Terra + Aqua</div>
+                    <div className="text-[10px] text-slate-500">Terra + Aqua</div>
                   </div>
 
-                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                    <div className="text-[10px] font-mono uppercase text-[#318C9B]">VIIRS (375m)</div>
-                    <div className="text-lg font-serif font-bold text-[#318C9B] mt-0.5">
+                  <div className="bg-white p-3 rounded-md border border-slate-200">
+                    <div className="text-[10px] font-mono uppercase text-sky-600">VIIRS (375m)</div>
+                    <div className="text-lg font-sans font-bold text-sky-600 mt-0.5">
                       {(countryAnalytics.kpi?.viirs_observations ?? 0).toLocaleString()}
                     </div>
-                    <div className="text-[10px] text-[#777970]">NOAA-20/21</div>
+                    <div className="text-[10px] text-slate-500">NOAA-20/21</div>
                   </div>
 
-                  <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                    <div className="text-[10px] font-mono uppercase text-[#54785E]">Co-Detected Cells</div>
-                    <div className="text-lg font-serif font-bold text-[#54785E] mt-0.5">
+                  <div className="bg-white p-3 rounded-md border border-slate-200">
+                    <div className="text-[10px] font-mono uppercase text-emerald-700">Co-Detected Cells</div>
+                    <div className="text-lg font-sans font-bold text-emerald-700 mt-0.5">
                       {(countryAnalytics.kpi?.co_detected_cells ?? 0).toLocaleString()}
                     </div>
-                    <div className="text-[10px] text-[#777970]">Dual confirmation</div>
+                    <div className="text-[10px] text-slate-500">Dual confirmation</div>
                   </div>
                 </div>
 
                 {/* Fire Radiative Power (MW) Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-[#FAF8F3] p-3.5 rounded-md border border-[#E1DED5]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3.5 rounded-md border border-slate-200">
                   <div className="flex items-center space-x-3">
-                    <Activity className="w-5 h-5 text-[#E65C35]" />
+                    <Activity className="w-5 h-5 text-orange-600" />
                     <div>
-                      <div className="text-xs font-semibold text-[#252923]">Mean Fire Radiative Power</div>
-                      <div className="text-sm font-serif font-bold text-[#E65C35]">
+                      <div className="text-xs font-semibold text-slate-900">Mean Fire Radiative Power</div>
+                      <div className="text-sm font-sans font-bold text-orange-600">
                         {(countryAnalytics.kpi?.mean_frp_mw || 0).toFixed(1)} MW
                       </div>
-                      <div className="text-[10px] text-[#777970]">Average intensity per detection</div>
+                      <div className="text-[10px] text-slate-500">Average intensity per detection</div>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Flame className="w-5 h-5 text-[#BD493C]" />
+                    <Flame className="w-5 h-5 text-red-600" />
                     <div>
-                      <div className="text-xs font-semibold text-[#252923]">Peak Radiative Power (Max)</div>
-                      <div className="text-sm font-serif font-bold text-[#BD493C]">
+                      <div className="text-xs font-semibold text-slate-900">Peak Radiative Power (Max)</div>
+                      <div className="text-sm font-sans font-bold text-red-600">
                         {(countryAnalytics.kpi?.max_frp_mw || 0).toFixed(1)} MW
                       </div>
-                      <div className="text-[10px] text-[#777970]">Highest energetic event recorded</div>
+                      <div className="text-[10px] text-slate-500">Highest energetic event recorded</div>
                     </div>
                   </div>
                 </div>
@@ -413,10 +413,10 @@ export const GlobalExplorerPage: React.FC = () => {
                 {/* 14-Day Timeline Bar Chart */}
                 <div className="space-y-2 pt-2">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-serif font-semibold text-[#252923]">
+                    <h4 className="text-xs font-sans font-semibold text-slate-900">
                       14-Day Daily Hot Spot Timeline ({countryAnalytics.country.name})
                     </h4>
-                    <span className="text-[10px] font-mono text-[#777970]">MODIS vs VIIRS</span>
+                    <span className="text-[10px] font-mono text-slate-500">MODIS vs VIIRS</span>
                   </div>
 
                   <div className="h-56 w-full">
@@ -445,7 +445,7 @@ export const GlobalExplorerPage: React.FC = () => {
                         </BarChart>
                       </ResponsiveContainer>
                     ) : (
-                      <div className="h-full flex items-center justify-center text-xs text-[#777970] bg-[#FAF8F3] rounded border border-dashed border-[#E1DED5]">
+                      <div className="h-full flex items-center justify-center text-xs text-slate-500 bg-white rounded border border-dashed border-slate-200">
                         No timeline data recorded for this country in the current database.
                       </div>
                     )}
@@ -453,10 +453,10 @@ export const GlobalExplorerPage: React.FC = () => {
                 </div>
 
                 {/* Sensor Resolution Note */}
-                <div className="p-3 bg-[#FAF8F3] rounded-md border border-[#E1DED5] flex items-start space-x-2.5 text-[11px] text-[#777970]">
-                  <Info className="w-4 h-4 text-[#777970] shrink-0 mt-0.5" />
+                <div className="p-3 bg-white rounded-md border border-slate-200 flex items-start space-x-2.5 text-[11px] text-slate-500">
+                  <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-semibold text-[#252923]">Sensor Harmonization Principle: </span>
+                    <span className="font-semibold text-slate-900">Sensor Harmonization Principle: </span>
                     VIIRS typically detects 3x to 5x more hot spots than MODIS due to its 375m footprint.
                     In FirePulse, both streams are aggregated into 1km equal-area cells to ensure consistent historical comparability.
                   </div>
@@ -464,7 +464,7 @@ export const GlobalExplorerPage: React.FC = () => {
 
               </div>
             ) : (
-              <div className="bg-white border border-[#E1DED5] rounded-lg p-12 text-center text-xs text-[#777970]">
+              <div className="bg-white border border-slate-200 rounded-lg p-12 text-center text-xs text-slate-500">
                 {loadingCountry ? 'Loading country data...' : 'Select a country on the left to inspect its active fire metrics.'}
               </div>
             )}

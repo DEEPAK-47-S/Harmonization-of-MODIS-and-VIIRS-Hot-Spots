@@ -107,7 +107,7 @@ export const TimeMachinePage: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] overflow-y-auto">
       <Header 
         title="Global Fire Time Machine" 
         subtitle="Chronological multi-sensor animation of Earth's thermal hot spots" 
@@ -115,15 +115,15 @@ export const TimeMachinePage: React.FC = () => {
 
       <main className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* INTRO */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
           <div className="space-y-1.5">
-            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-slate-500 uppercase">
               Temporal Playback / Global Fire Dynamics
             </span>
-            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-sans font-semibold text-slate-900 tracking-tight">
               Watch fire migrate across the planet.
             </h1>
-            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+            <p className="text-xs md:text-sm text-slate-500 font-sans max-w-2xl">
               Step through daily NASA satellite observations. Scrub the timeline to observe how fire clusters 
               ignite, spread, and extinguish across agricultural belts and boreal forests.
             </p>
@@ -133,7 +133,7 @@ export const TimeMachinePage: React.FC = () => {
             <select
               value={playbackSpeed}
               onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
-              className="bg-white border border-[#E1DED5] rounded text-xs py-1.5 px-2 text-[#252923] focus:outline-none"
+              className="bg-white border border-slate-200 rounded text-xs py-1.5 px-2 text-slate-900 focus:outline-none"
             >
               <option value={1500}>0.75x (Slow)</option>
               <option value={1000}>1.0x (Normal)</option>
@@ -144,17 +144,17 @@ export const TimeMachinePage: React.FC = () => {
         </div>
 
         {/* TIME MACHINE PLAYER CONTROLS CARD */}
-        <div className="bg-white border border-[#E1DED5] rounded-xl p-5 shadow-card space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E1DED5] pb-4">
+        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
             
             {/* Active Date Display */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-lg bg-[#FAF8F3] border border-[#E1DED5] flex items-center justify-center text-[#E65C35]">
+              <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-orange-600">
                 <Clock className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase text-[#777970] font-semibold">Observation Date (UTC)</span>
-                <div className="text-xl font-serif font-bold text-[#252923]">
+                <span className="text-[10px] font-mono uppercase text-slate-500 font-semibold">Observation Date (UTC)</span>
+                <div className="text-xl font-sans font-bold text-slate-900">
                   {currentFrame ? currentFrame.date_utc : 'Loading...'}
                 </div>
               </div>
@@ -166,7 +166,7 @@ export const TimeMachinePage: React.FC = () => {
                 onClick={() => setCurrentIndex(0)}
                 disabled={currentIndex === 0 || loading}
                 title="Rewind to First Frame"
-                className="p-2 rounded-md border border-[#E1DED5] text-[#777970] hover:text-[#252923] hover:bg-[#FAF8F3] disabled:opacity-40 transition-colors"
+                className="p-2 rounded-md border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-white disabled:opacity-40 transition-colors"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -174,14 +174,14 @@ export const TimeMachinePage: React.FC = () => {
                 onClick={() => handleStep('prev')}
                 disabled={currentIndex === 0 || loading}
                 title="Step Back 1 Day"
-                className="p-2 rounded-md border border-[#E1DED5] text-[#777970] hover:text-[#252923] hover:bg-[#FAF8F3] disabled:opacity-40 transition-colors"
+                className="p-2 rounded-md border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-white disabled:opacity-40 transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={handleTogglePlay}
                 disabled={loading || frames.length === 0}
-                className="flex items-center space-x-2 px-4 py-2 rounded-md bg-[#E65C35] hover:bg-[#D44F29] text-white text-xs font-semibold shadow-sm transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 rounded-md bg-orange-600 hover:bg-[#D44F29] text-white text-xs font-semibold shadow-sm transition-colors"
               >
                 {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                 <span>{isPlaying ? 'Pause' : 'Play Simulation'}</span>
@@ -190,7 +190,7 @@ export const TimeMachinePage: React.FC = () => {
                 onClick={() => handleStep('next')}
                 disabled={currentIndex >= frames.length - 1 || loading}
                 title="Step Forward 1 Day"
-                className="p-2 rounded-md border border-[#E1DED5] text-[#777970] hover:text-[#252923] hover:bg-[#FAF8F3] disabled:opacity-40 transition-colors"
+                className="p-2 rounded-md border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-white disabled:opacity-40 transition-colors"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -198,8 +198,8 @@ export const TimeMachinePage: React.FC = () => {
 
             {/* Frame Counter */}
             <div className="text-right">
-              <span className="text-[10px] font-mono uppercase text-[#777970]">Timeline Frame</span>
-              <div className="text-sm font-mono font-semibold text-[#252923]">
+              <span className="text-[10px] font-mono uppercase text-slate-500">Timeline Frame</span>
+              <div className="text-sm font-mono font-semibold text-slate-900">
                 {frames.length > 0 ? `Day ${currentIndex + 1} of ${frames.length}` : 'No frames recorded'}
               </div>
             </div>
@@ -217,9 +217,9 @@ export const TimeMachinePage: React.FC = () => {
                 setIsPlaying(false);
                 setCurrentIndex(Number(e.target.value));
               }}
-              className="w-full accent-[#E65C35] cursor-pointer h-2 bg-[#FAF8F3] border border-[#E1DED5] rounded-lg disabled:opacity-40"
+              className="w-full accent-[#E65C35] cursor-pointer h-2 bg-white border border-slate-200 rounded-lg disabled:opacity-40"
             />
-            <div className="flex justify-between text-[10px] font-mono text-[#777970]">
+            <div className="flex justify-between text-[10px] font-mono text-slate-500">
               <span>{frames[0]?.date_utc || 'Start'}</span>
               <span>Drag slider to travel in time</span>
               <span>{frames[frames.length - 1]?.date_utc || 'End'}</span>
@@ -229,27 +229,27 @@ export const TimeMachinePage: React.FC = () => {
           {/* Day KPIs */}
           {currentFrame && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                <div className="text-[10px] font-mono text-[#777970] uppercase">Detections Today</div>
-                <div className="text-lg font-serif font-bold text-[#252923]">
+              <div className="bg-white p-3 rounded-md border border-slate-200">
+                <div className="text-[10px] font-mono text-slate-500 uppercase">Detections Today</div>
+                <div className="text-lg font-sans font-bold text-slate-900">
                   {(currentFrame.total_observations || 0).toLocaleString()}
                 </div>
               </div>
-              <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                <div className="text-[10px] font-mono text-[#C27B26] uppercase">MODIS (1km)</div>
-                <div className="text-lg font-serif font-bold text-[#C27B26]">
+              <div className="bg-white p-3 rounded-md border border-slate-200">
+                <div className="text-[10px] font-mono text-amber-700 uppercase">MODIS (1km)</div>
+                <div className="text-lg font-sans font-bold text-amber-700">
                   {(currentFrame.modis_count || 0).toLocaleString()}
                 </div>
               </div>
-              <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                <div className="text-[10px] font-mono text-[#318C9B] uppercase">VIIRS (375m)</div>
-                <div className="text-lg font-serif font-bold text-[#318C9B]">
+              <div className="bg-white p-3 rounded-md border border-slate-200">
+                <div className="text-[10px] font-mono text-sky-600 uppercase">VIIRS (375m)</div>
+                <div className="text-lg font-sans font-bold text-sky-600">
                   {(currentFrame.viirs_count || 0).toLocaleString()}
                 </div>
               </div>
-              <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
-                <div className="text-[10px] font-mono text-[#54785E] uppercase">1km Active Cells</div>
-                <div className="text-lg font-serif font-bold text-[#54785E]">
+              <div className="bg-white p-3 rounded-md border border-slate-200">
+                <div className="text-[10px] font-mono text-emerald-700 uppercase">1km Active Cells</div>
+                <div className="text-lg font-sans font-bold text-emerald-700">
                   {(currentFrame.active_cells || 0).toLocaleString()}
                 </div>
               </div>
@@ -258,11 +258,11 @@ export const TimeMachinePage: React.FC = () => {
         </div>
 
         {/* MAP CONTAINER */}
-        <div className="bg-white border border-[#E1DED5] rounded-xl overflow-hidden shadow-card flex flex-col">
-          <div className="p-3.5 bg-[#FAF8F3] border-b border-[#E1DED5] flex items-center justify-between">
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+          <div className="p-3.5 bg-white border-b border-slate-200 flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Globe2 className="w-4 h-4 text-[#E65C35]" />
-              <span className="font-serif font-semibold text-xs text-[#252923]">
+              <Globe2 className="w-4 h-4 text-orange-600" />
+              <span className="font-sans font-semibold text-xs text-slate-900">
                 Worldwide Fire Dispersion on {currentFrame ? currentFrame.date_utc : 'Selected Day'}
               </span>
             </div>
@@ -271,7 +271,7 @@ export const TimeMachinePage: React.FC = () => {
               <select
                 value={mapStyle}
                 onChange={e => setMapStyle(e.target.value as any)}
-                className="bg-white border border-[#E1DED5] rounded text-[11px] py-1 px-1.5 text-[#252923] focus:outline-none"
+                className="bg-white border border-slate-200 rounded text-[11px] py-1 px-1.5 text-slate-900 focus:outline-none"
               >
                 <option value="light">Light Canvas</option>
                 <option value="satellite">Satellite</option>
@@ -313,23 +313,23 @@ export const TimeMachinePage: React.FC = () => {
                     }}
                   >
                     <Popup>
-                      <div className="p-2 space-y-1 text-xs font-sans text-[#252923]">
+                      <div className="p-2 space-y-1 text-xs font-sans text-slate-900">
                         <div className="font-bold border-b pb-1">
                           {c.total_detections} Total Detections
                         </div>
-                        <div className="text-[10px] text-[#777970] font-mono">
+                        <div className="text-[10px] text-slate-500 font-mono">
                           Coordinates: {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
                         </div>
                         <div className="flex justify-between text-[11px] pt-1">
-                          <span className="text-[#C27B26]">MODIS: {c.modis_detections}</span>
-                          <span className="text-[#318C9B]">VIIRS: {c.viirs_detections}</span>
+                          <span className="text-amber-700">MODIS: {c.modis_detections}</span>
+                          <span className="text-sky-600">VIIRS: {c.viirs_detections}</span>
                         </div>
                         {c.has_co_detection && (
-                          <div className="text-[10px] text-[#BD493C] font-semibold">
+                          <div className="text-[10px] text-red-600 font-semibold">
                             ✓ Co-detected by both sensors
                           </div>
                         )}
-                        <div className="text-[10px] text-[#777970]">
+                        <div className="text-[10px] text-slate-500">
                           Mean FRP: {c.mean_frp.toFixed(1)} MW
                         </div>
                       </div>
@@ -340,18 +340,18 @@ export const TimeMachinePage: React.FC = () => {
             </MapContainer>
           </div>
 
-          <div className="p-3 bg-[#FAF8F3] border-t border-[#E1DED5] flex flex-wrap items-center justify-between text-[11px] text-[#777970]">
+          <div className="p-3 bg-white border-t border-slate-200 flex flex-wrap items-center justify-between text-[11px] text-slate-500">
             <div className="flex items-center space-x-4">
               <span className="flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#BD493C]"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-red-600"></span>
                 <span>Cross-Sensor Co-Detected Clusters</span>
               </span>
               <span className="flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#318C9B]"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-600"></span>
                 <span>VIIRS Dominated Hotspots</span>
               </span>
               <span className="flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#C27B26]"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span>
                 <span>MODIS Dominated Hotspots</span>
               </span>
             </div>

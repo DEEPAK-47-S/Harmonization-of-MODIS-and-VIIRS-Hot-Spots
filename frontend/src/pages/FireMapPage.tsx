@@ -137,7 +137,7 @@ export const FireMapPage: React.FC = () => {
   const centerLon = (aoi.west + aoi.east) / 2;
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] h-screen overflow-hidden select-none">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] h-screen overflow-hidden select-none">
       <Header 
         title="Interactive Fire & Hotspot Map" 
         subtitle="Individual satellite detections and harmonized 1km analytical grid cells (EPSG:6933)"
@@ -527,10 +527,10 @@ export const FireMapPage: React.FC = () => {
 
             {/* Sensor Filter */}
             <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-[#777970] mb-1.5 font-semibold">
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-500 mb-1.5 font-semibold">
                 Sensor Instrument
               </label>
-              <div className="grid grid-cols-3 gap-1 bg-[#FAF8F3] p-1 rounded border border-[#E1DED5]">
+              <div className="grid grid-cols-3 gap-1 bg-white p-1 rounded border border-slate-200">
                 {[
                   { id: 'ALL', label: 'All' },
                   { id: 'MODIS', label: 'MODIS' },
@@ -541,8 +541,8 @@ export const FireMapPage: React.FC = () => {
                     onClick={() => setSensorFilter(s.id)}
                     className={`py-1 rounded text-xs font-medium transition ${
                       sensorFilter === s.id 
-                        ? 'bg-white text-[#E65C35] shadow-sm font-semibold' 
-                        : 'text-[#777970] hover:text-[#252923]'
+                        ? 'bg-white text-orange-600 shadow-sm font-semibold' 
+                        : 'text-slate-500 hover:text-slate-900'
                     }`}
                   >
                     {s.label}
@@ -554,8 +554,8 @@ export const FireMapPage: React.FC = () => {
             {/* Min FRP slider */}
             <div>
               <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="text-[#777970]">Min Thermal Power (FRP)</span>
-                <span className="font-mono text-[11px] font-semibold text-[#E65C35] bg-[#FCECE7] px-1.5 py-0.5 rounded">
+                <span className="text-slate-500">Min Thermal Power (FRP)</span>
+                <span className="font-mono text-[11px] font-semibold text-orange-600 bg-[#FCECE7] px-1.5 py-0.5 rounded">
                   &ge; {minFrp} MW
                 </span>
               </div>
@@ -566,9 +566,9 @@ export const FireMapPage: React.FC = () => {
                 step="5"
                 value={minFrp}
                 onChange={(e) => setMinFrp(Number(e.target.value))}
-                className="w-full accent-[#E65C35] h-1.5 bg-[#EBE8DF] rounded cursor-pointer"
+                className="w-full accent-[#E65C35] h-1.5 bg-slate-100 rounded cursor-pointer"
               />
-              <div className="flex justify-between text-[10px] text-[#777970] mt-0.5 font-mono">
+              <div className="flex justify-between text-[10px] text-slate-500 mt-0.5 font-mono">
                 <span>0 MW</span>
                 <span>50 MW</span>
                 <span>100 MW</span>
@@ -576,59 +576,59 @@ export const FireMapPage: React.FC = () => {
             </div>
 
             {/* Date Range Filter */}
-            <div className="space-y-2 pt-2 border-t border-[#E1DED5]">
-              <label className="block text-[10px] font-mono uppercase tracking-wider text-[#777970] font-semibold">
+            <div className="space-y-2 pt-2 border-t border-slate-200">
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold">
                 Date Range (UTC)
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <span className="text-[10px] text-[#777970] block mb-0.5">Start</span>
+                  <span className="text-[10px] text-slate-500 block mb-0.5">Start</span>
                   <input
                     type="date"
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
-                    className="w-full bg-[#FAF8F3] border border-[#E1DED5] rounded px-2 py-1 text-xs text-[#252923] focus:outline-none focus:border-[#E65C35] font-mono"
+                    className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-mono"
                   />
                 </div>
                 <div>
-                  <span className="text-[10px] text-[#777970] block mb-0.5">End</span>
+                  <span className="text-[10px] text-slate-500 block mb-0.5">End</span>
                   <input
                     type="date"
                     value={dateTo}
                     onChange={(e) => setDateTo(e.target.value)}
-                    className="w-full bg-[#FAF8F3] border border-[#E1DED5] rounded px-2 py-1 text-xs text-[#252923] focus:outline-none focus:border-[#E65C35] font-mono"
+                    className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-orange-500 font-mono"
                   />
                 </div>
               </div>
             </div>
 
             {/* Layer Toggles */}
-            <div className="space-y-2 pt-2 border-t border-[#E1DED5] text-xs">
-              <label className="flex items-center space-x-2 text-[#252923] cursor-pointer">
+            <div className="space-y-2 pt-2 border-t border-slate-200 text-xs">
+              <label className="flex items-center space-x-2 text-slate-900 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={showPoints}
                   onChange={(e) => setShowPoints(e.target.checked)}
-                  className="rounded text-[#E65C35] focus:ring-0 w-3.5 h-3.5"
+                  className="rounded text-orange-600 focus:ring-0 w-3.5 h-3.5"
                 />
                 <span>Satellite Hotspot Points</span>
               </label>
-              <label className="flex items-center space-x-2 text-[#252923] cursor-pointer">
+              <label className="flex items-center space-x-2 text-slate-900 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={showGrid}
                   onChange={(e) => setShowGrid(e.target.checked)}
-                  className="rounded text-[#E65C35] focus:ring-0 w-3.5 h-3.5"
+                  className="rounded text-orange-600 focus:ring-0 w-3.5 h-3.5"
                 />
                 <span>Harmonized 1km Grid (EPSG:6933)</span>
               </label>
             </div>
 
             {/* Reset Filters & Export */}
-            <div className="pt-2 border-t border-[#E1DED5] flex items-center justify-between text-xs">
+            <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs">
               <button
                 onClick={handleResetFilters}
-                className="flex items-center space-x-1 text-[#777970] hover:text-[#252923]"
+                className="flex items-center space-x-1 text-slate-500 hover:text-slate-900"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Reset Filters</span>
@@ -636,7 +636,7 @@ export const FireMapPage: React.FC = () => {
               <a
                 href={FirePulseAPI.getExportUrl('observations', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
                 download
-                className="flex items-center space-x-1 text-[#318C9B] font-medium hover:underline"
+                className="flex items-center space-x-1 text-sky-600 font-medium hover:underline"
               >
                 <Download className="w-3 h-3" />
                 <span>Download CSV</span>
@@ -647,13 +647,13 @@ export const FireMapPage: React.FC = () => {
 
         {/* Slide-over Hotspot Inspector Drawer (Right Side) */}
         {selectedObs && (
-          <div className="absolute top-4 right-6 bottom-4 z-20 w-88 max-w-[calc(100vw-3rem)] bg-white border border-[#E1DED5] rounded-lg p-5 shadow-float flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-150">
+          <div className="absolute top-4 right-6 bottom-4 z-20 w-88 max-w-[calc(100vw-3rem)] bg-white border border-slate-200 rounded-lg p-5 shadow-float flex flex-col justify-between overflow-y-auto animate-in slide-in-from-right duration-150">
             <div className="space-y-4">
               {/* Header */}
-              <div className="flex items-start justify-between border-b border-[#E1DED5] pb-3">
+              <div className="flex items-start justify-between border-b border-slate-200 pb-3">
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-[#777970]">Inspection Panel</span>
-                  <h3 className="font-serif font-semibold text-lg text-[#252923] flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[10px] font-mono uppercase text-slate-500">Inspection Panel</span>
+                  <h3 className="font-sans font-semibold text-lg text-slate-900 flex items-center gap-1.5 mt-0.5">
                     <span 
                       className="w-2.5 h-2.5 rounded-full" 
                       style={{ backgroundColor: selectedObs.sensor_family === 'MODIS' ? '#C27B26' : '#318C9B' }}
@@ -663,88 +663,88 @@ export const FireMapPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setSelectedObs(null)}
-                  className="text-[#777970] hover:text-[#252923] p-1 rounded hover:bg-[#FAF8F3]"
+                  className="text-slate-500 hover:text-slate-900 p-1 rounded hover:bg-white"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Coordinates Pill */}
-              <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md flex items-center justify-between">
+              <div className="p-3 bg-white border border-slate-200 rounded-md flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-[#777970] block">WGS84 Coordinates</span>
-                  <span className="font-mono text-xs text-[#252923] font-semibold">
+                  <span className="text-[10px] font-mono uppercase text-slate-500 block">WGS84 Coordinates</span>
+                  <span className="font-mono text-xs text-slate-900 font-semibold">
                     {formatCoord(selectedObs.latitude, true)}, {formatCoord(selectedObs.longitude, false)}
                   </span>
                 </div>
                 <button
                   onClick={() => handleCopyCoord(selectedObs.latitude, selectedObs.longitude)}
-                  className="p-1.5 rounded border border-[#E1DED5] bg-white text-[#777970] hover:text-[#252923] transition"
+                  className="p-1.5 rounded border border-slate-200 bg-white text-slate-500 hover:text-slate-900 transition"
                   title="Copy GPS coordinates"
                 >
-                  {copiedCoord ? <Check className="w-3.5 h-3.5 text-[#54785E]" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedCoord ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
 
               {/* Key Scientific Attributes */}
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
-                  <span className="text-[#777970]">Satellite Platform:</span>
-                  <span className="font-semibold text-[#252923]">{selectedObs.satellite} ({selectedObs.instrument})</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-200">
+                  <span className="text-slate-500">Satellite Platform:</span>
+                  <span className="font-semibold text-slate-900">{selectedObs.satellite} ({selectedObs.instrument})</span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
-                  <span className="text-[#777970]">UTC Timestamp:</span>
-                  <span className="font-mono text-[#252923]">
+                <div className="flex justify-between py-1.5 border-b border-slate-200">
+                  <span className="text-slate-500">UTC Timestamp:</span>
+                  <span className="font-mono text-slate-900">
                     {selectedObs.acquisition_date_utc} {selectedObs.acquisition_datetime_utc?.slice(11, 16)} UTC
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
-                  <span className="text-[#777970]">Fire Radiative Power:</span>
-                  <span className="font-mono font-bold text-[#E65C35]">
+                <div className="flex justify-between py-1.5 border-b border-slate-200">
+                  <span className="text-slate-500">Fire Radiative Power:</span>
+                  <span className="font-mono font-bold text-orange-600">
                     {selectedObs.frp_mw?.toFixed(1)} MW
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
-                  <span className="text-[#777970]">Brightness Temperature:</span>
-                  <span className="font-mono text-[#252923]">
+                <div className="flex justify-between py-1.5 border-b border-slate-200">
+                  <span className="text-slate-500">Brightness Temperature:</span>
+                  <span className="font-mono text-slate-900">
                     {selectedObs.brightness_temperature_kelvin ? `${selectedObs.brightness_temperature_kelvin.toFixed(1)} K` : 'N/A'}
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
-                  <span className="text-[#777970]">Detection Confidence:</span>
-                  <span className="font-semibold text-[#252923]">
+                <div className="flex justify-between py-1.5 border-b border-slate-200">
+                  <span className="text-slate-500">Detection Confidence:</span>
+                  <span className="font-semibold text-slate-900">
                     {selectedObs.confidence_raw} ({selectedObs.confidence_type})
                   </span>
                 </div>
 
-                <div className="flex justify-between py-1.5 border-b border-[#E1DED5]">
-                  <span className="text-[#777970]">Overpass Category:</span>
-                  <span className="text-[#252923]">
+                <div className="flex justify-between py-1.5 border-b border-slate-200">
+                  <span className="text-slate-500">Overpass Category:</span>
+                  <span className="text-slate-900">
                     {selectedObs.daynight === 'D' ? 'Daytime (Solar Heated)' : 'Nighttime (Cool Background)'}
                   </span>
                 </div>
               </div>
 
               {/* Grid Association */}
-              <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md space-y-1">
-                <span className="text-[10px] font-mono uppercase text-[#777970]">Assigned 1km Cell ID</span>
-                <div className="font-mono text-[11px] font-semibold text-[#252923] truncate">
+              <div className="p-3 bg-white border border-slate-200 rounded-md space-y-1">
+                <span className="text-[10px] font-mono uppercase text-slate-500">Assigned 1km Cell ID</span>
+                <div className="font-mono text-[11px] font-semibold text-slate-900 truncate">
                   {selectedObs.grid_cell_id}
                 </div>
-                <p className="text-[10px] text-[#777970] leading-tight">
+                <p className="text-[10px] text-slate-500 leading-tight">
                   Projected via EPSG:6933 into an equal-area 1,000m x 1,000m analytical grid cell.
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#E1DED5]">
+            <div className="pt-3 border-t border-slate-200">
               <button
                 onClick={() => setSelectedObs(null)}
-                className="w-full py-2 rounded bg-[#FAF8F3] hover:bg-[#EBE8DF] border border-[#E1DED5] text-xs font-semibold text-[#252923] transition"
+                className="w-full py-2 rounded bg-white hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-900 transition"
               >
                 Close Inspector
               </button>
