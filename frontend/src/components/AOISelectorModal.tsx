@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Globe2, Search, Check, SlidersHorizontal, MapPin } from 'lucide-react';
 import { useAOI, AOI_PRESETS } from '../context/AOIContext';
 import { AOIBounds, formatAOIBounds, CountryItem } from '../types';
@@ -105,18 +106,25 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
     c.continent.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200/80 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in duration-150 flex flex-col max-h-[90vh]">
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[99999] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="bg-white border border-slate-200/90 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 bg-slate-50/70">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-200/80 bg-slate-50/80 shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600">
+            <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600 shrink-0">
               <Globe2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-slate-900">Target Area of Interest</h3>
+              <h3 className="font-bold text-sm sm:text-base text-slate-900">Target Area of Interest</h3>
               <p className="text-xs text-slate-500">Switch monitoring scope from Entire World to any continent, country, or custom bbox.</p>
             </div>
           </div>
@@ -308,7 +316,7 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-mono text-[#777970] mb-1">West Longitude</label>
+                  <label className="block text-[11px] font-mono text-slate-500 mb-1">West Longitude</label>
                   <input
                     type="number"
                     step="0.01"
@@ -317,11 +325,11 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     max="180"
                     value={customBounds.west}
                     onChange={(e) => setCustomBounds({ ...customBounds, west: parseFloat(e.target.value) || 0 })}
-                    className="w-full bg-[#FAF8F3] border border-[#E1DED5] rounded px-3 py-1.5 text-xs text-[#252923] focus:outline-none focus:border-[#E65C35]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono text-[#777970] mb-1">East Longitude</label>
+                  <label className="block text-[11px] font-mono text-slate-500 mb-1">East Longitude</label>
                   <input
                     type="number"
                     step="0.01"
@@ -330,11 +338,11 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     max="180"
                     value={customBounds.east}
                     onChange={(e) => setCustomBounds({ ...customBounds, east: parseFloat(e.target.value) || 0 })}
-                    className="w-full bg-[#FAF8F3] border border-[#E1DED5] rounded px-3 py-1.5 text-xs text-[#252923] focus:outline-none focus:border-[#E65C35]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono text-[#777970] mb-1">South Latitude</label>
+                  <label className="block text-[11px] font-mono text-slate-500 mb-1">South Latitude</label>
                   <input
                     type="number"
                     step="0.01"
@@ -343,11 +351,11 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     max="90"
                     value={customBounds.south}
                     onChange={(e) => setCustomBounds({ ...customBounds, south: parseFloat(e.target.value) || 0 })}
-                    className="w-full bg-[#FAF8F3] border border-[#E1DED5] rounded px-3 py-1.5 text-xs text-[#252923] focus:outline-none focus:border-[#E65C35]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-mono text-[#777970] mb-1">North Latitude</label>
+                  <label className="block text-[11px] font-mono text-slate-500 mb-1">North Latitude</label>
                   <input
                     type="number"
                     step="0.01"
@@ -356,7 +364,7 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     max="90"
                     value={customBounds.north}
                     onChange={(e) => setCustomBounds({ ...customBounds, north: parseFloat(e.target.value) || 0 })}
-                    className="w-full bg-[#FAF8F3] border border-[#E1DED5] rounded px-3 py-1.5 text-xs text-[#252923] focus:outline-none focus:border-[#E65C35]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-orange-500"
                   />
                 </div>
               </div>
@@ -364,7 +372,7 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
               <div className="flex justify-end space-x-2 pt-2">
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#E65C35] hover:bg-[#D44F29] text-white transition-colors"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-orange-500 hover:bg-orange-600 text-white transition-colors"
                 >
                   Apply Custom Coordinates
                 </button>
@@ -375,19 +383,20 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3 bg-[#FAF8F3] border-t border-[#E1DED5] flex items-center justify-between text-[11px] text-[#777970]">
+        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 shrink-0">
           <div>
-            Current active: <span className="font-semibold text-[#252923]">{aoi.name || 'Custom'}</span>
+            Active Area: <span className="font-semibold text-slate-900">{aoi.name || 'Custom'}</span>
           </div>
           <button
             onClick={() => handleApply(continentPresets[0])}
-            className="text-[#E65C35] hover:underline font-medium"
+            className="text-orange-600 hover:text-orange-700 hover:underline font-medium"
           >
             Reset to Entire World
           </button>
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

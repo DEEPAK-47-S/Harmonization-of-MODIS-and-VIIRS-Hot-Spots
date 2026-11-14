@@ -24,6 +24,7 @@ import {
   CircleMarker, 
   Rectangle, 
   Popup, 
+  Tooltip as LeafletTooltip,
   useMap 
 } from 'react-leaflet';
 import { 
@@ -393,7 +394,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-[300px] sm:h-[400px] w-full relative">
+            <div className="h-[420px] sm:h-[480px] lg:h-[520px] w-full relative z-0">
               <MapContainer
                 center={isWorld ? [20, 0] : [aoi.south + (aoi.north - aoi.south) / 2, aoi.west + (aoi.east - aoi.west) / 2]}
                 zoom={isWorld ? 2 : 7}
@@ -440,10 +441,10 @@ export const DashboardPage: React.FC = () => {
                   />
                 )}
 
-                {/* World Mode: Macro Density Clusters */}
+                {/* World Mode: Macro Density Clusters with Rich Instant Tooltip */}
                 {isWorld && densityClusters.map((c, idx) => {
                   const detCount = c.total_detections || c.count || 1;
-                  const radius = Math.min(20, Math.max(5, Math.sqrt(detCount) * 2.5));
+                  const radius = Math.min(22, Math.max(6, Math.sqrt(detCount) * 2.5));
                   const isCo = c.has_co_detection;
                   const hasViirs = (c.viirs_detections || c.viirs_count || 0) > 0;
                   const color = isCo 
@@ -459,11 +460,30 @@ export const DashboardPage: React.FC = () => {
                       radius={radius}
                       pathOptions={{
                         fillColor: color,
-                        fillOpacity: 0.8,
+                        fillOpacity: 0.82,
                         color: '#FFFFFF',
                         weight: 1.5
                       }}
                     >
+                      <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                        <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
+                          <div className="font-bold flex items-center space-x-1.5">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                            <span>{detCount.toLocaleString()} Fire Detections</span>
+                          </div>
+                          <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                            {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
+                          </div>
+                          <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-700 mt-1">
+                            <span className="text-amber-600">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
+                            <span>•</span>
+                            <span className="text-sky-600">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
+                          </div>
+                          <div className="text-[10px] text-orange-600 font-bold mt-0.5">
+                            Mean FRP: {(c.mean_frp || 0).toFixed(1)} MW
+                          </div>
+                        </div>
+                      </LeafletTooltip>
                       <Popup>
                         <div className="p-2 space-y-1.5 text-xs font-sans text-slate-800">
                           <div className="font-bold border-b border-slate-100 pb-1 text-sm text-slate-900">
@@ -490,7 +510,7 @@ export const DashboardPage: React.FC = () => {
                   );
                 })}
 
-                {/* Regional Mode: 1km Grid Cells */}
+                {/* Regional Mode: 1km Grid Cells with Instant Hover Tooltip */}
                 {!isWorld && showGrid && gridCells.map(cell => {
                   const b = cell.cell_bounds_wgs84;
                   if (!b) return null;
@@ -500,12 +520,24 @@ export const DashboardPage: React.FC = () => {
                       key={cell.grid_cell_id}
                       bounds={[[b.south, b.west], [b.north, b.east]]}
                       pathOptions={{
-                        color: isCo ? '#10B981' : '#FF5722',
-                        weight: 1.5,
-                        fillColor: isCo ? '#10B981' : '#FF5722',
-                        fillOpacity: 0.2
+                        color: isCo ? '#10B981' : '#10B981',
+                        weight: isCo ? 2 : 1.2,
+                        fillColor: isCo ? '#10B981' : '#10B981',
+                        fillOpacity: isCo ? 0.35 : 0.18
                       }}
                     >
+                      <LeafletTooltip direction="top" offset={[0, -4]} opacity={1}>
+                        <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
+                          <div className="font-bold text-emerald-700 flex items-center space-x-1">
+                            <span>1km Equal-Area Grid Cell</span>
+                            {isCo && <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1 rounded font-bold">DUAL</span>}
+                          </div>
+                          <div className="text-[10px] font-mono text-slate-500">{cell.grid_cell_id}</div>
+                          <div className="text-[11px] font-semibold text-slate-800 mt-1">
+                            {cell.total_detections} Detections • {cell.sensors_present}
+                          </div>
+                        </div>
+                      </LeafletTooltip>
                       <Popup>
                         <div className="text-xs space-y-1.5 font-sans">
                           <div className="font-bold text-slate-900">1km Equal-Area Grid Cell</div>
@@ -522,7 +554,7 @@ export const DashboardPage: React.FC = () => {
                   );
                 })}
 
-                {/* Regional Mode: Granular Observation Points */}
+                {/* Regional Mode: Granular Observation Points with Hover Tooltip */}
                 {!isWorld && visibleHotspots.map(h => {
                   const isModis = h.sensor_family === 'MODIS';
                   const color = isModis ? '#F59E0B' : '#0EA5E9';
@@ -535,9 +567,25 @@ export const DashboardPage: React.FC = () => {
                         color: '#FFFFFF',
                         weight: 1.5,
                         fillColor: color,
-                        fillOpacity: 0.9
+                        fillOpacity: 0.92
                       }}
                     >
+                      <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                        <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
+                          <div className="font-bold flex items-center space-x-1">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                            <span>{h.sensor_family} • {h.satellite}</span>
+                          </div>
+                          <div className="text-[10px] font-mono text-slate-500 mt-0.5">
+                            {formatCoord(h.latitude, true)}, {formatCoord(h.longitude, false)}
+                          </div>
+                          <div className="flex items-center space-x-2 text-[11px] font-bold text-orange-600 mt-1">
+                            <span>{h.frp_mw?.toFixed(1)} MW</span>
+                            <span className="text-slate-300">•</span>
+                            <span className="text-slate-700 font-semibold">{h.brightness_temperature_kelvin?.toFixed(0)} K</span>
+                          </div>
+                        </div>
+                      </LeafletTooltip>
                       <Popup>
                         <div className="text-xs space-y-1.5 font-sans">
                           <div className="flex items-center space-x-1.5 font-bold text-slate-900">

@@ -4,6 +4,7 @@ import {
   TileLayer, 
   CircleMarker, 
   Popup, 
+  Tooltip as LeafletTooltip,
   Rectangle, 
   useMap 
 } from 'react-leaflet';
@@ -222,10 +223,10 @@ export const FireMapPage: React.FC = () => {
               const isCo = c.has_co_detection;
               const hasViirs = (c.viirs_detections || c.viirs_count || 0) > 0;
               const color = isCo 
-                ? '#BD493C' 
+                ? '#10B981' 
                 : hasViirs 
-                ? '#318C9B' 
-                : '#C27B26';
+                ? '#0EA5E9' 
+                : '#F59E0B';
 
               return (
                 <CircleMarker
@@ -234,29 +235,45 @@ export const FireMapPage: React.FC = () => {
                   radius={radius}
                   pathOptions={{
                     fillColor: color,
-                    fillOpacity: 0.75,
+                    fillOpacity: 0.82,
                     color: '#FFFFFF',
                     weight: 1.5
                   }}
                 >
-                  <Popup>
-                    <div className="p-2 space-y-1.5 text-xs font-sans text-[#252923]">
-                      <div className="font-bold border-b border-[#E1DED5] pb-1">
-                        {detCount} Fire Detections
+                  <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                    <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
+                      <div className="font-bold flex items-center space-x-1.5">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                        <span>{detCount.toLocaleString()} Fire Detections</span>
                       </div>
-                      <div className="text-[10px] text-[#777970] font-mono">
+                      <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                        {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
+                      </div>
+                      <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-700 mt-1">
+                        <span className="text-amber-600">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
+                        <span>•</span>
+                        <span className="text-sky-600">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
+                      </div>
+                    </div>
+                  </LeafletTooltip>
+                  <Popup>
+                    <div className="p-2 space-y-1.5 text-xs font-sans text-slate-900">
+                      <div className="font-bold border-b border-slate-200 pb-1 text-sm">
+                        {detCount.toLocaleString()} Fire Detections
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-mono">
                         Coordinates: {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
                       </div>
                       <div className="flex justify-between text-[11px] pt-1">
-                        <span className="text-[#C27B26]">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
-                        <span className="text-[#318C9B]">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
+                        <span className="text-amber-600 font-medium">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
+                        <span className="text-sky-600 font-medium">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
                       </div>
                       {isCo && (
-                        <div className="text-[10px] text-[#BD493C] font-semibold">
+                        <div className="text-[10px] text-emerald-600 font-bold">
                           ✓ Cross-Sensor Co-Detection
                         </div>
                       )}
-                      <div className="text-[10px] text-[#777970]">
+                      <div className="text-[10px] text-slate-500">
                         Mean FRP: {(c.mean_frp || 0).toFixed(1)} MW
                       </div>
                     </div>
@@ -270,8 +287,8 @@ export const FireMapPage: React.FC = () => {
               const bounds = cell.cell_bounds_wgs84;
               if (!bounds) return null;
               const isCoDetected = cell.cross_sensor_presence;
-              const strokeColor = isCoDetected ? '#54785E' : '#E65C35';
-              const fillColor = isCoDetected ? '#54785E' : '#E65C35';
+              const strokeColor = '#10B981';
+              const fillColor = '#10B981';
 
               return (
                 <Rectangle
@@ -282,23 +299,35 @@ export const FireMapPage: React.FC = () => {
                   ]}
                   pathOptions={{
                     color: strokeColor,
-                    weight: isCoDetected ? 1.5 : 1,
+                    weight: isCoDetected ? 2 : 1.2,
                     fillColor: fillColor,
                     fillOpacity: isCoDetected ? 0.35 : 0.18,
                   }}
                 >
+                  <LeafletTooltip direction="top" offset={[0, -4]} opacity={1}>
+                    <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
+                      <div className="font-bold text-emerald-700 flex items-center space-x-1">
+                        <span>1km Equal-Area Grid Cell</span>
+                        {isCoDetected && <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1 rounded font-bold">DUAL</span>}
+                      </div>
+                      <div className="text-[10px] font-mono text-slate-500">{cell.grid_cell_id}</div>
+                      <div className="text-[11px] font-semibold text-slate-800 mt-0.5">
+                        {cell.total_detections} Detections • {cell.sensors_present}
+                      </div>
+                    </div>
+                  </LeafletTooltip>
                   <Popup>
                     <div className="text-xs space-y-1.5 p-0.5 font-sans">
-                      <div className="flex items-center justify-between border-b border-[#E1DED5] pb-1">
-                        <span className="font-serif font-semibold text-[#252923]">1km Analytical Cell</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#FAF8F3] text-[#252923] border border-[#E1DED5]">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                        <span className="font-bold text-slate-900">1km Analytical Cell</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
                           {cell.sensors_present}
                         </span>
                       </div>
-                      <div className="font-mono text-[10px] text-[#777970] truncate">
+                      <div className="font-mono text-[10px] text-slate-500 truncate">
                         ID: {cell.grid_cell_id}
                       </div>
-                      <div className="space-y-0.5 text-[11px] text-[#252923]">
+                      <div className="space-y-0.5 text-[11px] text-slate-800">
                         <div>Date: <strong className="font-mono">{cell.activity_date_utc} UTC</strong></div>
                         <div>MODIS Detections: <strong>{cell.modis_detection_count}</strong></div>
                         <div>VIIRS Detections: <strong>{cell.viirs_detection_count}</strong></div>
@@ -307,8 +336,8 @@ export const FireMapPage: React.FC = () => {
                         )}
                       </div>
                       {isCoDetected && (
-                        <div className="p-1 rounded bg-[#54785E]/10 border border-[#54785E]/30 text-[10px] text-[#54785E] font-medium">
-                          Cross-Sensor Co-Detected Cell
+                        <div className="p-1 rounded bg-emerald-50 border border-emerald-200 text-[10px] text-emerald-700 font-bold">
+                          ✓ Cross-Sensor Co-Detected Cell
                         </div>
                       )}
                     </div>
@@ -320,7 +349,7 @@ export const FireMapPage: React.FC = () => {
             {/* Hotspot Observation Points */}
             {showPoints && hotspots.map((obs) => {
               const isModis = obs.sensor_family === 'MODIS';
-              const color = isModis ? '#C27B26' : '#318C9B';
+              const color = isModis ? '#F59E0B' : '#0EA5E9';
               const frp = obs.frp_mw || 1;
               const radius = Math.min(12, Math.max(4.5, Math.sqrt(frp) * 1.5));
 
@@ -335,48 +364,64 @@ export const FireMapPage: React.FC = () => {
                   pathOptions={{
                     color: '#FFFFFF',
                     fillColor: color,
-                    fillOpacity: 0.85,
+                    fillOpacity: 0.9,
                     weight: 1.5,
                   }}
                 >
+                  <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
+                    <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
+                      <div className="font-bold flex items-center space-x-1">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                        <span>{obs.sensor_family} • {obs.satellite}</span>
+                      </div>
+                      <div className="text-[10px] font-mono text-slate-500 mt-0.5">
+                        {formatCoord(obs.latitude, true)}, {formatCoord(obs.longitude, false)}
+                      </div>
+                      <div className="flex items-center space-x-2 text-[11px] font-bold text-orange-600 mt-1">
+                        <span>{obs.frp_mw?.toFixed(1)} MW</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-700 font-semibold">{obs.brightness_temperature_kelvin?.toFixed(0)} K</span>
+                      </div>
+                    </div>
+                  </LeafletTooltip>
                   <Popup>
                     <div className="text-xs space-y-1.5 p-0.5 font-sans min-w-[200px]">
-                      <div className="flex items-center justify-between border-b border-[#E1DED5] pb-1">
-                        <div className="flex items-center space-x-1 font-semibold text-[#252923]">
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                        <div className="flex items-center space-x-1.5 font-bold text-slate-900">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></span>
                           <span>{obs.sensor_family}</span>
                         </div>
-                        <span className="text-[10px] font-mono px-1.5 rounded bg-[#FAF8F3] text-[#777970] border border-[#E1DED5]">
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-medium border border-slate-200">
                           {obs.satellite}
                         </span>
                       </div>
-                      <div className="space-y-0.5 text-[11px] text-[#252923]">
+                      <div className="space-y-1 text-[11px] text-slate-800">
                         <div className="flex justify-between">
-                          <span className="text-[#777970]">Coords:</span>
-                          <span className="font-mono">{formatCoord(obs.latitude, true)}, {formatCoord(obs.longitude, false)}</span>
+                          <span className="text-slate-500">Coords:</span>
+                          <span className="font-mono text-slate-900">{formatCoord(obs.latitude, true)}, {formatCoord(obs.longitude, false)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#777970]">UTC Time:</span>
-                          <span className="font-mono">{obs.acquisition_date_utc} {obs.acquisition_datetime_utc?.slice(11, 16)}</span>
+                          <span className="text-slate-500">UTC Time:</span>
+                          <span className="font-mono text-slate-900">{obs.acquisition_date_utc} {obs.acquisition_datetime_utc?.slice(11, 16)}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#777970]">Thermal FRP:</span>
-                          <span className="font-semibold text-[#E65C35]">{obs.frp_mw} MW</span>
+                          <span className="text-slate-500">Thermal FRP:</span>
+                          <span className="font-bold text-orange-600">{obs.frp_mw} MW</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#777970]">Brightness:</span>
-                          <span>{obs.brightness_temperature_kelvin} K</span>
+                          <span className="text-slate-500">Brightness:</span>
+                          <span className="font-semibold text-slate-900">{obs.brightness_temperature_kelvin} K</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#777970]">Confidence:</span>
-                          <span>{obs.confidence_raw} ({obs.confidence_type})</span>
+                          <span className="text-slate-500">Confidence:</span>
+                          <span className="font-semibold text-slate-900">{obs.confidence_raw} ({obs.confidence_type})</span>
                         </div>
                       </div>
-                      <div className="pt-1 border-t border-[#E1DED5] flex justify-between items-center text-[10px]">
-                        <span className="font-mono text-[#777970] truncate max-w-[120px]">{obs.grid_cell_id}</span>
+                      <div className="pt-1.5 border-t border-slate-200 flex justify-between items-center text-[10px]">
+                        <span className="font-mono text-slate-500 truncate max-w-[120px]">{obs.grid_cell_id}</span>
                         <button
                           onClick={() => setSelectedObs(obs)}
-                          className="text-[#E65C35] font-semibold hover:underline"
+                          className="text-orange-600 font-bold hover:underline"
                         >
                           Inspect &rarr;
                         </button>

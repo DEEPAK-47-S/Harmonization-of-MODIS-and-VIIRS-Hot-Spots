@@ -8,6 +8,12 @@ import math
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from sqlalchemy import func, desc
+
+try:
+    from global_land_mask import globe
+except ImportError:
+    globe = None
+
 from ..db import SessionLocal
 from ..models import Observation, DailyGridActivity, ProcessingReport
 from ..utils.countries_data import COUNTRIES, CONTINENTS, get_country_by_iso3, get_countries_list, get_continents_list
@@ -246,22 +252,26 @@ class GlobalFireService:
             # Bin into spatial clusters
             clusters: Dict[str, Dict[str, Any]] = {}
             for r in rows:
-                bin_lat = math.floor(r.latitude / step) * step + step / 2.0
-                bin_lon = math.floor(r.longitude / step) * step + step / 2.0
-                key = f"{bin_lat:.2f}_{bin_lon:.2f}"
+                grid_idx_lat = math.floor(r.latitude / step)
+                grid_idx_lon = math.floor(r.longitude / step)
+                key = f"{grid_idx_lat}_{grid_idx_lon}"
 
                 if key not in clusters:
                     clusters[key] = {
-                        "lat": bin_lat,
-                        "lon": bin_lon,
                         "count": 0,
+                        "sum_lat": 0.0,
+                        "sum_lon": 0.0,
                         "modis_count": 0,
                         "viirs_count": 0,
                         "total_frp": 0.0,
-                        "step": step
+                        "step": step,
+                        "fallback_lat": r.latitude,
+                        "fallback_lon": r.longitude
                     }
                 c = clusters[key]
                 c["count"] += 1
+                c["sum_lat"] += r.latitude
+                c["sum_lon"] += r.longitude
                 if r.sensor_family == "MODIS":
                     c["modis_count"] += 1
                 else:
@@ -273,9 +283,17 @@ class GlobalFireService:
                 modis_cnt = c["modis_count"]
                 viirs_cnt = c["viirs_count"]
                 tot = c["count"]
+                centroid_lat = round(c["sum_lat"] / max(1, tot), 5)
+                centroid_lon = round(c["sum_lon"] / max(1, tot), 5)
+
+                # Land validation: if the mathematical centroid falls in water (e.g. concave coastlines), snap to a confirmed land coordinate
+                if globe is not None and not globe.is_land(centroid_lat, centroid_lon):
+                    centroid_lat = c["fallback_lat"]
+                    centroid_lon = c["fallback_lon"]
+
                 result.append({
-                    "lat": c["lat"],
-                    "lon": c["lon"],
+                    "lat": centroid_lat,
+                    "lon": centroid_lon,
                     "count": tot,
                     "total_detections": tot,
                     "point_count": tot,

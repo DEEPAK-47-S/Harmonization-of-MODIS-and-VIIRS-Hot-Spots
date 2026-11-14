@@ -145,7 +145,7 @@ def create_deck():
     tf = tb.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "• MODIS: Terra & Aqua (1km nominal)\n• VIIRS: NOAA-20 & NOAA-21 (375m I-band)\n• Historical: S-NPP preserved (2012–2026)\n• 24,310+ Verified NASA Observations\n• 18,953+ Harmonized 1km Grid Cells"
+    p.text = "• MODIS: Terra & Aqua (1km nominal)\n• VIIRS: NOAA-20 & NOAA-21 (375m I-band)\n• Historical: S-NPP preserved (2012–2026)\n• 24,126+ Verified Land Observations\n• 18,816+ Harmonized 1km Grid Cells\n• Global Land-Mask: Zero ocean/water points"
     p.font.size = Pt(11)
     p.font.color.rgb = DARK_TEXT
 

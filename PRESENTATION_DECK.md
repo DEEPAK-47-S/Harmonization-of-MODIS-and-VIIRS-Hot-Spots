@@ -17,7 +17,8 @@
   - **Objective 2:** Build an interactive, multi-year Burning Activity Calendar with seasonal anomaly baselines to help fire managers and researchers identify uncharacteristic burning patterns.
 - **Operational Scope:**
   - Full planetary coverage (Entire World, 7 Continents, 30+ Countries, Custom BBox).
-  - 24,310+ authentic NASA observations and 18,953+ harmonized 1km grid cells verified in the database.
+  - 24,126+ authentic NASA observations and 18,816+ harmonized 1km grid cells verified in the database.
+  - Global Land-Mask validation ensuring 100% terrestrial fire monitoring with zero ocean or open water false points.
   - Dynamic routing supporting active sensors (MODIS Terra/Aqua, VIIRS NOAA-20/21) and preserving historical Suomi-NPP archives (2012–Nov 2, 2026).
 
 > **Speaker Notes (English):**  

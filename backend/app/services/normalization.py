@@ -6,6 +6,11 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple, Optional
 from ..utils.geo import validate_coordinates, coords_to_grid_cell
 
+try:
+    from global_land_mask import globe
+except ImportError:
+    globe = None
+
 def parse_utc_datetime(acq_date_str: str, acq_time_str: Any) -> Tuple[Optional[datetime], Optional[str], Optional[str]]:
     """
     Parse acquisition date and acquisition time into UTC datetime.
@@ -101,6 +106,10 @@ class NormalizationService:
             return None, err
         lat = float(raw_lat)
         lon = float(raw_lon)
+
+        # 1b. Validate land surface (fires only occur on land, reject water / open ocean / flaring)
+        if globe is not None and not globe.is_land(lat, lon):
+            return None, f"Observation rejected: coordinate ({lat}, {lon}) is over ocean or water body"
 
         # 2. Parse temporal attributes (UTC)
         acq_date = c.get("acq_date")
