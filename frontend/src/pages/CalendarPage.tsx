@@ -194,36 +194,36 @@ export const CalendarPage: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] overflow-y-auto">
       <Header 
-        title="Burning Activity Calendar" 
-        subtitle="Spatially harmonized temporal calendar based on EPSG:6933 1km analytical cells"
+        title="Harmonized Burning Calendar" 
+        subtitle="Multi-year temporal active-fire intelligence based on EPSG:6933 1km analytical cells"
       />
 
       <main className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
-        {/* Editorial Introduction */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
+        {/* Modern Introduction */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/80 pb-6">
           <div className="space-y-1.5">
-            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
-              NASA Space Apps 2026 Core Objective / Temporal Intelligence
+            <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-semibold tracking-wide uppercase">
+              NASA Space Apps 2026 Core Objective • Temporal Intelligence
             </span>
-            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
-              The Harmonized Burning Activity Calendar
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Harmonized Burning Activity Calendar
             </h1>
-            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-500 font-normal max-w-2xl">
               Track seasonal fire dynamics across satellites. Explore year-by-month historical baselines, detect unusual monthly anomalies, and drill down into individual day observations.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {/* View Mode Switcher */}
-            <div className="flex items-center bg-[#FAF8F3] p-1 rounded-md border border-[#E1DED5]">
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
               <button
                 onClick={() => setViewMode('matrix')}
-                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded text-xs font-semibold transition ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   viewMode === 'matrix'
-                    ? 'bg-white text-[#E65C35] shadow-sm'
-                    : 'text-[#777970] hover:text-[#252923]'
+                    ? 'bg-white text-orange-600 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <Table className="w-3.5 h-3.5" />
@@ -232,10 +232,10 @@ export const CalendarPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('month')}
-                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded text-xs font-semibold transition ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   viewMode === 'month'
-                    ? 'bg-white text-[#E65C35] shadow-sm'
-                    : 'text-[#777970] hover:text-[#252923]'
+                    ? 'bg-white text-orange-600 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <CalendarIcon className="w-3.5 h-3.5" />
@@ -254,49 +254,49 @@ export const CalendarPage: React.FC = () => {
                 north: aoi.north
               })}
               download
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-md bg-white hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors shadow-sm"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 border border-slate-200 transition-colors shadow-2xs"
               title="Download Monthly Harmonized Grid CSV"
             >
-              <Download className="w-3.5 h-3.5 text-[#318C9B]" />
+              <Download className="w-3.5 h-3.5 text-sky-500" />
               <span>Export CSV</span>
             </a>
           </div>
         </div>
 
         {/* Navigation & Metric Selector Strip */}
-        <div className="bg-white border border-[#E1DED5] rounded-lg p-4 shadow-card flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
           {viewMode === 'month' ? (
             /* Month & Year Controls */
             <div className="flex items-center space-x-3">
               <button
                 onClick={handlePrevMonth}
-                className="p-1.5 rounded border border-[#E1DED5] bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#777970] hover:text-[#252923] transition-colors"
+                className="p-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
                 title="Previous Month"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
 
               <div className="flex items-center space-x-2">
-                <span className="font-serif font-bold text-base text-[#252923]">
+                <span className="font-bold text-base text-slate-900">
                   {MONTH_NAMES[selectedMonth - 1]}
                 </span>
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className="bg-[#FAF8F3] border border-[#E1DED5] rounded px-2 py-0.5 text-xs font-mono font-semibold text-[#252923] focus:outline-none"
+                  className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-slate-800 focus:outline-none"
                 >
                   {[2026, 2025, 2024, 2023, 2022, 2021, 2020].map((y) => (
                     <option key={y} value={y}>{y}</option>
                   ))}
                 </select>
-                <span className="text-[10px] font-mono text-[#777970] bg-[#FAF8F3] px-1.5 py-0.5 rounded border border-[#E1DED5]">
+                <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
                   UTC
                 </span>
               </div>
 
               <button
                 onClick={handleNextMonth}
-                className="p-1.5 rounded border border-[#E1DED5] bg-[#FAF8F3] hover:bg-[#EBE8DF] text-[#777970] hover:text-[#252923] transition-colors"
+                className="p-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
                 title="Next Month"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -304,30 +304,30 @@ export const CalendarPage: React.FC = () => {
 
               <button
                 onClick={() => setViewMode('matrix')}
-                className="text-xs text-[#E65C35] hover:underline font-medium ml-2 flex items-center space-x-1"
+                className="text-xs text-orange-600 hover:underline font-bold ml-2 flex items-center space-x-1"
               >
                 <span>← Back to All Years</span>
               </button>
             </div>
           ) : (
             <div className="flex items-center space-x-2">
-              <span className="text-xs font-serif font-semibold text-[#252923]">Multi-Year Temporal Heatmap</span>
-              <span className="text-[10px] font-mono text-[#777970] bg-[#FAF8F3] px-2 py-0.5 rounded border border-[#E1DED5]">
-                {matrixData?.years.length || 0} Years Recorded
+              <span className="text-xs font-bold text-slate-900">Multi-Year Temporal Heatmap</span>
+              <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
+                {matrixData?.years.length || 0} Years Active
               </span>
             </div>
           )}
 
           {/* Metric Selector Tabs */}
-          <div className="flex flex-wrap items-center gap-1 bg-[#FAF8F3] p-1 rounded-md border border-[#E1DED5]">
+          <div className="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80">
             {METRIC_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
                 onClick={() => setSelectedMetric(opt.id)}
-                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   selectedMetric === opt.id
-                    ? 'bg-white text-[#E65C35] font-semibold shadow-sm'
-                    : 'text-[#777970] hover:text-[#252923]'
+                    ? 'bg-white text-orange-600 shadow-2xs'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
                 title={opt.desc}
               >
@@ -340,37 +340,37 @@ export const CalendarPage: React.FC = () => {
         {/* VIEW MODE 1: MULTI-YEAR ANNUAL HEATMAP MATRIX (Years x Jan-Dec) */}
         {viewMode === 'matrix' && (
           <div className="space-y-6">
-            <div className="bg-white border border-[#E1DED5] rounded-lg p-6 shadow-card space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E1DED5] pb-3">
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
                 <div>
-                  <h3 className="font-serif font-semibold text-lg text-[#252923]">
-                    Annual Burning Activity Matrix (2000–2026)
+                  <h3 className="font-bold text-lg text-slate-900">
+                    Annual Burning Activity Matrix (2021–2026)
                   </h3>
-                  <p className="text-xs text-[#777970]">
+                  <p className="text-xs text-slate-500">
                     Standardized calendar cells. Click any month cell to drill down into the daily breakdown.
                   </p>
                 </div>
 
-                <div className="flex items-center space-x-3 text-xs text-[#777970]">
-                  <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-white border border-[#E1DED5]"></span>
+                <div className="flex items-center space-x-3 text-xs text-slate-500">
+                  <span className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded bg-white border border-slate-200"></span>
                     <span>No Activity</span>
                   </span>
-                  <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#FCECE7] border border-[#E1DED5]"></span>
+                  <span className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded bg-orange-100 border border-orange-200"></span>
                     <span>Low</span>
                   </span>
-                  <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#F29E85]"></span>
-                    <span>Baseline Normal</span>
+                  <span className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded bg-orange-300"></span>
+                    <span>Normal</span>
                   </span>
-                  <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#E65C35]"></span>
+                  <span className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded bg-orange-500"></span>
                     <span>High</span>
                   </span>
-                  <span className="flex items-center space-x-1">
-                    <span className="w-3 h-3 rounded bg-[#BD493C]"></span>
-                    <span>Unusual Anomaly</span>
+                  <span className="flex items-center space-x-1.5">
+                    <span className="w-3 h-3 rounded bg-red-600"></span>
+                    <span>Anomaly</span>
                   </span>
                 </div>
               </div>
@@ -379,18 +379,18 @@ export const CalendarPage: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-[#FAF8F3] border-b border-[#E1DED5] text-[11px] font-mono text-[#777970]">
-                      <th className="py-2.5 px-3 font-semibold sticky left-0 bg-[#FAF8F3] z-10">Year</th>
+                    <tr className="bg-slate-50/70 border-b border-slate-200 text-[11px] font-mono font-bold text-slate-400">
+                      <th className="py-3 px-3.5 sticky left-0 bg-slate-50/90 backdrop-blur-xs z-10">Year</th>
                       {MONTH_SHORT.map((m) => (
-                        <th key={m} className="py-2.5 px-2 text-center font-semibold">{m}</th>
+                        <th key={m} className="py-3 px-2 text-center font-bold">{m}</th>
                       ))}
-                      <th className="py-2.5 px-3 text-right font-semibold">Annual Total</th>
+                      <th className="py-3 px-3.5 text-right font-bold">Annual Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E1DED5] font-sans">
+                  <tbody className="divide-y divide-slate-100 font-sans">
                     {loadingMatrix ? (
                       <tr>
-                        <td colSpan={14} className="py-12 text-center text-xs text-[#777970] animate-pulse">
+                        <td colSpan={14} className="py-12 text-center text-xs text-slate-400 animate-pulse">
                           Loading historical burning activity matrix across satellites...
                         </td>
                       </tr>
@@ -398,8 +398,8 @@ export const CalendarPage: React.FC = () => {
                       matrixData.matrix.map((row) => {
                         const annualTotal = row.months.reduce((acc, m) => acc + (m.value || 0), 0);
                         return (
-                          <tr key={row.year} className="hover:bg-[#FAF8F3]/50 transition-colors">
-                            <td className="py-2 px-3 font-mono font-bold text-[#252923] sticky left-0 bg-white z-10 border-r border-[#E1DED5]">
+                          <tr key={row.year} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="py-2.5 px-3.5 font-mono font-bold text-slate-900 sticky left-0 bg-white z-10 border-r border-slate-100">
                               {row.year}
                             </td>
                             {row.months.map((item) => (
@@ -411,25 +411,25 @@ export const CalendarPage: React.FC = () => {
                                 className="p-1 text-center"
                               >
                                 <div 
-                                  className={`h-10 rounded border flex flex-col items-center justify-center cursor-pointer transition-transform hover:scale-105 p-1 relative ${getMatrixCellStyle(item)}`}
+                                  className={`h-10 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-all hover:scale-105 hover:shadow-xs p-1 relative ${getMatrixCellStyle(item)}`}
                                   title={`${MONTH_NAMES[item.month - 1]} ${row.year}: ${item.value} ${METRIC_OPTIONS.find(m => m.id === selectedMetric)?.label} (Baseline: ${item.historical_median})`}
                                 >
                                   {item.has_data && item.value > 0 ? (
                                     <>
-                                      <span className="font-mono text-[11px] font-semibold leading-tight">
+                                      <span className="font-mono text-[11px] font-bold leading-tight">
                                         {selectedMetric === 'mean_frp' ? `${item.value.toFixed(1)}` : item.value >= 1000 ? `${(item.value / 1000).toFixed(1)}k` : item.value}
                                       </span>
                                       {item.is_anomaly && (
-                                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-300 absolute top-1 right-1" title="Unusual Anomaly"></span>
+                                        <span className="w-2 h-2 rounded-full bg-amber-400 absolute top-1 right-1 border border-white" title="Unusual Anomaly"></span>
                                       )}
                                     </>
                                   ) : (
-                                    <span className="text-[10px] opacity-30 font-mono">—</span>
+                                    <span className="text-[10px] opacity-25 font-mono">—</span>
                                   )}
                                 </div>
                               </td>
                             ))}
-                            <td className="py-2 px-3 text-right font-mono font-bold text-[#252923] bg-[#FAF8F3]">
+                            <td className="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900 bg-slate-50/50">
                               {selectedMetric === 'mean_frp' ? (annualTotal / 12).toFixed(1) : annualTotal.toLocaleString()}
                             </td>
                           </tr>
@@ -437,7 +437,7 @@ export const CalendarPage: React.FC = () => {
                       })
                     ) : (
                       <tr>
-                        <td colSpan={14} className="py-8 text-center text-xs text-[#777970]">
+                        <td colSpan={14} className="py-8 text-center text-xs text-slate-400">
                           No historical matrix records available for this Area of Interest.
                         </td>
                       </tr>
@@ -446,19 +446,19 @@ export const CalendarPage: React.FC = () => {
                   {/* Historical Baseline Row */}
                   {matrixData && Object.keys(matrixData.monthly_medians).length > 0 && (
                     <tfoot>
-                      <tr className="bg-[#FAF8F3] border-t-2 border-[#E1DED5] text-[11px] font-mono text-[#777970]">
-                        <td className="py-2.5 px-3 font-bold text-[#252923] sticky left-0 bg-[#FAF8F3] z-10 border-r border-[#E1DED5]">
+                      <tr className="bg-slate-50 border-t-2 border-slate-200 text-[11px] font-mono text-slate-600">
+                        <td className="py-3 px-3.5 font-bold text-slate-900 sticky left-0 bg-slate-50 z-10 border-r border-slate-200">
                           Historical Median
                         </td>
                         {MONTH_SHORT.map((_, idx) => {
                           const med = matrixData.monthly_medians[String(idx + 1)] ?? 0;
                           return (
-                            <td key={`med-${idx}`} className="py-2.5 px-2 text-center font-bold text-[#252923]">
+                            <td key={`med-${idx}`} className="py-3 px-2 text-center font-bold text-slate-900">
                               {med > 0 ? (selectedMetric === 'mean_frp' ? med.toFixed(1) : Math.round(med).toLocaleString()) : '—'}
                             </td>
                           );
                         })}
-                        <td className="py-2.5 px-3 text-right font-bold text-[#252923]">
+                        <td className="py-3 px-3.5 text-right font-bold text-slate-900">
                           Baseline
                         </td>
                       </tr>
@@ -469,15 +469,15 @@ export const CalendarPage: React.FC = () => {
 
               {/* Cell Inspection Preview Strip */}
               {hoveredCell && hoveredCell.has_data && (
-                <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md flex flex-wrap items-center justify-between gap-4 text-xs">
+                <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-wrap items-center justify-between gap-4 text-xs">
                   <div className="flex items-center space-x-3">
-                    <span className="font-serif font-bold text-sm text-[#252923]">
+                    <span className="font-bold text-sm text-slate-900">
                       {MONTH_NAMES[hoveredCell.month - 1]} {hoveredCell.year}
                     </span>
-                    <span className="text-[10px] font-mono text-[#777970] bg-white px-2 py-0.5 rounded border border-[#E1DED5]">
-                      {METRIC_OPTIONS.find(m => m.id === selectedMetric)?.label}: <strong className="text-[#E65C35]">{hoveredCell.value.toLocaleString()}</strong>
+                    <span className="text-[10px] font-mono text-slate-600 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+                      {METRIC_OPTIONS.find(m => m.id === selectedMetric)?.label}: <strong className="text-orange-600">{hoveredCell.value.toLocaleString()}</strong>
                     </span>
-                    <span className="text-[10px] font-mono text-[#777970]">
+                    <span className="text-[10px] font-mono text-slate-500">
                       Historical Median: <strong>{hoveredCell.historical_median.toLocaleString()}</strong>
                     </span>
                   </div>

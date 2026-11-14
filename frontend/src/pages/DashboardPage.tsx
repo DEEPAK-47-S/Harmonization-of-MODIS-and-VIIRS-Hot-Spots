@@ -1,20 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  MapPin, 
-  Play, 
-  RefreshCw, 
-  Calendar as CalendarIcon, 
+  Flame, 
   Layers, 
   Grid, 
-  Clock, 
+  Activity, 
+  MapPin, 
+  Calendar as CalendarIcon, 
+  Play, 
+  ChevronRight, 
+  ArrowUpDown, 
   Info, 
-  Download, 
-  ChevronRight,
-  Filter,
-  ArrowUpDown,
-  ExternalLink
+  Download,
+  Globe2,
+  Sparkles,
+  Sliders,
+  TrendingUp,
+  CheckCircle2
 } from 'lucide-react';
+import { 
+  MapContainer, 
+  TileLayer, 
+  CircleMarker, 
+  Rectangle, 
+  Popup, 
+  useMap 
+} from 'react-leaflet';
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -24,49 +35,57 @@ import {
   Tooltip, 
   Legend 
 } from 'recharts';
-import { 
-  MapContainer, 
-  TileLayer, 
-  CircleMarker, 
-  Popup, 
-  Rectangle, 
-  useMap 
-} from 'react-leaflet';
 import { Header } from '../components/Header';
 import { useAOI } from '../context/AOIContext';
 import { useToast } from '../context/ToastContext';
 import { FirePulseAPI } from '../services/api';
-import { DashboardSummary, Observation, GridCell, GlobalSummary, MapDensityCluster, formatAOIBounds, formatCoord } from '../types';
+import { 
+  DashboardSummary, 
+  Observation, 
+  GridCell, 
+  GlobalSummary, 
+  MapDensityCluster,
+  formatCoord, 
+  formatAOIBounds, 
+  AOIBounds 
+} from '../types';
 
-// Map auto-fitter helper
-const MapBoundsFitter: React.FC<{ 
-  aoi: { west: number; south: number; east: number; north: number };
-  hotspots: Observation[];
-}> = ({ aoi, hotspots }) => {
+// Map Auto-Fitter for regional views
+function MapBoundsFitter({ aoi, hotspots }: { aoi: AOIBounds; hotspots: Observation[] }) {
   const map = useMap();
+
   useEffect(() => {
-    if (hotspots.length > 0) {
+    const isWorld = aoi.name === 'Entire World' || (aoi.west <= -170 && aoi.east >= 170);
+    if (isWorld) {
+      map.setView([20, 0], 2);
+      return;
+    }
+
+    if (hotspots && hotspots.length > 0) {
       const lats = hotspots.map(h => h.latitude);
       const lons = hotspots.map(h => h.longitude);
       const minLat = Math.min(...lats);
       const maxLat = Math.max(...lats);
       const minLon = Math.min(...lons);
       const maxLon = Math.max(...lons);
-      const latPad = Math.max(0.05, (maxLat - minLat) * 0.15);
-      const lonPad = Math.max(0.05, (maxLon - minLon) * 0.15);
+      
+      const padLat = Math.max(0.15, (maxLat - minLat) * 0.1);
+      const padLon = Math.max(0.15, (maxLon - minLon) * 0.1);
+      
       map.fitBounds([
-        [minLat - latPad, minLon - lonPad],
-        [maxLat + latPad, maxLon + lonPad]
-      ], { padding: [30, 30], maxZoom: 12, animate: true });
+        [minLat - padLat, minLon - padLon],
+        [maxLat + padLat, maxLon + padLon]
+      ], { maxZoom: 12, animate: true });
     } else {
       map.fitBounds([
         [aoi.south, aoi.west],
         [aoi.north, aoi.east]
-      ], { padding: [25, 25], animate: true });
+      ], { maxZoom: 10, animate: true });
     }
   }, [aoi, hotspots, map]);
+
   return null;
-};
+}
 
 export const DashboardPage: React.FC = () => {
   const { aoi, refreshKey, triggerRefresh } = useAOI();
@@ -74,9 +93,10 @@ export const DashboardPage: React.FC = () => {
 
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [globalSummary, setGlobalSummary] = useState<GlobalSummary | null>(null);
-  const [densityClusters, setDensityClusters] = useState<MapDensityCluster[]>([]);
   const [hotspots, setHotspots] = useState<Observation[]>([]);
   const [gridCells, setGridCells] = useState<GridCell[]>([]);
+  const [densityClusters, setDensityClusters] = useState<MapDensityCluster[]>([]);
+  
   const [loading, setLoading] = useState<boolean>(true);
   const [ingesting, setIngesting] = useState<boolean>(false);
   const [ingestMsg, setIngestMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -108,8 +128,8 @@ export const DashboardPage: React.FC = () => {
           south: aoi.south,
           east: aoi.east,
           north: aoi.north,
-          limit: 150,
-          include_grid: !isWorld
+          limit: isWorld ? 300 : 800,
+          include_grid: true
         }).catch(() => ({ hotspots: [], grid_cells: [] })),
         isWorld ? FirePulseAPI.getGlobalSummary(7).catch(() => null) : Promise.resolve(null),
         isWorld ? FirePulseAPI.getMapDensity({ zoom: 3 }).catch(() => ({ clusters: [] })) : Promise.resolve({ clusters: [] })
@@ -140,12 +160,14 @@ export const DashboardPage: React.FC = () => {
         day_range: 3,
         sources: ['MODIS_NRT', 'VIIRS_NOAA20_NRT', 'VIIRS_NOAA21_NRT']
       });
+
       setIngestMsg({
         type: 'success',
-        text: `NASA FIRMS query complete: ${res.total_records_saved} new observations processed into ${res.harmonization?.active_grid_cells_created || 0} grid cells.`
+        text: `NASA Sync complete: ${res.total_records_saved} new observations processed.`
       });
-      showToast('success', 'NASA FIRMS Data Fetched', `${res.total_records_saved} observations ingested.`);
+      showToast('success', 'NASA Telemetry Synced', `${res.total_records_saved} new active fire records ingested.`);
       triggerRefresh();
+      loadDashboardData();
     } catch (err: any) {
       const msg = err.response?.data?.message || err.response?.data?.error || err.message;
       setIngestMsg({
@@ -182,26 +204,27 @@ export const DashboardPage: React.FC = () => {
   const viirsPct = totalObs > 0 ? 100 - modisPct : 0;
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[#F4F1E9] overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] overflow-y-auto">
       <Header 
         title="Harmonized Fire Intelligence" 
         subtitle="Spatially and temporally aggregated NASA FIRMS observations"
       />
 
       <main className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
-        {/* PAGE INTRODUCTION */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-5">
-          <div className="space-y-1">
-            <span className="text-[10px] sm:text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
-              {isWorld ? 'Global Earth Observation / Planetary Fire Intel' : `Regional Earth Observation / ${aoi.name}`}
-            </span>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
-              {isWorld ? 'One planet. A clearer picture of fire activity.' : `Fire activity, in focus: ${aoi.name}`}
+        {/* HERO SECTION - MODERN GEN-Z LIGHT */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/80 pb-5">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-semibold tracking-wide uppercase">
+              <Sparkles className="w-3 h-3" />
+              <span>{isWorld ? 'Planetary Fire Intel • Global Scope' : `Focused Region • ${aoi.name}`}</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+              {isWorld ? 'Real-time Planetary Active Fires' : `Thermal Intelligence: ${aoi.name}`}
             </h1>
-            <p className="text-xs sm:text-sm text-[#777970] font-sans max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-500 font-normal max-w-2xl">
               {isWorld 
-                ? 'Worldwide active fire detections across all seven continents, harmonized from NASA MODIS (Terra/Aqua) and VIIRS (NOAA-20/21/S-NPP) into a standardized 1km equal-area grid.' 
-                : `Explore where satellite observations detect burning activity across ${aoi.name}, harmonized to a common 1km grid.`}
+                ? 'NASA MODIS (Terra/Aqua) and VIIRS (NOAA-20/21) active fire observations, harmonized onto an analytical 1km equal-area grid.' 
+                : `Satellite detections and 1km harmonized burning footprints across ${aoi.name}.`}
             </p>
           </div>
 
@@ -209,154 +232,168 @@ export const DashboardPage: React.FC = () => {
             <button
               onClick={handleQuickIngest}
               disabled={ingesting}
-              className="flex items-center space-x-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-md text-xs font-semibold bg-[#E65C35] hover:bg-[#D44F29] text-white transition-colors shadow-sm disabled:opacity-50"
+              className="flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white transition-all shadow-sm hover:shadow-md disabled:opacity-50"
             >
               <Play className={`w-3.5 h-3.5 ${ingesting ? 'animate-spin' : ''}`} />
               <span>{ingesting ? 'Syncing FIRMS...' : isWorld ? 'Sync Global NASA' : 'Sync Region NASA'}</span>
             </button>
             <Link
               to="/settings"
-              className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-md text-xs font-medium bg-white hover:bg-[#EBE8DF] text-[#252923] border border-[#E1DED5] transition-colors"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors shadow-2xs"
             >
               Archive
             </Link>
           </div>
         </div>
 
-        {/* Ingestion status notice */}
+        {/* Ingestion notice */}
         {ingestMsg && (
-          <div className={`p-3.5 rounded-md text-xs flex items-center space-x-2.5 border ${
+          <div className={`p-4 rounded-xl text-xs flex items-center space-x-3 border ${
             ingestMsg.type === 'success'
-              ? 'bg-[#54785E]/10 border-[#54785E]/30 text-[#54785E]'
-              : 'bg-[#BD493C]/10 border-[#BD493C]/30 text-[#BD493C]'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-red-50 border-red-200 text-red-800'
           }`}>
             <Info className="w-4 h-4 shrink-0" />
-            <span className="font-medium">{ingestMsg.text}</span>
+            <span className="font-semibold">{ingestMsg.text}</span>
           </div>
         )}
 
-        {/* METRIC STRIP (2x2 on Mobile, 4 Cols on Desktop) */}
+        {/* METRIC CARDS STRIP - 4 COLS DESKTOP, 2X2 MOBILE */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {/* 1. Active Grid Cells */}
-          <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-[#777970] font-semibold">Active Grid Cells</span>
-              <Grid className="w-3.5 h-3.5 text-[#E65C35]" />
+          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Active 1km Cells</span>
+              <div className="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
+                <Grid className="w-4 h-4" />
+              </div>
             </div>
-            <div className="text-2xl font-serif font-bold text-[#252923]">
+            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               {loading ? '—' : ((summary?.kpi?.active_grid_cell_days ?? 0).toLocaleString())}
             </div>
-            <div className="text-[11px] text-[#252923] font-medium mt-0.5">1 km analytical cells</div>
-            <p className="text-[10px] text-[#777970] mt-1 leading-tight">
-              EPSG:6933 equal-area cell-days with verified thermal activity.
+            <div className="text-[11px] text-slate-600 font-medium mt-1">Harmonized 1km footprint</div>
+            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
+              EPSG:6933 standard cylindrical equal-area cells.
             </p>
           </div>
 
           {/* 2. MODIS Observations */}
-          <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-[#C27B26] font-semibold">MODIS Detections</span>
-              <span className="w-2 h-2 rounded-full bg-[#C27B26]"></span>
+          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-amber-600 font-semibold">MODIS Detections</span>
+              <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Flame className="w-4 h-4" />
+              </div>
             </div>
-            <div className="text-2xl font-serif font-bold text-[#252923]">
+            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               {loading ? '—' : ((summary?.kpi?.total_modis_observations ?? 0).toLocaleString())}
             </div>
-            <div className="text-[11px] text-[#252923] font-medium mt-0.5">Observations (Terra &amp; Aqua)</div>
-            <p className="text-[10px] text-[#777970] mt-1 leading-tight">
-              1,000 m nadir footprint. Not confirmed single fires.
+            <div className="text-[11px] text-slate-600 font-medium mt-1">Terra &amp; Aqua Satellites</div>
+            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
+              1,000 m nominal nadir resolution.
             </p>
           </div>
 
           {/* 3. VIIRS Observations */}
-          <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-[#318C9B] font-semibold">VIIRS Detections</span>
-              <span className="w-2 h-2 rounded-full bg-[#318C9B]"></span>
+          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-sky-600 font-semibold">VIIRS Detections</span>
+              <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
+                <Layers className="w-4 h-4" />
+              </div>
             </div>
-            <div className="text-2xl font-serif font-bold text-[#252923]">
+            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               {loading ? '—' : ((summary?.kpi?.total_viirs_observations ?? 0).toLocaleString())}
             </div>
-            <div className="text-[11px] text-[#252923] font-medium mt-0.5">Observations (NOAA-20/21)</div>
-            <p className="text-[10px] text-[#777970] mt-1 leading-tight">
-              375 m nadir footprint (~7.11x finer area resolution).
+            <div className="text-[11px] text-slate-600 font-medium mt-1">NOAA-20/21 &amp; S-NPP</div>
+            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
+              375 m high-resolution thermal I-bands.
             </p>
           </div>
 
           {/* 4. Cross-Sensor Co-Detected */}
-          <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-[#777970] font-semibold">Co-Detected Cell-Days</span>
-              <Layers className="w-3.5 h-3.5 text-[#54785E]" />
+          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-600 font-semibold">Dual Verified</span>
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
             </div>
-            <div className="text-2xl font-serif font-bold text-[#252923]">
+            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               {loading ? '—' : ((summary?.kpi?.cross_sensor_co_detected_cell_days ?? 0).toLocaleString())}
             </div>
-            <div className="text-[11px] text-[#252923] font-medium mt-0.5">Joint Sensor Overlap</div>
-            <p className="text-[10px] text-[#777970] mt-1 leading-tight">
-              1 km cells observed by both MODIS and VIIRS on the same UTC day.
+            <div className="text-[11px] text-slate-600 font-medium mt-1">Co-Detected Cell-Days</div>
+            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
+              Detected by both MODIS &amp; VIIRS on same day.
             </p>
           </div>
         </div>
 
-        {/* MAIN VISUALIZATION: 65% MAP / 35% ACTIVITY SUMMARY */}
+        {/* MAIN VISUALIZATION: MAP (8 cols) + RIGHT PANEL (4 cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          {/* MAP (65% width) */}
-          <div className="lg:col-span-8 bg-white border border-[#E1DED5] rounded-lg overflow-hidden shadow-card flex flex-col">
-            <div className="p-3.5 border-b border-[#E1DED5] bg-[#FAF8F3] flex flex-wrap items-center justify-between gap-3">
+          {/* MAP */}
+          <div className="lg:col-span-8 bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs flex flex-col">
+            <div className="p-4 border-b border-slate-200/80 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-serif font-semibold text-[#252923]">Active Observations Map</span>
-                <span className="text-[10px] font-mono text-[#777970] bg-[#EBE8DF] px-2 py-0.5 rounded">
+                <span className="text-xs font-bold text-slate-900">Active Fire Map</span>
+                <span className="text-[10px] font-mono text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full shadow-2xs">
                   {isWorld 
                     ? `${densityClusters.length} clusters (${densityClusters.reduce((acc, c) => acc + (c.total_detections || c.count || 0), 0).toLocaleString()} fires)` 
                     : `${visibleHotspots.length} points visible`}
                 </span>
               </div>
 
-              {/* Layer toggles & basemap switcher */}
-              <div className="flex items-center space-x-2 text-xs">
-                <label className="flex items-center space-x-1 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={showModis} 
-                    onChange={e => setShowModis(e.target.checked)} 
-                    className="rounded text-[#C27B26] focus:ring-0" 
-                  />
-                  <span className="text-[11px] text-[#777970]">MODIS</span>
-                </label>
-                <label className="flex items-center space-x-1 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={showViirs} 
-                    onChange={e => setShowViirs(e.target.checked)} 
-                    className="rounded text-[#318C9B] focus:ring-0" 
-                  />
-                  <span className="text-[11px] text-[#777970]">VIIRS</span>
-                </label>
-                <label className="flex items-center space-x-1 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={showGrid} 
-                    onChange={e => setShowGrid(e.target.checked)} 
-                    className="rounded text-[#E65C35] focus:ring-0" 
-                  />
-                  <span className="text-[11px] text-[#777970]">1km Grid</span>
-                </label>
+              {/* Modern layer toggle pills */}
+              <div className="flex items-center space-x-1.5 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowModis(!showModis)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                    showModis 
+                      ? 'bg-amber-100 text-amber-800 border border-amber-300' 
+                      : 'bg-white text-slate-400 border border-slate-200'
+                  }`}
+                >
+                  MODIS
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowViirs(!showViirs)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                    showViirs 
+                      ? 'bg-sky-100 text-sky-800 border border-sky-300' 
+                      : 'bg-white text-slate-400 border border-slate-200'
+                  }`}
+                >
+                  VIIRS
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowGrid(!showGrid)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                    showGrid 
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                      : 'bg-white text-slate-400 border border-slate-200'
+                  }`}
+                >
+                  1km Grid
+                </button>
 
-                <div className="h-3.5 w-[1px] bg-[#E1DED5] mx-1"></div>
+                <div className="h-4 w-[1px] bg-slate-200 mx-1"></div>
 
                 <select
                   value={mapStyle}
                   onChange={e => setMapStyle(e.target.value as any)}
-                  className="bg-white border border-[#E1DED5] rounded text-[11px] py-1 px-1.5 text-[#252923] focus:outline-none"
+                  className="bg-white border border-slate-200 rounded-lg text-[11px] py-1 px-2 font-medium text-slate-700 focus:outline-none"
                 >
                   <option value="light">Light Canvas</option>
-                  <option value="satellite">Satellite</option>
-                  <option value="dark">Dark</option>
+                  <option value="satellite">Satellite Imagery</option>
+                  <option value="dark">Dark Canvas</option>
                 </select>
               </div>
             </div>
 
-            <div className="h-[280px] sm:h-[380px] w-full relative">
+            <div className="h-[300px] sm:h-[400px] w-full relative">
               <MapContainer
                 center={isWorld ? [20, 0] : [aoi.south + (aoi.north - aoi.south) / 2, aoi.west + (aoi.east - aoi.west) / 2]}
                 zoom={isWorld ? 2 : 7}
@@ -395,7 +432,7 @@ export const DashboardPage: React.FC = () => {
                       [aoi.north, aoi.east]
                     ]}
                     pathOptions={{
-                      color: '#E65C35',
+                      color: '#FF5722',
                       weight: 1.5,
                       dashArray: '4, 4',
                       fill: false
@@ -410,10 +447,10 @@ export const DashboardPage: React.FC = () => {
                   const isCo = c.has_co_detection;
                   const hasViirs = (c.viirs_detections || c.viirs_count || 0) > 0;
                   const color = isCo 
-                    ? '#BD493C' 
+                    ? '#10B981' 
                     : hasViirs 
-                    ? '#318C9B' 
-                    : '#C27B26';
+                    ? '#0EA5E9' 
+                    : '#F59E0B';
 
                   return (
                     <CircleMarker
@@ -422,29 +459,29 @@ export const DashboardPage: React.FC = () => {
                       radius={radius}
                       pathOptions={{
                         fillColor: color,
-                        fillOpacity: 0.75,
+                        fillOpacity: 0.8,
                         color: '#FFFFFF',
-                        weight: 1
+                        weight: 1.5
                       }}
                     >
                       <Popup>
-                        <div className="p-2 space-y-1 text-xs font-sans text-[#252923]">
-                          <div className="font-bold border-b pb-1">
-                            {detCount} Total Detections
+                        <div className="p-2 space-y-1.5 text-xs font-sans text-slate-800">
+                          <div className="font-bold border-b border-slate-100 pb-1 text-sm text-slate-900">
+                            {detCount.toLocaleString()} Fire Detections
                           </div>
-                          <div className="text-[10px] text-[#777970] font-mono">
+                          <div className="text-[10px] text-slate-500 font-mono">
                             {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
                           </div>
                           <div className="flex justify-between text-[11px] pt-1">
-                            <span className="text-[#C27B26]">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
-                            <span className="text-[#318C9B]">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
+                            <span className="text-amber-600 font-medium">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
+                            <span className="text-sky-600 font-medium">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
                           </div>
                           {isCo && (
-                            <div className="text-[10px] text-[#BD493C] font-semibold">
+                            <div className="text-[10px] text-emerald-600 font-bold">
                               ✓ Cross-Sensor Co-Detection
                             </div>
                           )}
-                          <div className="text-[10px] text-[#777970]">
+                          <div className="text-[10px] text-slate-500">
                             Mean FRP: {(c.mean_frp || 0).toFixed(1)} MW
                           </div>
                         </div>
@@ -463,19 +500,22 @@ export const DashboardPage: React.FC = () => {
                       key={cell.grid_cell_id}
                       bounds={[[b.south, b.west], [b.north, b.east]]}
                       pathOptions={{
-                        color: isCo ? '#54785E' : '#E65C35',
-                        weight: 1,
-                        fillColor: isCo ? '#54785E' : '#E65C35',
-                        fillOpacity: 0.18
+                        color: isCo ? '#10B981' : '#FF5722',
+                        weight: 1.5,
+                        fillColor: isCo ? '#10B981' : '#FF5722',
+                        fillOpacity: 0.2
                       }}
                     >
                       <Popup>
-                        <div className="text-xs space-y-1 font-sans">
-                          <div className="font-semibold text-[#252923]">1km Analytical Cell</div>
-                          <div className="font-mono text-[10px] text-[#777970]">{cell.grid_cell_id}</div>
-                          <div>Status: <span className="font-medium">{cell.sensors_present}</span></div>
-                          <div>Total Detections: <span className="font-semibold">{cell.total_detections}</span></div>
-                          <div>Mean FRP: <span className="font-semibold">{((cell.modis_frp_mean || cell.viirs_frp_mean || 0)).toFixed(1)} MW</span></div>
+                        <div className="text-xs space-y-1.5 font-sans">
+                          <div className="font-bold text-slate-900">1km Equal-Area Grid Cell</div>
+                          <div className="font-mono text-[10px] text-slate-500">{cell.grid_cell_id}</div>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-slate-500">Status:</span>
+                            <span className="font-semibold text-slate-800">{cell.sensors_present}</span>
+                          </div>
+                          <div>Total Detections: <span className="font-bold text-slate-900">{cell.total_detections}</span></div>
+                          <div>Mean FRP: <span className="font-bold text-orange-600">{((cell.modis_frp_mean || cell.viirs_frp_mean || 0)).toFixed(1)} MW</span></div>
                         </div>
                       </Popup>
                     </Rectangle>
@@ -485,33 +525,33 @@ export const DashboardPage: React.FC = () => {
                 {/* Regional Mode: Granular Observation Points */}
                 {!isWorld && visibleHotspots.map(h => {
                   const isModis = h.sensor_family === 'MODIS';
-                  const color = isModis ? '#C27B26' : '#318C9B';
+                  const color = isModis ? '#F59E0B' : '#0EA5E9';
                   return (
                     <CircleMarker
                       key={h.observation_id}
                       center={[h.latitude, h.longitude]}
-                      radius={isModis ? 5.5 : 4}
+                      radius={isModis ? 6 : 4.5}
                       pathOptions={{
                         color: '#FFFFFF',
-                        weight: 1,
+                        weight: 1.5,
                         fillColor: color,
-                        fillOpacity: 0.85
+                        fillOpacity: 0.9
                       }}
                     >
                       <Popup>
-                        <div className="text-xs space-y-1 font-sans">
-                          <div className="flex items-center space-x-1.5 font-semibold text-[#252923]">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
+                        <div className="text-xs space-y-1.5 font-sans">
+                          <div className="flex items-center space-x-1.5 font-bold text-slate-900">
+                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></span>
                             <span>{h.sensor_family} ({h.satellite})</span>
                           </div>
-                          <div className="font-mono text-[10px] text-[#777970]">
+                          <div className="font-mono text-[10px] text-slate-500">
                             {formatCoord(h.latitude, true)}, {formatCoord(h.longitude, false)}
                           </div>
-                          <div className="grid grid-cols-2 gap-x-2 text-[11px] pt-1 border-t border-[#E1DED5]">
-                            <div>FRP: <span className="font-semibold">{h.frp_mw?.toFixed(1)} MW</span></div>
-                            <div>Brightness: <span className="font-semibold">{h.brightness_temperature_kelvin?.toFixed(0)} K</span></div>
-                            <div>Time: <span className="font-mono text-[10px]">{h.acquisition_datetime_utc?.slice(11, 16)} UTC</span></div>
-                            <div>Conf: <span className="font-medium">{h.confidence_raw || 'N/A'}</span></div>
+                          <div className="grid grid-cols-2 gap-x-2 text-[11px] pt-1.5 border-t border-slate-100">
+                            <div>FRP: <span className="font-bold text-orange-600">{h.frp_mw?.toFixed(1)} MW</span></div>
+                            <div>Temp: <span className="font-semibold text-slate-800">{h.brightness_temperature_kelvin?.toFixed(0)} K</span></div>
+                            <div>Time: <span className="font-mono text-[10px] text-slate-600">{h.acquisition_datetime_utc?.slice(11, 16)} UTC</span></div>
+                            <div>Conf: <span className="font-semibold text-slate-800">{h.confidence_raw || 'N/A'}</span></div>
                           </div>
                         </div>
                       </Popup>
@@ -521,47 +561,47 @@ export const DashboardPage: React.FC = () => {
               </MapContainer>
             </div>
 
-            <div className="p-2.5 bg-[#FAF8F3] border-t border-[#E1DED5] flex items-center justify-between text-[11px] text-[#777970]">
+            <div className="p-3 bg-slate-50/70 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-600">
               <div className="flex items-center space-x-3">
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-[#C27B26]"></span>
-                  <span>MODIS (1 km)</span>
+                <span className="flex items-center space-x-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                  <span className="font-medium">MODIS (1 km)</span>
                 </span>
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-[#318C9B]"></span>
-                  <span>VIIRS (375 m)</span>
+                <span className="flex items-center space-x-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                  <span className="font-medium">VIIRS (375 m)</span>
                 </span>
-                <span className="flex items-center space-x-1">
-                  <span className="w-2 h-2 border border-[#54785E] bg-[#54785E]/20"></span>
-                  <span>Co-Detected 1km Cell</span>
+                <span className="flex items-center space-x-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span className="font-medium">Co-Detected 1km Cell</span>
                 </span>
               </div>
-              <Link to="/fire-map" className="text-[#E65C35] hover:underline font-medium flex items-center space-x-1">
-                <span>Dedicated Map Experience</span>
-                <ChevronRight className="w-3 h-3" />
+              <Link to="/fire-map" className="text-orange-600 hover:text-orange-700 font-bold flex items-center space-x-1">
+                <span>Open Full Map</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
 
-          {/* ACTIVITY SUMMARY (35% width) */}
-          <div className="lg:col-span-4 bg-white border border-[#E1DED5] rounded-lg p-5 shadow-card flex flex-col justify-between space-y-4">
+          {/* ACTIVITY SUMMARY (4 cols) */}
+          <div className="lg:col-span-4 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between space-y-4">
             <div>
-              <div className="flex items-center justify-between border-b border-[#E1DED5] pb-2 mb-3">
-                <h3 className="font-serif font-semibold text-base text-[#252923]">Observation Summary</h3>
-                <span className="text-[10px] font-mono text-[#777970] uppercase">UTC Synchronized</span>
+              <div className="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-3">
+                <h3 className="font-bold text-base text-slate-900">Observation Summary</h3>
+                <span className="text-[10px] font-mono text-slate-400 uppercase">UTC Synchronized</span>
               </div>
 
               {/* Sensor share bar */}
               <div className="space-y-1.5 mb-4">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#777970]">Sensor Share</span>
-                  <span className="font-mono text-[11px] text-[#252923]">
+                  <span className="text-slate-500 font-medium">Sensor Balance</span>
+                  <span className="font-mono text-[11px] font-bold text-slate-800">
                     {modisPct}% MODIS / {viirsPct}% VIIRS
                   </span>
                 </div>
-                <div className="h-2 w-full bg-[#EBE8DF] rounded-full overflow-hidden flex">
-                  <div style={{ width: `${modisPct}%` }} className="bg-[#C27B26]" title={`MODIS: ${modisPct}%`}></div>
-                  <div style={{ width: `${viirsPct}%` }} className="bg-[#318C9B]" title={`VIIRS: ${viirsPct}%`}></div>
+                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                  <div style={{ width: `${modisPct}%` }} className="bg-amber-500 transition-all duration-300" title={`MODIS: ${modisPct}%`}></div>
+                  <div style={{ width: `${viirsPct}%` }} className="bg-sky-500 transition-all duration-300" title={`VIIRS: ${viirsPct}%`}></div>
                 </div>
               </div>
 
@@ -569,16 +609,16 @@ export const DashboardPage: React.FC = () => {
               <div className="space-y-3 text-xs">
                 {isWorld && globalSummary && globalSummary.top_countries && globalSummary.top_countries.length > 0 ? (
                   <div className="space-y-2">
-                    <span className="text-[10px] font-mono uppercase text-[#777970] font-semibold">Top Active Nations</span>
+                    <span className="text-[10px] font-mono uppercase text-slate-400 font-semibold">Active Regions</span>
                     <div className="space-y-1.5">
                       {globalSummary.top_countries.slice(0, 4).map((tc) => (
-                        <div key={tc.iso3} className="p-2 bg-[#FAF8F3] border border-[#E1DED5] rounded flex items-center justify-between">
+                        <div key={tc.iso3} className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
                           <div>
-                            <span className="font-semibold text-[#252923] text-xs">{tc.name}</span>
-                            <span className="text-[10px] font-mono text-[#777970] ml-1.5">{tc.iso3}</span>
+                            <span className="font-bold text-slate-900 text-xs">{tc.name}</span>
+                            <span className="text-[10px] font-mono text-slate-400 ml-1.5">{tc.iso3}</span>
                           </div>
-                          <span className="text-[11px] font-mono font-bold text-[#E65C35]">
-                            {((tc as any).observations_count || (tc as any).observation_count || 0).toLocaleString()} pts
+                          <span className="text-xs font-mono font-bold text-orange-600">
+                            {((tc as any).observations_count || (tc as any).observation_count || 0).toLocaleString()} fires
                           </span>
                         </div>
                       ))}
@@ -586,44 +626,44 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
-                      <span className="text-[10px] font-mono uppercase text-[#777970]">Latest UTC Acquisition</span>
-                      <div className="font-mono font-medium text-sm text-[#252923] mt-0.5">
+                    <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                      <span className="text-[10px] font-mono uppercase text-slate-400">Latest Satellite Acquisition</span>
+                      <div className="font-mono font-bold text-sm text-slate-900 mt-0.5">
                         {summary?.kpi?.latest_observation_utc ? summary.kpi.latest_observation_utc.replace('T', ' ').slice(0, 16) + ' UTC' : 'No records recorded'}
                       </div>
                     </div>
 
-                    <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
-                      <span className="text-[10px] font-mono uppercase text-[#777970]">Active Area of Interest</span>
-                      <div className="font-semibold text-xs text-[#252923] mt-0.5">{aoi.name}</div>
-                      <div className="font-mono text-[10px] text-[#777970]">{formatAOIBounds(aoi)}</div>
+                    <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                      <span className="text-[10px] font-mono uppercase text-slate-400">Active AOI</span>
+                      <div className="font-bold text-xs text-slate-900 mt-0.5">{aoi.name}</div>
+                      <div className="font-mono text-[10px] text-slate-400">{formatAOIBounds(aoi)}</div>
                     </div>
                   </>
                 )}
 
-                <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
-                  <span className="text-[10px] font-mono uppercase text-[#777970]">Analytical Projection</span>
-                  <div className="font-mono font-medium text-xs text-[#252923] mt-0.5">EPSG:6933 Equal-Area</div>
-                  <p className="text-[10px] text-[#777970] mt-0.5">
+                <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                  <span className="text-[10px] font-mono uppercase text-slate-400">Analytical Projection</span>
+                  <div className="font-mono font-bold text-xs text-slate-900 mt-0.5">EPSG:6933 Equal-Area</div>
+                  <p className="text-[10px] text-slate-500 mt-0.5">
                     Guarantees equal ground surface area (1 km²) per grid cell worldwide.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-[#E1DED5] space-y-1.5">
+            <div className="pt-2 border-t border-slate-200/80 space-y-2">
               {isWorld ? (
                 <>
                   <Link 
                     to="/global-explorer"
-                    className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors"
+                    className="w-full flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-800 border border-slate-200 transition-colors"
                   >
                     <span>Explore Continents &amp; Countries</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </Link>
                   <Link 
                     to="/time-machine"
-                    className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] text-xs font-semibold text-[#E65C35] border border-[#E1DED5] transition-colors"
+                    className="w-full flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-xs font-bold text-orange-600 border border-orange-200 transition-colors"
                   >
                     <span>Launch Global Time Machine</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -632,7 +672,7 @@ export const DashboardPage: React.FC = () => {
               ) : (
                 <Link 
                   to="/comparison"
-                  className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors"
+                  className="w-full flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-800 border border-slate-200 transition-colors"
                 >
                   <span>View Full Sensor Comparison</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -645,12 +685,12 @@ export const DashboardPage: React.FC = () => {
         {/* TWO-COLUMN SECTION: TIMELINE + MONTHLY SUMMARY */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
           {/* Daily Activity Timeline (7 cols) */}
-          <div className="lg:col-span-7 bg-white border border-[#E1DED5] rounded-lg p-5 shadow-card flex flex-col justify-between">
+          <div className="lg:col-span-7 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h3 className="font-serif font-semibold text-base text-[#252923]">Daily Activity Timeline</h3>
-                  <p className="text-xs text-[#777970]">
+                  <h3 className="font-bold text-base text-slate-900">Daily Activity Timeline</h3>
+                  <p className="text-xs text-slate-500">
                     Harmonized 1km grid cells vs raw sensor detection counts per UTC day
                   </p>
                 </div>
@@ -660,26 +700,26 @@ export const DashboardPage: React.FC = () => {
                 {summary && summary.recent_timeline.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={summary.recent_timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <XAxis dataKey="date" stroke="#777970" fontSize={10} tickLine={false} />
-                      <YAxis stroke="#777970" fontSize={10} tickLine={false} />
+                      <XAxis dataKey="date" stroke="#94A3B8" fontSize={10} tickLine={false} />
+                      <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E1DED5', borderRadius: '6px', fontSize: '11px', color: '#252923' }}
+                        contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '12px', fontSize: '11px', color: '#0F172A', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                       />
                       <Legend 
                         wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} 
                         iconType="circle"
                       />
-                      <Bar dataKey="active_grid_cells" name="Active 1km Cells" fill="#E65C35" radius={[2, 2, 0, 0]} />
-                      <Bar dataKey="viirs_count" name="VIIRS Detections" fill="#318C9B" radius={[2, 2, 0, 0]} />
-                      <Bar dataKey="modis_count" name="MODIS Detections" fill="#C27B26" radius={[2, 2, 0, 0]} />
+                      <Bar dataKey="active_grid_cells" name="Active 1km Cells" fill="#FF5722" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="viirs_count" name="VIIRS Detections" fill="#0EA5E9" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="modis_count" name="MODIS Detections" fill="#F59E0B" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex flex-col items-center justify-center text-[#777970] space-y-2">
+                  <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-2">
                     <p className="text-xs">No observation records ingested yet for this AOI.</p>
                     <button
                       onClick={handleQuickIngest}
-                      className="px-3 py-1.5 text-xs font-semibold rounded bg-[#E65C35] text-white hover:bg-[#D44F29] transition-colors"
+                      className="px-3.5 py-2 text-xs font-bold rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors"
                     >
                       Fetch NASA Observations
                     </button>
@@ -688,32 +728,32 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#E1DED5] text-[10px] text-[#777970] flex items-center justify-between">
+            <div className="pt-3 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
               <span>Source: NASA FIRMS (Terra/Aqua MODIS, NOAA-20/21 VIIRS)</span>
               <span className="font-mono">Timezone: UTC 24-hr</span>
             </div>
           </div>
 
           {/* Monthly Overview Card (5 cols) */}
-          <div className="lg:col-span-5 bg-white border border-[#E1DED5] rounded-lg p-5 shadow-card flex flex-col justify-between">
+          <div className="lg:col-span-5 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h3 className="font-serif font-semibold text-base text-[#252923]">Burning Calendar Overview</h3>
-                  <p className="text-xs text-[#777970]">
+                  <h3 className="font-bold text-base text-slate-900">Burning Calendar Overview</h3>
+                  <p className="text-xs text-slate-500">
                     Quantile-based distribution across recent observation days
                   </p>
                 </div>
-                <Link to="/calendar" className="text-xs text-[#E65C35] font-semibold hover:underline">
-                  Open Calendar
+                <Link to="/calendar" className="text-xs text-orange-600 font-bold hover:underline">
+                  Open Calendar &rarr;
                 </Link>
               </div>
 
               {/* Visual Calendar Teaser Matrix */}
-              <div className="my-4 p-4 bg-[#FAF8F3] border border-[#E1DED5] rounded-md space-y-3">
-                <div className="flex items-center justify-between text-xs text-[#777970]">
-                  <span>Recent Active Days</span>
-                  <span className="font-mono text-[11px] text-[#252923]">
+              <div className="my-4 p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3">
+                <div className="flex items-center justify-between text-xs text-slate-500">
+                  <span className="font-medium">Recent Observation Grid</span>
+                  <span className="font-mono text-[11px] font-bold text-slate-800">
                     {summary?.recent_timeline?.filter(t => t.active_grid_cells > 0).length || 0} active dates
                   </span>
                 </div>
@@ -721,17 +761,17 @@ export const DashboardPage: React.FC = () => {
                 <div className="grid grid-cols-7 gap-1.5 pt-1">
                   {(summary?.recent_timeline?.slice(-14) || []).map((day, idx) => {
                     const count = day.active_grid_cells;
-                    let bg = '#EBE8DF';
-                    if (count > 0 && count <= 3) bg = '#FCECE7';
-                    else if (count > 3 && count <= 10) bg = '#F7D6CB';
-                    else if (count > 10) bg = '#E65C35';
+                    let bg = '#E2E8F0';
+                    if (count > 0 && count <= 3) bg = '#FFEDD5';
+                    else if (count > 3 && count <= 10) bg = '#FDBA74';
+                    else if (count > 10) bg = '#FF5722';
 
                     return (
                       <div 
                         key={idx} 
                         title={`${day.date}: ${count} active 1km cells`}
                         style={{ backgroundColor: bg }}
-                        className="h-7 rounded flex items-center justify-center text-[10px] font-mono text-[#252923] font-medium transition-transform hover:scale-110"
+                        className="h-8 rounded-lg flex items-center justify-center text-[10px] font-mono text-slate-900 font-bold transition-transform hover:scale-105"
                       >
                         {day.date.slice(8, 10)}
                       </div>
@@ -739,29 +779,29 @@ export const DashboardPage: React.FC = () => {
                   })}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-[#777970] pt-2 border-t border-[#E1DED5]">
+                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-slate-200">
                   <span>Lower Activity</span>
                   <div className="flex items-center space-x-1">
-                    <span className="w-2.5 h-2.5 rounded bg-[#EBE8DF]"></span>
-                    <span className="w-2.5 h-2.5 rounded bg-[#FCECE7]"></span>
-                    <span className="w-2.5 h-2.5 rounded bg-[#F7D6CB]"></span>
-                    <span className="w-2.5 h-2.5 rounded bg-[#E65C35]"></span>
+                    <span className="w-2.5 h-2.5 rounded bg-slate-200"></span>
+                    <span className="w-2.5 h-2.5 rounded bg-orange-100"></span>
+                    <span className="w-2.5 h-2.5 rounded bg-orange-300"></span>
+                    <span className="w-2.5 h-2.5 rounded bg-orange-500"></span>
                   </div>
                   <span>High Activity</span>
                 </div>
               </div>
 
-              <p className="text-xs text-[#777970] leading-relaxed">
+              <p className="text-xs text-slate-500 leading-relaxed">
                 The Burning Activity Calendar uses empirical relative quantiles instead of arbitrary universal risk cutoffs, making regional patterns comparable across seasons.
               </p>
             </div>
 
-            <div className="pt-3 border-t border-[#E1DED5]">
+            <div className="pt-3 border-t border-slate-100">
               <Link 
                 to="/calendar"
-                className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded-md bg-[#FAF8F3] hover:bg-[#EBE8DF] text-xs font-semibold text-[#252923] border border-[#E1DED5] transition-colors"
+                className="w-full flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-xs font-bold text-orange-600 border border-orange-200 transition-colors"
               >
-                <CalendarIcon className="w-3.5 h-3.5 text-[#E65C35]" />
+                <CalendarIcon className="w-3.5 h-3.5" />
                 <span>Launch Full Burning Calendar</span>
               </Link>
             </div>
@@ -769,18 +809,18 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* RECENT OBSERVATIONS TABLE */}
-        <div className="bg-white border border-[#E1DED5] rounded-lg shadow-card overflow-hidden">
-          <div className="p-4 border-b border-[#E1DED5] flex flex-wrap items-center justify-between gap-3">
+        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 className="font-serif font-semibold text-base text-[#252923]">Recent Satellite Observations</h3>
-              <p className="text-xs text-[#777970]">
+              <h3 className="font-bold text-base text-slate-900">Recent Satellite Observations</h3>
+              <p className="text-xs text-slate-500">
                 Individual sensor detections ingested into the active database
               </p>
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setTableSortAsc(!tableSortAsc)}
-                className="flex items-center space-x-1 px-2.5 py-1.5 rounded border border-[#E1DED5] text-xs text-[#777970] hover:text-[#252923] hover:bg-[#FAF8F3] transition-colors"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
               >
                 <ArrowUpDown className="w-3 h-3" />
                 <span>{tableSortAsc ? 'Oldest First' : 'Newest First'}</span>
@@ -788,9 +828,9 @@ export const DashboardPage: React.FC = () => {
               <a
                 href={FirePulseAPI.getExportUrl('observations', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
                 download
-                className="flex items-center space-x-1 px-2.5 py-1.5 rounded border border-[#E1DED5] text-xs font-medium text-[#252923] hover:bg-[#FAF8F3] transition-colors"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
               >
-                <Download className="w-3 h-3 text-[#318C9B]" />
+                <Download className="w-3.5 h-3.5 text-sky-500" />
                 <span>Export CSV</span>
               </a>
             </div>
@@ -799,45 +839,45 @@ export const DashboardPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-[#FAF8F3] border-b border-[#E1DED5] text-[10px] font-mono uppercase text-[#777970]">
-                  <th className="py-2.5 px-4 font-semibold">UTC Date &amp; Time</th>
-                  <th className="py-2.5 px-4 font-semibold">Coordinates (WGS84)</th>
-                  <th className="py-2.5 px-4 font-semibold">Sensor Family</th>
-                  <th className="py-2.5 px-4 font-semibold">Satellite</th>
-                  <th className="py-2.5 px-4 font-semibold">FRP (MW)</th>
-                  <th className="py-2.5 px-4 font-semibold">Brightness (K)</th>
-                  <th className="py-2.5 px-4 font-semibold">Confidence</th>
+                <tr className="bg-slate-50/70 border-b border-slate-200 text-[10px] font-mono uppercase text-slate-400">
+                  <th className="py-3 px-4 font-bold">UTC Date &amp; Time</th>
+                  <th className="py-3 px-4 font-bold">Coordinates (WGS84)</th>
+                  <th className="py-3 px-4 font-bold">Sensor Family</th>
+                  <th className="py-3 px-4 font-bold">Satellite</th>
+                  <th className="py-3 px-4 font-bold">FRP (MW)</th>
+                  <th className="py-3 px-4 font-bold">Brightness (K)</th>
+                  <th className="py-3 px-4 font-bold">Confidence</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E1DED5] font-sans">
+              <tbody className="divide-y divide-slate-100 font-sans">
                 {paginatedHotspots.length > 0 ? (
                   paginatedHotspots.map(h => {
                     const isModis = h.sensor_family === 'MODIS';
                     return (
-                      <tr key={h.observation_id} className="hover:bg-[#FAF8F3] transition-colors">
-                        <td className="py-2.5 px-4 font-mono text-[#252923]">
+                      <tr key={h.observation_id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3 px-4 font-mono font-medium text-slate-900">
                           {h.acquisition_datetime_utc ? h.acquisition_datetime_utc.replace('T', ' ').slice(0, 16) + ' UTC' : '—'}
                         </td>
-                        <td className="py-2.5 px-4 font-mono text-[#777970]">
+                        <td className="py-3 px-4 font-mono text-slate-500">
                           {formatCoord(h.latitude, true)}, {formatCoord(h.longitude, false)}
                         </td>
-                        <td className="py-2.5 px-4">
-                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium ${
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                             isModis 
-                              ? 'bg-[#C27B26]/10 text-[#C27B26] border border-[#C27B26]/20' 
-                              : 'bg-[#318C9B]/10 text-[#318C9B] border border-[#318C9B]/20'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200' 
+                              : 'bg-sky-50 text-sky-700 border border-sky-200'
                           }`}>
                             {h.sensor_family}
                           </span>
                         </td>
-                        <td className="py-2.5 px-4 text-[#252923] font-medium">{h.satellite}</td>
-                        <td className="py-2.5 px-4 font-mono font-semibold text-[#252923]">
+                        <td className="py-3 px-4 text-slate-800 font-semibold">{h.satellite}</td>
+                        <td className="py-3 px-4 font-mono font-bold text-orange-600">
                           {h.frp_mw !== null && h.frp_mw !== undefined ? h.frp_mw.toFixed(1) : '—'}
                         </td>
-                        <td className="py-2.5 px-4 font-mono text-[#777970]">
+                        <td className="py-3 px-4 font-mono text-slate-600">
                           {h.brightness_temperature_kelvin ? h.brightness_temperature_kelvin.toFixed(1) : '—'}
                         </td>
-                        <td className="py-2.5 px-4 text-[#777970]">
+                        <td className="py-3 px-4 text-slate-500 font-medium">
                           {h.confidence_raw || '—'}
                         </td>
                       </tr>
@@ -845,7 +885,7 @@ export const DashboardPage: React.FC = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-xs text-[#777970]">
+                    <td colSpan={7} className="py-8 text-center text-xs text-slate-400">
                       No observations available for this area. Click "Sync NASA FIRMS" above to fetch recent observations.
                     </td>
                   </tr>
@@ -856,22 +896,22 @@ export const DashboardPage: React.FC = () => {
 
           {/* Table pagination */}
           {totalPages > 1 && (
-            <div className="p-3 border-t border-[#E1DED5] bg-[#FAF8F3] flex items-center justify-between text-xs text-[#777970]">
-              <span>
+            <div className="p-3 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between text-xs text-slate-500">
+              <span className="font-medium">
                 Showing page {tablePage} of {totalPages} ({sortedHotspots.length} total records)
               </span>
               <div className="flex items-center space-x-1.5">
                 <button
                   disabled={tablePage === 1}
                   onClick={() => setTablePage(p => Math.max(1, p - 1))}
-                  className="px-2.5 py-1 rounded border border-[#E1DED5] bg-white text-xs disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-colors"
                 >
                   Previous
                 </button>
                 <button
                   disabled={tablePage === totalPages}
                   onClick={() => setTablePage(p => Math.min(totalPages, p + 1))}
-                  className="px-2.5 py-1 rounded border border-[#E1DED5] bg-white text-xs disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-colors"
                 >
                   Next
                 </button>
@@ -880,13 +920,13 @@ export const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* SCIENTIFIC EDITORIAL FOOTER */}
-        <footer className="border-t border-[#E1DED5] pt-6 pb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-[#777970]">
+        {/* MODERN FOOTER */}
+        <footer className="border-t border-slate-200/80 pt-6 pb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-slate-500">
           <div className="space-y-1">
-            <p className="font-serif font-medium text-[#252923]">
+            <p className="font-bold text-slate-900">
               FirePulse: NASA Space Apps Challenge 2026 • Team Virtual Warriors
             </p>
-            <p className="text-[11px]">
+            <p className="text-[11px] text-slate-400">
               Active fire data provided by NASA LANCE / FIRMS. Standardized on EPSG:6933 Equal-Area Grid.
             </p>
           </div>
@@ -895,7 +935,7 @@ export const DashboardPage: React.FC = () => {
             <span>•</span>
             <span>Harmonization: 1km Daily Cell</span>
             <span>•</span>
-            <Link to="/about" className="text-[#E65C35] hover:underline">
+            <Link to="/about" className="text-orange-600 font-bold hover:underline">
               Read Methodology
             </Link>
           </div>

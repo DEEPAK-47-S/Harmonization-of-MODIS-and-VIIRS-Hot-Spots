@@ -20,7 +20,7 @@ export const MobileBottomNav: React.FC = () => {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-md border-t border-[#E1DED5] flex items-center justify-around z-30 px-2 shadow-lg safe-area-pb">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white/95 backdrop-blur-md border-t border-slate-200/80 flex items-center justify-around z-30 px-2 shadow-lg safe-area-pb">
       {navItems.map((item) => {
         const Icon = item.icon;
         return (
@@ -30,8 +30,8 @@ export const MobileBottomNav: React.FC = () => {
             className={({ isActive }) =>
               `flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-medium transition-colors ${
                 isActive 
-                  ? 'text-[#E65C35] font-semibold' 
-                  : 'text-[#777970] hover:text-[#252923]'
+                  ? 'text-orange-600 font-bold' 
+                  : 'text-slate-400 hover:text-slate-700'
               }`
             }
           >
@@ -44,10 +44,10 @@ export const MobileBottomNav: React.FC = () => {
       {/* Menu Drawer Toggle Button */}
       <button
         onClick={toggleMobile}
-        className="flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-medium text-[#777970] hover:text-[#252923] transition-colors"
+        className="flex flex-col items-center justify-center flex-1 py-1 text-[10px] font-medium text-slate-400 hover:text-slate-700 transition-colors"
         title="Open full menu"
       >
-        <Menu className="w-4 h-4 mb-0.5 text-[#252923]" />
+        <Menu className="w-4 h-4 mb-0.5 text-slate-600" />
         <span>More</span>
       </button>
     </nav>

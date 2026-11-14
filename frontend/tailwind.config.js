@@ -7,52 +7,52 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Editorial Earth Science Palette
+        // Modern Clean Gen-Z Light Palette
         ivory: {
-          50: '#FAF8F3',
-          100: '#F4F1E9', // Primary Background
-          200: '#EBE8DF', // Warm Stone Surface
-          300: '#E1DED5', // Soft Neutral Border
-          400: '#CEC9BD',
-          500: '#B5AFA1',
+          50: '#FFFFFF',
+          100: '#F8FAFC', // Slate 50 clean light background
+          200: '#F1F5F9', // Slate 100 soft surface
+          300: '#E2E8F0', // Slate 200 crisp border
+          400: '#CBD5E1', // Slate 300
+          500: '#94A3B8', // Slate 400
         },
         charcoal: {
-          DEFAULT: '#252923', // Primary Text
-          dark: '#181B17',
-          muted: '#777970', // Secondary Text
-          subtle: '#9A9C93',
+          DEFAULT: '#0F172A', // Slate 900 high-contrast primary text
+          dark: '#020617',
+          muted: '#64748B', // Slate 500 secondary text
+          subtle: '#94A3B8',
         },
         fire: {
-          DEFAULT: '#E65C35', // Fire Orange
-          hover: '#D44F29',
-          light: '#FCECE7',
-          subtle: '#F7D6CB',
+          DEFAULT: '#FF5722', // Vibrant Electric Fire Orange
+          hover: '#EA580C',
+          light: '#FFF1ED',
+          subtle: '#FED7AA',
         },
         modis: {
-          DEFAULT: '#C27B26', // Muted Amber
-          light: '#FBF2E5',
-          border: '#E8B374',
+          DEFAULT: '#F59E0B', // Amber 500
+          light: '#FEF3C7',
+          border: '#FDE68A',
         },
         viirs: {
-          DEFAULT: '#318C9B', // Muted Teal
-          light: '#E6F4F6',
-          border: '#7CC2CD',
+          DEFAULT: '#0EA5E9', // Sky 500 Electric Cyan
+          light: '#E0F2FE',
+          border: '#BAE6FD',
         },
         nature: {
-          green: '#54785E', // Natural Green
-          ochre: '#B98B37', // Soft Ochre
-          red: '#BD493C',   // Controlled Red
+          green: '#10B981', // Emerald 500
+          ochre: '#D97706', // Amber 600
+          red: '#EF4444',   // Red 500
         }
       },
       fontFamily: {
-        serif: ['Newsreader', 'Georgia', 'serif'],
-        display: ['Newsreader', 'Georgia', 'serif'],
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        mono: ['"IBM Plex Mono"', 'JetBrains Mono', 'monospace'],
+        serif: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        display: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"IBM Plex Mono"', 'monospace'],
       },
       boxShadow: {
-        'card': '0 1px 3px 0 rgba(37, 41, 35, 0.05), 0 1px 2px -1px rgba(37, 41, 35, 0.03)',
-        'float': '0 10px 25px -5px rgba(37, 41, 35, 0.08), 0 8px 10px -6px rgba(37, 41, 35, 0.04)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',
+        'float': '0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04)',
       }
     },
   },

@@ -4,45 +4,41 @@
 
 @layer base {
   body {
-    @apply bg-[#F4F1E9] text-[#252923] font-sans min-h-screen antialiased selection:bg-[#E65C35]/15 selection:text-[#E65C35];
-  }
-
-  h1, h2, h3, .font-serif {
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    @apply bg-[#F8FAFC] text-slate-900 font-sans min-h-screen antialiased selection:bg-orange-500/15 selection:text-orange-600;
   }
 }
 
-/* Subtle, refined scrollbar */
+/* Subtle, refined modern scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #EBE8DF;
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CEC9BD;
-  border-radius: 4px;
+  background: #CBD5E1;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #B5AFA1;
+  background: #94A3B8;
 }
 
-/* Leaflet map styles — editorial styling with crisp, legible popups */
+/* Leaflet map styles — modern light styling with crisp rounded popups */
 .leaflet-container {
-  background-color: #EBE8DF !important;
+  background-color: #F1F5F9 !important;
   font-family: 'Inter', -apple-system, sans-serif !important;
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
   background: #FFFFFF !important;
-  color: #252923 !important;
-  border: 1px solid #E1DED5 !important;
-  border-radius: 8px !important;
-  box-shadow: 0 10px 25px -5px rgba(37, 41, 35, 0.08), 0 8px 10px -6px rgba(37, 41, 35, 0.04) !important;
+  color: #0F172A !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04) !important;
 }
 
 .leaflet-popup-content {
@@ -51,24 +47,24 @@
 }
 
 .leaflet-container a.leaflet-popup-close-button {
-  color: #777970 !important;
+  color: #64748B !important;
   padding: 8px 8px 0 0 !important;
 }
 
 .leaflet-container a.leaflet-popup-close-button:hover {
-  color: #252923 !important;
+  color: #0F172A !important;
 }
 
-/* Editorial card classes */
+/* Modern Gen-Z card classes */
 .editorial-card {
   background-color: #FFFFFF;
-  border: 1px solid #E1DED5;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px 0 rgba(37, 41, 35, 0.04);
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
 }
 
 .editorial-card-stone {
-  background-color: #EBE8DF;
-  border: 1px solid #E1DED5;
-  border-radius: 8px;
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
 }

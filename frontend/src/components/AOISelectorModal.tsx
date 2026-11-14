@@ -106,64 +106,66 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#252923]/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white border border-[#E1DED5] rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in duration-150 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200/80 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in duration-150 flex flex-col max-h-[90vh]">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E1DED5] bg-[#FAF8F3]">
-          <div className="flex items-center space-x-2.5">
-            <Globe2 className="w-5 h-5 text-[#E65C35]" />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200/80 bg-slate-50/70">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600">
+              <Globe2 className="w-5 h-5" />
+            </div>
             <div>
-              <h3 className="font-serif font-bold text-lg text-[#252923]">Target Area of Interest</h3>
-              <p className="text-xs text-[#777970]">Switch monitoring scope from Entire World to any continent, country, or custom bbox.</p>
+              <h3 className="font-bold text-base text-slate-900">Target Area of Interest</h3>
+              <p className="text-xs text-slate-500">Switch monitoring scope from Entire World to any continent, country, or custom bbox.</p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 rounded-md text-[#777970] hover:text-[#252923] hover:bg-[#EBE8DF] transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-[#E1DED5] bg-white px-6">
+        <div className="flex border-b border-slate-200/80 bg-white px-6">
           <button
             onClick={() => setActiveTab('continents')}
-            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-colors ${
+            className={`py-3 px-4 text-xs font-bold border-b-2 transition-colors ${
               activeTab === 'continents'
-                ? 'border-[#E65C35] text-[#E65C35]'
-                : 'border-transparent text-[#777970] hover:text-[#252923]'
+                ? 'border-orange-500 text-orange-600'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
-            Global & Continents
+            Global &amp; Continents
           </button>
           <button
             onClick={() => setActiveTab('countries')}
-            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-colors ${
+            className={`py-3 px-4 text-xs font-bold border-b-2 transition-colors ${
               activeTab === 'countries'
-                ? 'border-[#E65C35] text-[#E65C35]'
-                : 'border-transparent text-[#777970] hover:text-[#252923]'
+                ? 'border-orange-500 text-orange-600'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             Countries ({countries.length > 0 ? countries.length : '30+'})
           </button>
           <button
             onClick={() => setActiveTab('presets')}
-            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-colors ${
+            className={`py-3 px-4 text-xs font-bold border-b-2 transition-colors ${
               activeTab === 'presets'
-                ? 'border-[#E65C35] text-[#E65C35]'
-                : 'border-transparent text-[#777970] hover:text-[#252923]'
+                ? 'border-orange-500 text-orange-600'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             Regional Presets
           </button>
           <button
             onClick={() => setActiveTab('custom')}
-            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-colors ${
+            className={`py-3 px-4 text-xs font-bold border-b-2 transition-colors ${
               activeTab === 'custom'
-                ? 'border-[#E65C35] text-[#E65C35]'
-                : 'border-transparent text-[#777970] hover:text-[#252923]'
+                ? 'border-orange-500 text-orange-600'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
             }`}
           >
             Custom BBox

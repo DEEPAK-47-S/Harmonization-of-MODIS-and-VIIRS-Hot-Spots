@@ -69,24 +69,24 @@ export const Sidebar: React.FC = () => {
     <div className="flex flex-col h-full justify-between">
       <div className="flex flex-col min-h-0">
         {/* Brand Header */}
-        <div className="p-4 sm:p-5 border-b border-[#E1DED5] flex items-center justify-between shrink-0">
-          <div className="flex items-center space-x-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-md bg-[#E65C35] flex items-center justify-center text-white shadow-sm shrink-0">
-              <Flame className="w-4 h-4" />
+        <div className="p-4 sm:p-5 border-b border-slate-200/80 flex items-center justify-between shrink-0">
+          <div className="flex items-center space-x-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-sm shrink-0">
+              <Flame className="w-5 h-5 fill-white/20" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center space-x-1.5">
-                <span className="font-serif font-semibold text-lg tracking-tight text-[#252923]">FirePulse</span>
-                <span className="text-[10px] font-mono font-medium px-1.5 py-0.2 rounded bg-[#EBE8DF] text-[#777970] border border-[#E1DED5]">2026</span>
+                <span className="font-bold text-lg tracking-tight text-slate-900">FirePulse</span>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-200">2026</span>
               </div>
-              <p className="text-[11px] text-[#777970] font-sans truncate">NASA Active-Fire Intelligence</p>
+              <p className="text-[11px] text-slate-500 font-normal truncate">NASA Active-Fire Intelligence</p>
             </div>
           </div>
 
           {/* Close button on mobile */}
           <button 
             onClick={closeMobile}
-            className="md:hidden p-1.5 rounded-md text-[#777970] hover:text-[#252923] hover:bg-[#FAF8F3] transition-colors"
+            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             title="Close navigation"
           >
             <X className="w-5 h-5" />
@@ -97,10 +97,10 @@ export const Sidebar: React.FC = () => {
         <nav className="p-3 space-y-4 overflow-y-auto flex-1">
           {navGroups.map((group) => (
             <div key={group.label} className="space-y-1">
-              <h4 className="px-2.5 text-[10px] font-mono uppercase tracking-wider text-[#777970] font-semibold">
+              <h4 className="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
                 {group.label}
               </h4>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -109,10 +109,10 @@ export const Sidebar: React.FC = () => {
                       to={item.to}
                       onClick={closeMobile}
                       className={({ isActive }) =>
-                        `flex items-center space-x-2.5 px-2.5 py-2 rounded-md text-xs font-medium transition-colors ${
+                        `flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                           isActive
-                            ? 'bg-[#FCECE7] text-[#E65C35] font-semibold shadow-xs'
-                            : 'text-[#252923] hover:bg-[#F4F1E9] hover:text-[#252923]'
+                            ? 'bg-orange-50 text-orange-600 font-semibold border border-orange-200/80 shadow-2xs'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                         }`
                       }
                     >
@@ -128,12 +128,12 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Footer Team Attribution */}
-      <div className="p-3.5 border-t border-[#E1DED5] bg-[#FAF8F3] shrink-0">
+      <div className="p-3.5 border-t border-slate-200/80 bg-slate-50 shrink-0">
         <div className="flex items-center space-x-2 mb-1">
-          <span className="w-2 h-2 rounded-full bg-[#54785E]"></span>
-          <span className="text-xs font-medium text-[#252923]">Team Virtual Warriors</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span className="text-xs font-bold text-slate-800">Team Virtual Warriors</span>
         </div>
-        <p className="text-[10px] text-[#777970] leading-tight">
+        <p className="text-[10px] text-slate-500 leading-tight">
           NASA Space Apps Challenge 2026<br />
           Harmonization of MODIS &amp; VIIRS Hot Spots
         </p>
@@ -144,7 +144,7 @@ export const Sidebar: React.FC = () => {
   return (
     <>
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden md:flex w-[230px] bg-white border-r border-[#E1DED5] flex-col justify-between shrink-0 h-screen sticky top-0 select-none z-30">
+      <aside className="hidden md:flex w-[230px] bg-white border-r border-slate-200/80 flex-col justify-between shrink-0 h-screen sticky top-0 select-none z-30">
         {renderNavContent()}
       </aside>
 
@@ -154,11 +154,11 @@ export const Sidebar: React.FC = () => {
           {/* Backdrop */}
           <div 
             onClick={closeMobile}
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-fade-in"
+            className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs transition-opacity animate-fade-in"
           />
 
           {/* Drawer Panel */}
-          <div className="relative w-[280px] max-w-[85vw] bg-white h-full shadow-2xl flex flex-col z-10 animate-slide-in-left border-r border-[#E1DED5]">
+          <div className="relative w-[280px] max-w-[85vw] bg-white h-full shadow-2xl flex flex-col z-10 animate-slide-in-left border-r border-slate-200/80">
             {renderNavContent()}
           </div>
         </div>

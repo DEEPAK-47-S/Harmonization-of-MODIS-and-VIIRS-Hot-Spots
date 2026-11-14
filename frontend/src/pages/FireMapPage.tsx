@@ -389,28 +389,28 @@ export const FireMapPage: React.FC = () => {
           </MapContainer>
         </div>
 
-        {/* Top Editorial Floating Bar */}
+        {/* Top Floating Bar - Modern Light Gen-Z Style */}
         <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-6 sm:right-6 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
           {/* Left stats pills */}
           <div className="flex items-center space-x-2 pointer-events-auto">
-            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs font-medium text-[#252923]">
-              <Flame className="w-3.5 h-3.5 text-[#E65C35]" />
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-sm text-xs font-semibold text-slate-800">
+              <Flame className="w-3.5 h-3.5 text-orange-500" />
               <span className="font-bold">
                 {isWorld ? densityClusters.reduce((acc, c) => acc + (c.total_detections || c.count || 0), 0).toLocaleString() : hotspots.length.toLocaleString()}
               </span>
-              <span className="text-[11px] text-[#777970]">{isWorld ? 'Global Detections' : 'Hotspots'}</span>
+              <span className="text-[11px] text-slate-400 font-normal">{isWorld ? 'Global Detections' : 'Hotspots'}</span>
             </div>
 
-            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs font-medium text-[#252923]">
-              <Grid className="w-3.5 h-3.5 text-[#54785E]" />
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-sm text-xs font-semibold text-slate-800">
+              <Grid className="w-3.5 h-3.5 text-emerald-500" />
               <span className="font-bold">
                 {isWorld ? densityClusters.length.toLocaleString() : gridCells.length.toLocaleString()}
               </span>
-              <span className="text-[11px] text-[#777970]">{isWorld ? 'Macro Clusters' : '1km Cells'}</span>
+              <span className="text-[11px] text-slate-400 font-normal">{isWorld ? 'Macro Clusters' : '1km Cells'}</span>
             </div>
 
             {loading && (
-              <div className="px-3 py-1.5 rounded-md bg-[#FAF8F3] border border-[#E1DED5] text-xs font-medium text-[#777970] animate-pulse">
+              <div className="px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/80 text-xs font-medium text-slate-500 shadow-sm animate-pulse">
                 Fetching satellite observations...
               </div>
             )}
@@ -419,12 +419,12 @@ export const FireMapPage: React.FC = () => {
           {/* Right quick toggles: Basemap & Controls Button */}
           <div className="flex items-center space-x-2 pointer-events-auto">
             {/* Basemap Switcher */}
-            <div className="flex items-center p-0.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs">
+            <div className="flex items-center p-1 rounded-full bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-sm text-xs">
               <button
                 type="button"
                 onClick={() => setBasemap('light')}
-                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
-                  basemap === 'light' ? 'bg-[#FAF8F3] text-[#E65C35] font-semibold' : 'text-[#777970] hover:text-[#252923]'
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                  basemap === 'light' ? 'bg-orange-500 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Light
@@ -432,8 +432,8 @@ export const FireMapPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setBasemap('satellite')}
-                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
-                  basemap === 'satellite' ? 'bg-[#FAF8F3] text-[#318C9B] font-semibold' : 'text-[#777970] hover:text-[#252923]'
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                  basemap === 'satellite' ? 'bg-sky-500 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Satellite
@@ -441,8 +441,8 @@ export const FireMapPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setBasemap('osm')}
-                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
-                  basemap === 'osm' ? 'bg-[#FAF8F3] text-[#54785E] font-semibold' : 'text-[#777970] hover:text-[#252923]'
+                className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+                  basemap === 'osm' ? 'bg-emerald-500 text-white shadow-2xs' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Street
@@ -452,29 +452,29 @@ export const FireMapPage: React.FC = () => {
             {/* Toggle Drawer Button */}
             <button
               onClick={() => setControlsOpen(!controlsOpen)}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition border shadow-card ${
+              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all border shadow-sm ${
                 controlsOpen 
-                  ? 'bg-[#FCECE7] text-[#E65C35] border-[#E65C35]/30' 
-                  : 'bg-white text-[#252923] border-[#E1DED5] hover:bg-[#FAF8F3]'
+                  ? 'bg-orange-50 text-orange-600 border-orange-200' 
+                  : 'bg-white/95 backdrop-blur-md text-slate-700 border-slate-200/80 hover:bg-slate-50'
               }`}
             >
-              <Sliders className="w-3.5 h-3.5 text-[#E65C35]" />
+              <Sliders className="w-3.5 h-3.5 text-orange-500" />
               <span>{controlsOpen ? 'Hide Filters' : 'Map Filters'}</span>
             </button>
           </div>
         </div>
 
-        {/* Collapsible Left Filter Drawer (Editorial Clean Style) */}
+        {/* Collapsible Left Filter Drawer - Modern Rounded Light */}
         {controlsOpen && (
-          <div className="absolute top-14 left-3 right-3 sm:right-auto sm:left-6 z-20 sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white border border-[#E1DED5] rounded-lg p-4 shadow-float space-y-4 animate-in slide-in-from-left duration-150">
-            <div className="flex items-center justify-between border-b border-[#E1DED5] pb-2.5">
+          <div className="absolute top-14 left-3 right-3 sm:right-auto sm:left-6 z-20 sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-4 shadow-xl space-y-4 animate-in slide-in-from-left duration-150">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <div className="flex items-center space-x-2">
-                <Sliders className="w-3.5 h-3.5 text-[#E65C35]" />
-                <h3 className="font-serif font-semibold text-sm text-[#252923]">Filter Observations</h3>
+                <Sliders className="w-3.5 h-3.5 text-orange-500" />
+                <h3 className="font-bold text-sm text-slate-900">Filter Observations</h3>
               </div>
               <button
                 onClick={() => setControlsOpen(false)}
-                className="text-[#777970] hover:text-[#252923] p-1 rounded hover:bg-[#FAF8F3]"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
