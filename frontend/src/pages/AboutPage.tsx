@@ -19,7 +19,7 @@ export const AboutPage: React.FC = () => {
         subtitle="Data harmonization principles, mathematical formulation, and remote sensing limitations"
       />
 
-      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+      <main className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
         {/* Editorial Introduction */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
           <div className="space-y-1.5">

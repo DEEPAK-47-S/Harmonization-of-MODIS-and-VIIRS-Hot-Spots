@@ -188,37 +188,37 @@ export const DashboardPage: React.FC = () => {
         subtitle="Spatially and temporally aggregated NASA FIRMS observations"
       />
 
-      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+      <main className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
         {/* PAGE INTRODUCTION */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
-          <div className="space-y-1.5">
-            <span className="text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-5">
+          <div className="space-y-1">
+            <span className="text-[10px] sm:text-[11px] font-mono font-semibold tracking-wider text-[#777970] uppercase">
               {isWorld ? 'Global Earth Observation / Planetary Fire Intel' : `Regional Earth Observation / ${aoi.name}`}
             </span>
-            <h1 className="text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-serif font-semibold text-[#252923] tracking-tight">
               {isWorld ? 'One planet. A clearer picture of fire activity.' : `Fire activity, in focus: ${aoi.name}`}
             </h1>
-            <p className="text-xs md:text-sm text-[#777970] font-sans max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#777970] font-sans max-w-2xl">
               {isWorld 
                 ? 'Worldwide active fire detections across all seven continents, harmonized from NASA MODIS (Terra/Aqua) and VIIRS (NOAA-20/21/S-NPP) into a standardized 1km equal-area grid.' 
                 : `Explore where satellite observations detect burning activity across ${aoi.name}, harmonized to a common 1km grid.`}
             </p>
           </div>
 
-          <div className="flex items-center space-x-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
               onClick={handleQuickIngest}
               disabled={ingesting}
-              className="flex items-center space-x-2 px-3.5 py-2 rounded-md text-xs font-semibold bg-[#E65C35] hover:bg-[#D44F29] text-white transition-colors shadow-sm disabled:opacity-50"
+              className="flex items-center space-x-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-md text-xs font-semibold bg-[#E65C35] hover:bg-[#D44F29] text-white transition-colors shadow-sm disabled:opacity-50"
             >
               <Play className={`w-3.5 h-3.5 ${ingesting ? 'animate-spin' : ''}`} />
-              <span>{ingesting ? 'Fetching NASA FIRMS...' : isWorld ? 'Sync Global NASA (3 Days)' : 'Sync Region NASA (3 Days)'}</span>
+              <span>{ingesting ? 'Syncing FIRMS...' : isWorld ? 'Sync Global NASA' : 'Sync Region NASA'}</span>
             </button>
             <Link
               to="/settings"
-              className="px-3.5 py-2 rounded-md text-xs font-medium bg-white hover:bg-[#EBE8DF] text-[#252923] border border-[#E1DED5] transition-colors"
+              className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-md text-xs font-medium bg-white hover:bg-[#EBE8DF] text-[#252923] border border-[#E1DED5] transition-colors"
             >
-              Upload Archive
+              Archive
             </Link>
           </div>
         </div>
@@ -235,8 +235,8 @@ export const DashboardPage: React.FC = () => {
           </div>
         )}
 
-        {/* METRIC STRIP (4 Compact Editorial Metrics) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* METRIC STRIP (2x2 on Mobile, 4 Cols on Desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {/* 1. Active Grid Cells */}
           <div className="bg-white border border-[#E1DED5] p-4 rounded-lg shadow-card">
             <div className="flex items-center justify-between mb-1">
@@ -356,7 +356,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-[380px] w-full relative">
+            <div className="h-[280px] sm:h-[380px] w-full relative">
               <MapContainer
                 center={isWorld ? [20, 0] : [aoi.south + (aoi.north - aoi.south) / 2, aoi.west + (aoi.east - aoi.west) / 2]}
                 zoom={isWorld ? 2 : 7}

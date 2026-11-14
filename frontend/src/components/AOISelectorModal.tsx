@@ -229,7 +229,7 @@ export const AOISelectorModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   Loading country registries...
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
                   {filteredCountries.map((c) => {
                     const b = extractBounds(c.bounds);
                     const countryAoi: AOIBounds = {

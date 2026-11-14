@@ -75,7 +75,7 @@ export const FireMapPage: React.FC = () => {
   const [dateTo, setDateTo] = useState<string>('');
   
   // UI Panels
-  const [controlsOpen, setControlsOpen] = useState<boolean>(true);
+  const [controlsOpen, setControlsOpen] = useState<boolean>(window.innerWidth >= 768);
   const [selectedObs, setSelectedObs] = useState<Observation | null>(null);
   const [copiedCoord, setCopiedCoord] = useState<boolean>(false);
 
@@ -390,7 +390,7 @@ export const FireMapPage: React.FC = () => {
         </div>
 
         {/* Top Editorial Floating Bar */}
-        <div className="absolute top-4 left-6 right-6 z-20 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+        <div className="absolute top-2 left-2 right-2 sm:top-4 sm:left-6 sm:right-6 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
           {/* Left stats pills */}
           <div className="flex items-center space-x-2 pointer-events-auto">
             <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs font-medium text-[#252923]">
@@ -466,7 +466,7 @@ export const FireMapPage: React.FC = () => {
 
         {/* Collapsible Left Filter Drawer (Editorial Clean Style) */}
         {controlsOpen && (
-          <div className="absolute top-16 left-6 z-20 w-80 max-w-[calc(100vw-3rem)] bg-white border border-[#E1DED5] rounded-lg p-4 shadow-float space-y-4 animate-in slide-in-from-left duration-150">
+          <div className="absolute top-14 left-3 right-3 sm:right-auto sm:left-6 z-20 sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white border border-[#E1DED5] rounded-lg p-4 shadow-float space-y-4 animate-in slide-in-from-left duration-150">
             <div className="flex items-center justify-between border-b border-[#E1DED5] pb-2.5">
               <div className="flex items-center space-x-2">
                 <Sliders className="w-3.5 h-3.5 text-[#E65C35]" />

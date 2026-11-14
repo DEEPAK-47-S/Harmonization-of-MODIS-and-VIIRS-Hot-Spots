@@ -200,7 +200,7 @@ export const CalendarPage: React.FC = () => {
         subtitle="Spatially harmonized temporal calendar based on EPSG:6933 1km analytical cells"
       />
 
-      <main className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto w-full">
+      <main className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
         {/* Editorial Introduction */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#E1DED5] pb-6">
           <div className="space-y-1.5">
@@ -215,30 +215,32 @@ export const CalendarPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             {/* View Mode Switcher */}
             <div className="flex items-center bg-[#FAF8F3] p-1 rounded-md border border-[#E1DED5]">
               <button
                 onClick={() => setViewMode('matrix')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded text-xs font-semibold transition ${
+                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded text-xs font-semibold transition ${
                   viewMode === 'matrix'
                     ? 'bg-white text-[#E65C35] shadow-sm'
                     : 'text-[#777970] hover:text-[#252923]'
                 }`}
               >
                 <Table className="w-3.5 h-3.5" />
-                <span>Annual Heatmap (Years × Months)</span>
+                <span className="hidden sm:inline">Annual Heatmap (Years × Months)</span>
+                <span className="sm:hidden">Annual Heatmap</span>
               </button>
               <button
                 onClick={() => setViewMode('month')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded text-xs font-semibold transition ${
+                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded text-xs font-semibold transition ${
                   viewMode === 'month'
                     ? 'bg-white text-[#E65C35] shadow-sm'
                     : 'text-[#777970] hover:text-[#252923]'
                 }`}
               >
                 <CalendarIcon className="w-3.5 h-3.5" />
-                <span>Monthly Day Grid</span>
+                <span className="hidden sm:inline">Monthly Day Grid</span>
+                <span className="sm:hidden">Day Grid</span>
               </button>
             </div>
 
