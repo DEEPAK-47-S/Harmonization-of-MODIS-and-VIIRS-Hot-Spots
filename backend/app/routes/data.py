@@ -105,8 +105,15 @@ def ingest_recent():
         return jsonify({"error": f"Invalid AOI bounding box: {err_aoi}"}), 400
 
     sources = body.get("sources") or ["MODIS_NRT", "VIIRS_NOAA20_NRT", "VIIRS_NOAA21_NRT"]
-    day_range = int(body.get("day_range", 3))
+    day_range = int(body.get("day_range", 2))
     day_range = max(1, min(5, day_range))
+    
+    # Optimize worldwide requests so they complete within serverless timeout
+    is_world = (west <= -170.0 and east >= 170.0)
+    if is_world:
+        day_range = 1
+        if len(sources) > 2:
+            sources = ["VIIRS_NOAA20_NRT", "MODIS_NRT"]
     
     date_str = body.get("date_str")
     if not date_str:

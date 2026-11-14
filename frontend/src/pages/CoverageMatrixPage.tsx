@@ -122,7 +122,7 @@ export const CoverageMatrixPage: React.FC = () => {
             <div className="bg-white p-3 rounded-md border border-slate-200">
               <span className="text-[10px] font-mono text-emerald-700 uppercase">Archive Range</span>
               <div className="text-xs font-mono font-semibold text-slate-900 mt-1.5 truncate">
-                {matrix?.database_records.earliest_observation || 'N/A'} → {matrix?.database_records.latest_observation || 'N/A'}
+                {matrix?.database_records?.earliest_observation || 'N/A'} → {matrix?.database_records?.latest_observation || 'N/A'}
               </div>
             </div>
           </div>

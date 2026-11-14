@@ -42,7 +42,7 @@ export const InsightsPage: React.FC = () => {
     }
   };
 
-  const hasSufficientHistory = data?.safeguards.sufficient_history ?? false;
+  const hasSufficientHistory = data?.safeguards?.sufficient_history ?? false;
 
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] overflow-y-auto">
@@ -109,14 +109,14 @@ export const InsightsPage: React.FC = () => {
                     : 'Insufficient Historical Data for Reliable Anomaly Flagging'}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Requires at least {data?.safeguards.required_years || 3} distinct observation years to form a statistically robust baseline.
+                  Requires at least {data?.safeguards?.required_years || 3} distinct observation years to form a statistically robust baseline.
                 </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-2 text-xs font-mono">
               <span className="px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-900">
-                Years in DB: <strong>{data?.safeguards.distinct_years_count ?? 0} / {data?.safeguards.required_years ?? 3}</strong>
+                Years in DB: <strong>{data?.safeguards?.distinct_years_count ?? 0} / {data?.safeguards?.required_years ?? 3}</strong>
               </span>
             </div>
           </div>

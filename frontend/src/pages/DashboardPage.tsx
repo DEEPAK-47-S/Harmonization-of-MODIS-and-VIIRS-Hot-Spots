@@ -745,7 +745,7 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               <div className="h-64 w-full mt-4">
-                {summary && summary.recent_timeline.length > 0 ? (
+                {summary?.recent_timeline && summary.recent_timeline.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={summary.recent_timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <XAxis dataKey="date" stroke="#94A3B8" fontSize={10} tickLine={false} />

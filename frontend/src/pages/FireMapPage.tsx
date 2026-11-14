@@ -107,8 +107,8 @@ export const FireMapPage: React.FC = () => {
           date_to: dateTo || undefined,
           limit: 5000
         });
-        setHotspots(res.hotspots);
-        setGridCells(res.grid_cells || []);
+        setHotspots(res?.hotspots || []);
+        setGridCells(res?.grid_cells || []);
         setDensityClusters([]);
       }
     } catch (err) {

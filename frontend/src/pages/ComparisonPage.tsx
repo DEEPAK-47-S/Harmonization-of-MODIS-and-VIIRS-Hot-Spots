@@ -52,10 +52,10 @@ export const ComparisonPage: React.FC = () => {
     }
   };
 
-  const overlapPieData = data ? [
-    { name: 'Co-Detected (Both)', value: data.overlap.co_detected_cell_days, color: '#54785E' },
-    { name: 'VIIRS Only', value: data.overlap.viirs_only_cell_days, color: '#318C9B' },
-    { name: 'MODIS Only', value: data.overlap.modis_only_cell_days, color: '#C27B26' },
+  const overlapPieData = data?.overlap ? [
+    { name: 'Co-Detected (Both)', value: data.overlap.co_detected_cell_days || 0, color: '#54785E' },
+    { name: 'VIIRS Only', value: data.overlap.viirs_only_cell_days || 0, color: '#318C9B' },
+    { name: 'MODIS Only', value: data.overlap.modis_only_cell_days || 0, color: '#C27B26' },
   ].filter(d => d.value > 0) : [];
 
   return (
@@ -117,18 +117,18 @@ export const ComparisonPage: React.FC = () => {
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white p-3 rounded border border-slate-200">
                 <span className="text-[10px] font-mono uppercase text-slate-500 block">Detections</span>
-                <span className="text-xl font-bold font-sans text-amber-700">{data?.modis.observation_count ?? 0}</span>
+                <span className="text-xl font-bold font-sans text-amber-700">{data?.modis?.observation_count ?? 0}</span>
               </div>
               <div className="bg-white p-3 rounded border border-slate-200">
                 <span className="text-[10px] font-mono uppercase text-slate-500 block">Mean FRP</span>
                 <span className="text-xl font-bold font-sans text-slate-900">
-                  {data?.modis.frp_mean ?? 0} <span className="text-[10px] font-normal font-sans text-slate-500">MW</span>
+                  {data?.modis?.frp_mean ?? 0} <span className="text-[10px] font-normal font-sans text-slate-500">MW</span>
                 </span>
               </div>
               <div className="bg-white p-3 rounded border border-slate-200">
                 <span className="text-[10px] font-mono uppercase text-slate-500 block">Max FRP</span>
                 <span className="text-xl font-bold font-sans text-slate-900">
-                  {data?.modis.frp_max ?? 0} <span className="text-[10px] font-normal font-sans text-slate-500">MW</span>
+                  {data?.modis?.frp_max ?? 0} <span className="text-[10px] font-normal font-sans text-slate-500">MW</span>
                 </span>
               </div>
             </div>
@@ -136,9 +136,9 @@ export const ComparisonPage: React.FC = () => {
             <div className="p-3 bg-white rounded border border-slate-200 text-xs space-y-1">
               <span className="text-[10px] font-mono uppercase text-slate-500 font-semibold block">Confidence Scale (0–100%)</span>
               <div className="flex items-center justify-between text-slate-900 pt-0.5 font-mono text-[11px]">
-                <span>Low (&lt;30%): <strong>{data?.modis.confidence_distribution.low ?? 0}</strong></span>
-                <span>Nominal (30-80%): <strong>{data?.modis.confidence_distribution.nominal ?? 0}</strong></span>
-                <span>High (&gt;80%): <strong>{data?.modis.confidence_distribution.high ?? 0}</strong></span>
+                <span>Low (&lt;30%): <strong>{data?.modis?.confidence_distribution?.low ?? 0}</strong></span>
+                <span>Nominal (30-80%): <strong>{data?.modis?.confidence_distribution?.nominal ?? 0}</strong></span>
+                <span>High (&gt;80%): <strong>{data?.modis?.confidence_distribution?.high ?? 0}</strong></span>
               </div>
             </div>
 
@@ -174,18 +174,18 @@ export const ComparisonPage: React.FC = () => {
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white p-3 rounded border border-slate-200">
                 <span className="text-[10px] font-mono uppercase text-slate-500 block">Detections</span>
-                <span className="text-xl font-bold font-sans text-sky-600">{data?.viirs.observation_count ?? 0}</span>
+                <span className="text-xl font-bold font-sans text-sky-600">{data?.viirs?.observation_count ?? 0}</span>
               </div>
               <div className="bg-white p-3 rounded border border-slate-200">
                 <span className="text-[10px] font-mono uppercase text-slate-500 block">Mean FRP</span>
                 <span className="text-xl font-bold font-sans text-slate-900">
-                  {data?.viirs.frp_mean ?? 0} <span className="text-[10px] font-normal font-sans text-slate-500">MW</span>
+                  {data?.viirs?.frp_mean ?? 0} <span className="text-[10px] font-normal font-sans text-slate-500">MW</span>
                 </span>
               </div>
               <div className="bg-white p-3 rounded border border-slate-200">
                 <span className="text-[10px] font-mono uppercase text-slate-500 block">Max FRP</span>
                 <span className="text-xl font-bold font-sans text-slate-900">
-                  {data?.viirs.frp_max ?? 0} <span className="text-[10px] font-normal font-sans text-slate-500">MW</span>
+                  {data?.viirs?.frp_max ?? 0} <span className="text-[10px] font-normal font-sans text-slate-500">MW</span>
                 </span>
               </div>
             </div>
@@ -193,9 +193,9 @@ export const ComparisonPage: React.FC = () => {
             <div className="p-3 bg-white rounded border border-slate-200 text-xs space-y-1">
               <span className="text-[10px] font-mono uppercase text-slate-500 font-semibold block">Confidence Scale (Categorical)</span>
               <div className="flex items-center justify-between text-slate-900 pt-0.5 font-mono text-[11px]">
-                <span>Low ('l'): <strong>{data?.viirs.confidence_distribution.low ?? 0}</strong></span>
-                <span>Nominal ('n'): <strong>{data?.viirs.confidence_distribution.nominal ?? 0}</strong></span>
-                <span>High ('h'): <strong>{data?.viirs.confidence_distribution.high ?? 0}</strong></span>
+                <span>Low ('l'): <strong>{data?.viirs?.confidence_distribution?.low ?? 0}</strong></span>
+                <span>Nominal ('n'): <strong>{data?.viirs?.confidence_distribution?.nominal ?? 0}</strong></span>
+                <span>High ('h'): <strong>{data?.viirs?.confidence_distribution?.high ?? 0}</strong></span>
               </div>
             </div>
 
@@ -328,7 +328,7 @@ export const ComparisonPage: React.FC = () => {
                   </div>
                 </div>
                 <span className="font-mono font-bold text-emerald-700 text-base">
-                  {data?.overlap.co_detected_cell_days ?? 0}
+                  {data?.overlap?.co_detected_cell_days ?? 0}
                 </span>
               </div>
 
@@ -341,7 +341,7 @@ export const ComparisonPage: React.FC = () => {
                   </div>
                 </div>
                 <span className="font-mono font-bold text-sky-600 text-base">
-                  {data?.overlap.viirs_only_cell_days ?? 0}
+                  {data?.overlap?.viirs_only_cell_days ?? 0}
                 </span>
               </div>
 
@@ -354,7 +354,7 @@ export const ComparisonPage: React.FC = () => {
                   </div>
                 </div>
                 <span className="font-mono font-bold text-amber-700 text-base">
-                  {data?.overlap.modis_only_cell_days ?? 0}
+                  {data?.overlap?.modis_only_cell_days ?? 0}
                 </span>
               </div>
             </div>

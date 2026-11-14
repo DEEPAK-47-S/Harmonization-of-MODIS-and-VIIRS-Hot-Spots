@@ -55,7 +55,7 @@ export const FirePulseAPI = {
     date_str?: string;
     aoi_name?: string;
   }) => {
-    const res = await api.post('/data/ingest/recent', payload);
+    const res = await api.post('/data/ingest/recent', payload, { timeout: 120000 });
     return res.data;
   },
 
@@ -69,7 +69,7 @@ export const FirePulseAPI = {
     north?: number;
     aoi_name?: string;
   }) => {
-    const res = await api.post('/data/ingest/historical', payload);
+    const res = await api.post('/data/ingest/historical', payload, { timeout: 120000 });
     return res.data;
   },
 

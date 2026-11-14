@@ -118,16 +118,16 @@ class FirmsClient:
             "User-Agent": "FirePulse-NASA-Space-Apps-2026/1.0"
         }
 
-        # Bounded retry with exponential backoff (max 3 attempts)
-        max_retries = 3
-        backoff = 1.0
+        # Bounded retry with exponential backoff (max 2 attempts in serverless)
+        max_retries = 2
+        backoff = 0.5
 
         for attempt in range(max_retries):
             try:
                 # Inter-request delay to honor rate limits
                 time.sleep(Config.FIRMS_RATE_LIMIT_DELAY)
                 
-                response = requests.get(url, headers=headers, timeout=25)
+                response = requests.get(url, headers=headers, timeout=12)
                 
                 # Check HTTP status
                 if response.status_code == 429:

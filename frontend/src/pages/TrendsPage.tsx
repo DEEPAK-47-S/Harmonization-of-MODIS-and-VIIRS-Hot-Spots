@@ -50,10 +50,30 @@ export const TrendsPage: React.FC = () => {
     }
   };
 
-  const formattedSeasonality = data?.seasonality?.map((s: any) => ({
-    ...s,
-    month_name: MONTH_LABELS[s.month - 1]
-  })) || [];
+  const yearlyData = (data?.years || data?.yearly_totals || []).map((y: any) => {
+    let metric = y.active_grid_cells ?? y.active_cells ?? y.total_metric ?? 0;
+    if (seriesType === 'modis') metric = y.modis_observations ?? y.modis_count ?? 0;
+    if (seriesType === 'viirs') metric = y.viirs_observations ?? y.viirs_count ?? 0;
+    if (seriesType === 'overlap') metric = y.co_detected_cells ?? 0;
+    return {
+      ...y,
+      year: String(y.year),
+      total_metric: metric,
+      modis_count: y.modis_observations ?? y.modis_count ?? 0,
+      viirs_count: y.viirs_observations ?? y.viirs_count ?? 0,
+    };
+  });
+
+  const formattedSeasonality = data?.seasonality?.map((s: any) => {
+    let val = s.active_cells ?? s.mean_active_cells ?? 0;
+    if (seriesType === 'modis') val = s.modis_count ?? 0;
+    if (seriesType === 'viirs') val = s.viirs_count ?? 0;
+    return {
+      ...s,
+      month_name: MONTH_LABELS[s.month - 1] || `M${s.month}`,
+      active_cells: val,
+    };
+  }) || [];
 
   return (
     <div className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] overflow-y-auto">
@@ -132,15 +152,20 @@ export const TrendsPage: React.FC = () => {
             </div>
 
             <div className="h-64 w-full pt-2">
-              {data && data.yearly_totals?.length > 0 ? (
+              {yearlyData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.yearly_totals} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <XAxis dataKey="year" stroke="#777970" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#777970" fontSize={11} tickLine={false} />
+                  <BarChart data={yearlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <XAxis dataKey="year" stroke="#64748B" fontSize={11} tickLine={false} />
+                    <YAxis stroke="#64748B" fontSize={11} tickLine={false} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E1DED5', borderRadius: '6px', fontSize: '11px', color: '#252923' }}
+                      contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '8px', fontSize: '11px', color: '#0F172A' }}
                     />
-                    <Bar dataKey="total_metric" name="Active 1km Cells" fill="#E65C35" radius={[2, 2, 0, 0]} />
+                    <Bar 
+                      dataKey="total_metric" 
+                      name={seriesType === 'modis' ? 'MODIS Detections' : seriesType === 'viirs' ? 'VIIRS Detections' : seriesType === 'overlap' ? 'Co-detected Cells' : 'Harmonized 1km Cells'} 
+                      fill="#EA580C" 
+                      radius={[4, 4, 0, 0]} 
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -164,18 +189,18 @@ export const TrendsPage: React.FC = () => {
               {formattedSeasonality.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={formattedSeasonality} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <XAxis dataKey="month_name" stroke="#777970" fontSize={11} tickLine={false} />
-                    <YAxis stroke="#777970" fontSize={11} tickLine={false} />
+                    <XAxis dataKey="month_name" stroke="#64748B" fontSize={11} tickLine={false} />
+                    <YAxis stroke="#64748B" fontSize={11} tickLine={false} />
                     <Tooltip 
-                      contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E1DED5', borderRadius: '6px', fontSize: '11px', color: '#252923' }}
+                      contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '8px', fontSize: '11px', color: '#0F172A' }}
                     />
                     <Line 
                       type="monotone" 
-                      dataKey="mean_active_cells" 
-                      name="Mean Active Cells" 
-                      stroke="#318C9B" 
+                      dataKey="active_cells" 
+                      name={seriesType === 'modis' ? 'MODIS Observations' : seriesType === 'viirs' ? 'VIIRS Observations' : 'Active Cell-Days'} 
+                      stroke="#0284C7" 
                       strokeWidth={2}
-                      dot={{ fill: '#318C9B', r: 3 }}
+                      dot={{ fill: '#0284C7', r: 3 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
