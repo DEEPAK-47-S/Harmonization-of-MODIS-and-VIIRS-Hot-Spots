@@ -396,7 +396,7 @@ export const FireMapPage: React.FC = () => {
             <div className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-white border border-[#E1DED5] shadow-card text-xs font-medium text-[#252923]">
               <Flame className="w-3.5 h-3.5 text-[#E65C35]" />
               <span className="font-bold">
-                {isWorld ? densityClusters.reduce((acc, c) => acc + c.total_detections, 0).toLocaleString() : hotspots.length.toLocaleString()}
+                {isWorld ? densityClusters.reduce((acc, c) => acc + (c.total_detections || c.count || 0), 0).toLocaleString() : hotspots.length.toLocaleString()}
               </span>
               <span className="text-[11px] text-[#777970]">{isWorld ? 'Global Detections' : 'Hotspots'}</span>
             </div>

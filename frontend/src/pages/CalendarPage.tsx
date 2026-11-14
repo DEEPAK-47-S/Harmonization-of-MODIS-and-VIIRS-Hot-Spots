@@ -404,8 +404,8 @@ export const CalendarPage: React.FC = () => {
                             <span className="font-semibold text-[#252923]">{cell.sensors_present}</span>
                             <span className="font-mono text-[#E65C35]">{cell.total_detections} det.</span>
                           </div>
-                          {cell.mean_frp_mw && (
-                            <div className="text-[10px] text-[#777970] mt-0.5">Mean FRP: {cell.mean_frp_mw.toFixed(1)} MW</div>
+                          {cell.mean_frp_mw !== null && cell.mean_frp_mw !== undefined && (
+                            <div className="text-[10px] text-[#777970] mt-0.5">Mean FRP: {Number(cell.mean_frp_mw).toFixed(1)} MW</div>
                           )}
                         </div>
                       ))}

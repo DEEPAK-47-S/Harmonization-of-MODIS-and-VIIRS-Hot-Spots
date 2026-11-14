@@ -72,7 +72,9 @@ class GlobalFireService:
                         "iso3": iso3,
                         "name": cinfo["name"],
                         "continent": cinfo["continent"],
-                        "observation_count": cnt
+                        "observation_count": cnt,
+                        "observations_count": cnt,
+                        "active_cells_count": 0
                     })
 
             country_summaries.sort(key=lambda x: x["observation_count"], reverse=True)

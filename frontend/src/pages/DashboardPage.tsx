@@ -177,8 +177,8 @@ export const DashboardPage: React.FC = () => {
   const paginatedHotspots = sortedHotspots.slice((tablePage - 1) * pageSize, tablePage * pageSize);
 
   // Sensor proportion
-  const totalObs = (summary?.kpi.total_modis_observations || 0) + (summary?.kpi.total_viirs_observations || 0);
-  const modisPct = totalObs > 0 ? Math.round(((summary?.kpi.total_modis_observations || 0) / totalObs) * 100) : 0;
+  const totalObs = (summary?.kpi?.total_modis_observations || 0) + (summary?.kpi?.total_viirs_observations || 0);
+  const modisPct = totalObs > 0 ? Math.round(((summary?.kpi?.total_modis_observations || 0) / totalObs) * 100) : 0;
   const viirsPct = totalObs > 0 ? 100 - modisPct : 0;
 
   return (
@@ -244,7 +244,7 @@ export const DashboardPage: React.FC = () => {
               <Grid className="w-3.5 h-3.5 text-[#E65C35]" />
             </div>
             <div className="text-2xl font-serif font-bold text-[#252923]">
-              {loading ? '—' : (summary?.kpi.active_grid_cell_days.toLocaleString() ?? '0')}
+              {loading ? '—' : ((summary?.kpi?.active_grid_cell_days ?? 0).toLocaleString())}
             </div>
             <div className="text-[11px] text-[#252923] font-medium mt-0.5">1 km analytical cells</div>
             <p className="text-[10px] text-[#777970] mt-1 leading-tight">
@@ -259,7 +259,7 @@ export const DashboardPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-[#C27B26]"></span>
             </div>
             <div className="text-2xl font-serif font-bold text-[#252923]">
-              {loading ? '—' : (summary?.kpi.total_modis_observations.toLocaleString() ?? '0')}
+              {loading ? '—' : ((summary?.kpi?.total_modis_observations ?? 0).toLocaleString())}
             </div>
             <div className="text-[11px] text-[#252923] font-medium mt-0.5">Observations (Terra &amp; Aqua)</div>
             <p className="text-[10px] text-[#777970] mt-1 leading-tight">
@@ -274,7 +274,7 @@ export const DashboardPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-[#318C9B]"></span>
             </div>
             <div className="text-2xl font-serif font-bold text-[#252923]">
-              {loading ? '—' : (summary?.kpi.total_viirs_observations.toLocaleString() ?? '0')}
+              {loading ? '—' : ((summary?.kpi?.total_viirs_observations ?? 0).toLocaleString())}
             </div>
             <div className="text-[11px] text-[#252923] font-medium mt-0.5">Observations (NOAA-20/21)</div>
             <p className="text-[10px] text-[#777970] mt-1 leading-tight">
@@ -289,7 +289,7 @@ export const DashboardPage: React.FC = () => {
               <Layers className="w-3.5 h-3.5 text-[#54785E]" />
             </div>
             <div className="text-2xl font-serif font-bold text-[#252923]">
-              {loading ? '—' : (summary?.kpi.cross_sensor_co_detected_cell_days.toLocaleString() ?? '0')}
+              {loading ? '—' : ((summary?.kpi?.cross_sensor_co_detected_cell_days ?? 0).toLocaleString())}
             </div>
             <div className="text-[11px] text-[#252923] font-medium mt-0.5">Joint Sensor Overlap</div>
             <p className="text-[10px] text-[#777970] mt-1 leading-tight">
@@ -567,7 +567,7 @@ export const DashboardPage: React.FC = () => {
 
               {/* Summary Items */}
               <div className="space-y-3 text-xs">
-                {isWorld && globalSummary && globalSummary.top_countries.length > 0 ? (
+                {isWorld && globalSummary && globalSummary.top_countries && globalSummary.top_countries.length > 0 ? (
                   <div className="space-y-2">
                     <span className="text-[10px] font-mono uppercase text-[#777970] font-semibold">Top Active Nations</span>
                     <div className="space-y-1.5">
@@ -578,7 +578,7 @@ export const DashboardPage: React.FC = () => {
                             <span className="text-[10px] font-mono text-[#777970] ml-1.5">{tc.iso3}</span>
                           </div>
                           <span className="text-[11px] font-mono font-bold text-[#E65C35]">
-                            {tc.observations_count.toLocaleString()} pts
+                            {((tc as any).observations_count || (tc as any).observation_count || 0).toLocaleString()} pts
                           </span>
                         </div>
                       ))}
@@ -589,7 +589,7 @@ export const DashboardPage: React.FC = () => {
                     <div className="p-3 bg-[#FAF8F3] border border-[#E1DED5] rounded-md">
                       <span className="text-[10px] font-mono uppercase text-[#777970]">Latest UTC Acquisition</span>
                       <div className="font-mono font-medium text-sm text-[#252923] mt-0.5">
-                        {summary?.kpi.latest_observation_utc ? summary.kpi.latest_observation_utc.replace('T', ' ').slice(0, 16) + ' UTC' : 'No records recorded'}
+                        {summary?.kpi?.latest_observation_utc ? summary.kpi.latest_observation_utc.replace('T', ' ').slice(0, 16) + ' UTC' : 'No records recorded'}
                       </div>
                     </div>
 
@@ -714,12 +714,12 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between text-xs text-[#777970]">
                   <span>Recent Active Days</span>
                   <span className="font-mono text-[11px] text-[#252923]">
-                    {summary?.recent_timeline.filter(t => t.active_grid_cells > 0).length || 0} active dates
+                    {summary?.recent_timeline?.filter(t => t.active_grid_cells > 0).length || 0} active dates
                   </span>
                 </div>
 
                 <div className="grid grid-cols-7 gap-1.5 pt-1">
-                  {(summary?.recent_timeline.slice(-14) || []).map((day, idx) => {
+                  {(summary?.recent_timeline?.slice(-14) || []).map((day, idx) => {
                     const count = day.active_grid_cells;
                     let bg = '#EBE8DF';
                     if (count > 0 && count <= 3) bg = '#FCECE7';

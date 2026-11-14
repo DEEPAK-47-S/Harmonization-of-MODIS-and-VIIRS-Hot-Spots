@@ -173,7 +173,7 @@ export const GlobalExplorerPage: React.FC = () => {
               <Globe2 className="w-4 h-4 text-[#E65C35]" />
             </div>
             <div className="text-2xl font-serif font-bold text-[#252923]">
-              {loading ? '—' : (globalSummary?.kpi.active_countries_count ?? countries.length)}
+              {loading ? '—' : (globalSummary?.kpi?.active_countries_count ?? countries.length)}
             </div>
             <div className="text-[11px] text-[#252923] font-medium mt-0.5">Monitored Sovereign Borders</div>
             <p className="text-[10px] text-[#777970] mt-1 leading-tight">
@@ -187,7 +187,7 @@ export const GlobalExplorerPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-[#C27B26]"></span>
             </div>
             <div className="text-2xl font-serif font-bold text-[#252923]">
-              {loading ? '—' : (globalSummary?.kpi.modis_observations.toLocaleString() ?? '0')}
+              {loading ? '—' : ((globalSummary?.kpi?.modis_observations ?? 0).toLocaleString())}
             </div>
             <div className="text-[11px] text-[#252923] font-medium mt-0.5">Terra &amp; Aqua Hotspots</div>
             <p className="text-[10px] text-[#777970] mt-1 leading-tight">
@@ -201,7 +201,7 @@ export const GlobalExplorerPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-[#318C9B]"></span>
             </div>
             <div className="text-2xl font-serif font-bold text-[#252923]">
-              {loading ? '—' : (globalSummary?.kpi.viirs_observations.toLocaleString() ?? '0')}
+              {loading ? '—' : ((globalSummary?.kpi?.viirs_observations ?? 0).toLocaleString())}
             </div>
             <div className="text-[11px] text-[#252923] font-medium mt-0.5">NOAA-20/21 &amp; S-NPP Hotspots</div>
             <p className="text-[10px] text-[#777970] mt-1 leading-tight">
@@ -215,7 +215,7 @@ export const GlobalExplorerPage: React.FC = () => {
               <Layers className="w-4 h-4 text-[#54785E]" />
             </div>
             <div className="text-2xl font-serif font-bold text-[#252923]">
-              {loading ? '—' : (globalSummary?.kpi.active_grid_cells.toLocaleString() ?? '0')}
+              {loading ? '—' : ((globalSummary?.kpi?.active_grid_cells ?? 0).toLocaleString())}
             </div>
             <div className="text-[11px] text-[#252923] font-medium mt-0.5">1 km Cylindrical Equal-Area</div>
             <p className="text-[10px] text-[#777970] mt-1 leading-tight">
@@ -347,7 +347,7 @@ export const GlobalExplorerPage: React.FC = () => {
                   <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
                     <div className="text-[10px] font-mono uppercase text-[#777970]">Total Observations</div>
                     <div className="text-lg font-serif font-bold text-[#252923] mt-0.5">
-                      {countryAnalytics.kpi.total_observations.toLocaleString()}
+                      {(countryAnalytics.kpi?.total_observations ?? 0).toLocaleString()}
                     </div>
                     <div className="text-[10px] text-[#777970]">Active hot spots</div>
                   </div>
@@ -355,7 +355,7 @@ export const GlobalExplorerPage: React.FC = () => {
                   <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
                     <div className="text-[10px] font-mono uppercase text-[#C27B26]">MODIS (1km)</div>
                     <div className="text-lg font-serif font-bold text-[#C27B26] mt-0.5">
-                      {countryAnalytics.kpi.modis_observations.toLocaleString()}
+                      {(countryAnalytics.kpi?.modis_observations ?? 0).toLocaleString()}
                     </div>
                     <div className="text-[10px] text-[#777970]">Terra + Aqua</div>
                   </div>
@@ -363,7 +363,7 @@ export const GlobalExplorerPage: React.FC = () => {
                   <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
                     <div className="text-[10px] font-mono uppercase text-[#318C9B]">VIIRS (375m)</div>
                     <div className="text-lg font-serif font-bold text-[#318C9B] mt-0.5">
-                      {countryAnalytics.kpi.viirs_observations.toLocaleString()}
+                      {(countryAnalytics.kpi?.viirs_observations ?? 0).toLocaleString()}
                     </div>
                     <div className="text-[10px] text-[#777970]">NOAA-20/21</div>
                   </div>
@@ -371,7 +371,7 @@ export const GlobalExplorerPage: React.FC = () => {
                   <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
                     <div className="text-[10px] font-mono uppercase text-[#54785E]">Co-Detected Cells</div>
                     <div className="text-lg font-serif font-bold text-[#54785E] mt-0.5">
-                      {countryAnalytics.kpi.co_detected_cells.toLocaleString()}
+                      {(countryAnalytics.kpi?.co_detected_cells ?? 0).toLocaleString()}
                     </div>
                     <div className="text-[10px] text-[#777970]">Dual confirmation</div>
                   </div>
@@ -384,7 +384,7 @@ export const GlobalExplorerPage: React.FC = () => {
                     <div>
                       <div className="text-xs font-semibold text-[#252923]">Mean Fire Radiative Power</div>
                       <div className="text-sm font-serif font-bold text-[#E65C35]">
-                        {countryAnalytics.kpi.mean_frp_mw.toFixed(1)} MW
+                        {(countryAnalytics.kpi?.mean_frp_mw || 0).toFixed(1)} MW
                       </div>
                       <div className="text-[10px] text-[#777970]">Average intensity per detection</div>
                     </div>
@@ -394,7 +394,7 @@ export const GlobalExplorerPage: React.FC = () => {
                     <div>
                       <div className="text-xs font-semibold text-[#252923]">Peak Radiative Power (Max)</div>
                       <div className="text-sm font-serif font-bold text-[#BD493C]">
-                        {countryAnalytics.kpi.max_frp_mw.toFixed(1)} MW
+                        {(countryAnalytics.kpi?.max_frp_mw || 0).toFixed(1)} MW
                       </div>
                       <div className="text-[10px] text-[#777970]">Highest energetic event recorded</div>
                     </div>

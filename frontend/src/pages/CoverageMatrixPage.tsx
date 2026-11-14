@@ -101,21 +101,21 @@ export const CoverageMatrixPage: React.FC = () => {
             <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
               <span className="text-[10px] font-mono text-[#777970] uppercase">Total Observations</span>
               <div className="text-xl font-serif font-bold text-[#252923] mt-0.5">
-                {matrix?.database_records.total_observations.toLocaleString() ?? '—'}
+                {(matrix?.database_records?.total_observations ?? 0).toLocaleString()}
               </div>
             </div>
 
             <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
               <span className="text-[10px] font-mono text-[#C27B26] uppercase">MODIS Records</span>
               <div className="text-xl font-serif font-bold text-[#C27B26] mt-0.5">
-                {matrix?.database_records.modis_observations.toLocaleString() ?? '—'}
+                {(matrix?.database_records?.modis_observations ?? 0).toLocaleString()}
               </div>
             </div>
 
             <div className="bg-[#FAF8F3] p-3 rounded-md border border-[#E1DED5]">
               <span className="text-[10px] font-mono text-[#318C9B] uppercase">VIIRS Records</span>
               <div className="text-xl font-serif font-bold text-[#318C9B] mt-0.5">
-                {matrix?.database_records.viirs_observations.toLocaleString() ?? '—'}
+                {(matrix?.database_records?.viirs_observations ?? 0).toLocaleString()}
               </div>
             </div>
 

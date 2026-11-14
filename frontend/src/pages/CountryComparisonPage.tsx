@@ -165,7 +165,7 @@ export const CountryComparisonPage: React.FC = () => {
 
                   <div className="flex justify-between items-center bg-[#FAF8F3] p-2 rounded">
                     <span className="text-[#318C9B]">VIIRS (375m)</span>
-                    <span className="font-mono font-bold text-[#318C9B]">{country.viirs_observations.toLocaleString()}</span>
+                    <span className="font-mono font-bold text-[#318C9B]">{(country.viirs_observations || 0).toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between items-center bg-[#FAF8F3] p-2 rounded">
