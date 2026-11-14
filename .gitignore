@@ -51,7 +51,8 @@ frontend/dist-ssr/
 *.sqlite
 *.sqlite3
 *.db
-backend/firepulse.db
+# Allow compressed production database for fast git sync & Vercel deployment
+!backend/firepulse.db.gz
 
 # OS / Editor
 .DS_Store
