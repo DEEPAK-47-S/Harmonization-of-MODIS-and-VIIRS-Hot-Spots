@@ -105,8 +105,8 @@ export const DataSourcesPage: React.FC = () => {
         </div>
 
         {/* Operational Sensor Condition: Suomi-NPP Notice */}
-        <div className="bg-[#B98B37]/10 border border-[#B98B37]/30 rounded-lg p-5 shadow-sm flex items-start space-x-3.5">
-          <AlertTriangle className="w-5 h-5 text-[#B98B37] shrink-0 mt-0.5" />
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 shadow-xs flex items-start space-x-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-xs text-slate-900 leading-relaxed">
             <strong className="text-slate-900 font-semibold block mb-0.5">
               Mission Status: Suomi-NPP Data Delivery Cessation (November 2, 2026)
@@ -208,7 +208,7 @@ export const DataSourcesPage: React.FC = () => {
                   <td className="py-2.5 px-4 font-mono">375 m</td>
                   <td className="py-2.5 px-4">Standard Processing (Historical Only)</td>
                   <td className="py-2.5 px-4 text-slate-500 font-medium flex items-center space-x-1">
-                    <Info className="w-3.5 h-3.5 text-[#B98B37]" />
+                    <Info className="w-3.5 h-3.5 text-amber-600" />
                     <span>Decommissioned (Nov 2026)</span>
                   </td>
                 </tr>

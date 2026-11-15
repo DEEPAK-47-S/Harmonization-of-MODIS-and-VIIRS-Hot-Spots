@@ -137,45 +137,43 @@ export const GlobalExplorerPage: React.FC = () => {
 
       <main className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
         {/* PAGE INTRO */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/80 pb-6">
-          <div className="space-y-1.5">
-            <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-semibold tracking-wide uppercase">
-              Global Scale • Continental &amp; Country Breakdown
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+              Global Observational Scope
             </span>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Earth at a glance.
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-normal max-w-2xl">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Global Fire Activity Explorer
+            </h2>
+            <p className="text-xs text-slate-500 max-w-2xl">
               Cross-sensor active fire detections across all seven continents and 30+ monitored countries.
               Select any nation to inspect granular 1km grid harmonizations and sensor attribution.
             </p>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 shrink-0">
             <button
               onClick={() => {
                 setAOI({ name: 'Entire World', west: -180, south: -90, east: 180, north: 90 });
                 triggerRefresh();
                 showToast('info', 'Global Scope', 'Application reset to Worldwide coverage');
               }}
-              className="flex items-center space-x-2 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-50 shadow-2xs transition-colors"
+              className="flex items-center space-x-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-xs font-semibold transition-colors shadow-xs"
             >
-              <Globe2 className="w-4 h-4 text-orange-500" />
-              <span>Set Global Scope</span>
+              <Globe2 className="w-3.5 h-3.5 text-orange-400" />
+              <span>Worldwide Scope</span>
             </button>
           </div>
         </div>
 
         {/* WORLDWIDE KPI STRIP */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Active Countries</span>
-              <div className="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
-                <Globe2 className="w-4 h-4" />
-              </div>
+          <div className="bg-white border border-slate-200/90 p-4 rounded-lg shadow-xs">
+            <div className="flex items-center justify-between mb-1 text-slate-500">
+              <span className="text-xs font-medium">Monitored Nations</span>
+              <Globe2 className="w-4 h-4 text-orange-600" />
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
               {loading ? '—' : (globalSummary?.kpi?.active_countries_count ?? countries.length)}
             </div>
             <div className="text-[11px] text-slate-600 font-medium mt-1">Monitored Sovereign Borders</div>

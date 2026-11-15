@@ -90,10 +90,10 @@ export const InsightsPage: React.FC = () => {
         </div>
 
         {/* Safeguard Status Box */}
-        <div className={`p-4 rounded-lg border shadow-sm ${
+        <div className={`p-4 rounded-lg border shadow-xs ${
           hasSufficientHistory 
-            ? 'bg-emerald-600/5 border-[#54785E]/30' 
-            : 'bg-[#B98B37]/5 border-[#B98B37]/30'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-900' 
+            : 'bg-amber-50 border-amber-200 text-amber-900'
         }`}>
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center space-x-3">

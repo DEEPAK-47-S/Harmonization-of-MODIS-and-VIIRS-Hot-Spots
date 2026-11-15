@@ -3,68 +3,96 @@
 @tailwind utilities;
 
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: light;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-[#F8FAFC] text-slate-900 font-sans min-h-screen antialiased selection:bg-orange-500/15 selection:text-orange-600;
+    @apply bg-slate-50 text-slate-900 font-sans min-h-screen antialiased selection:bg-orange-500/20 selection:text-orange-700;
+  }
+
+  /* Monospace numbers for telemetry and data alignment */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Subtle, refined modern scrollbar */
+/* Precision scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
-  border-radius: 9999px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
 
-/* Leaflet map styles — modern light styling with crisp rounded popups */
+/* Modern Leaflet Map Styling */
 .leaflet-container {
   background-color: #F1F5F9 !important;
-  font-family: 'Inter', -apple-system, sans-serif !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
   background: #FFFFFF !important;
   color: #0F172A !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04) !important;
 }
 
 .leaflet-popup-content {
-  margin: 12px 14px !important;
-  line-height: 1.45 !important;
+  margin: 10px 12px !important;
+  line-height: 1.4 !important;
+  font-size: 12px !important;
 }
 
 .leaflet-container a.leaflet-popup-close-button {
-  color: #64748B !important;
-  padding: 8px 8px 0 0 !important;
+  color: #94A3B8 !important;
+  padding: 6px 6px 0 0 !important;
 }
 
 .leaflet-container a.leaflet-popup-close-button:hover {
   color: #0F172A !important;
 }
 
-/* Modern Gen-Z card classes */
-.editorial-card {
-  background-color: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 14px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
+/* Tooltip precision */
+.leaflet-tooltip {
+  background: #0F172A !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
 }
 
-.editorial-card-stone {
-  background-color: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  border-radius: 14px;
+.leaflet-tooltip-top:before {
+  border-top-color: #0F172A !important;
+}
+
+/* Card components */
+.ui-card {
+  @apply bg-white border border-slate-200/90 rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.04)];
+}
+
+.ui-card-subtle {
+  @apply bg-slate-50/70 border border-slate-200/80 rounded-lg;
 }

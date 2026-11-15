@@ -218,8 +218,8 @@ export const CountryComparisonPage: React.FC = () => {
                     }} 
                   />
                   <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '6px' }} />
-                  <Bar dataKey="modis_observations" name="MODIS (1km)" fill="#C27B26" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="viirs_observations" name="VIIRS (375m)" fill="#318C9B" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="modis_observations" name="MODIS (1km)" fill="#D97706" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="viirs_observations" name="VIIRS (375m)" fill="#0284C7" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

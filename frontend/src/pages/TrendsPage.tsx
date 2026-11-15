@@ -118,7 +118,7 @@ export const TrendsPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1 bg-white p-1 rounded-md border border-slate-200">
+          <div className="flex flex-wrap items-center gap-1 bg-slate-100 p-1 rounded-md border border-slate-200">
             {[
               { id: 'harmonized', label: 'Harmonized 1km Cells' },
               { id: 'modis', label: 'MODIS Series Only' },
@@ -128,10 +128,10 @@ export const TrendsPage: React.FC = () => {
               <button
                 key={t.id}
                 onClick={() => setSeriesType(t.id)}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition ${
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
                   seriesType === t.id
-                    ? 'bg-white text-orange-600 font-semibold shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
+                    ? 'bg-white text-slate-900 font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 {t.label}

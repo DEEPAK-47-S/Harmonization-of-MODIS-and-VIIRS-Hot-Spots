@@ -141,9 +141,9 @@ export const AboutPage: React.FC = () => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1 text-xs">
-            <div className="p-4 bg-emerald-600/5 border border-[#54785E]/30 rounded space-y-2">
-              <h4 className="font-semibold text-emerald-700">What FirePulse DOES</h4>
-              <ul className="list-disc pl-4 space-y-1 text-slate-900 text-[11px]">
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded space-y-2">
+              <h4 className="font-semibold text-emerald-800">What FirePulse DOES</h4>
+              <ul className="list-disc pl-4 space-y-1 text-slate-800 text-[11px]">
                 <li>Projects coordinates onto a consistent, equal-area spatial grid (EPSG:6933).</li>
                 <li>Normalizes diverse attribute column structures across MODIS and VIIRS.</li>
                 <li>Identifies when both sensors detect activity in the same 1km cell on the same UTC day.</li>
@@ -152,8 +152,8 @@ export const AboutPage: React.FC = () => {
               </ul>
             </div>
 
-            <div className="p-4 bg-red-600/5 border border-red-400/30 rounded space-y-2">
-              <h4 className="font-semibold text-red-600">What FirePulse DOES NOT DO</h4>
+            <div className="p-4 bg-red-50 border border-red-200 rounded space-y-2">
+              <h4 className="font-semibold text-red-800">What FirePulse DOES NOT DO</h4>
               <ul className="list-disc pl-4 space-y-1 text-slate-900 text-[11px]">
                 <li>Never sums raw MODIS and VIIRS counts into a single "number of fires".</li>
                 <li>Does not fabricate data when satellite coverage is unavailable or obstructed by clouds.</li>

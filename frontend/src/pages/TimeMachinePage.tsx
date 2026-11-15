@@ -117,13 +117,13 @@ export const TimeMachinePage: React.FC = () => {
         {/* INTRO */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
           <div className="space-y-1.5">
-            <span className="text-[11px] font-mono font-semibold tracking-wider text-slate-500 uppercase">
+            <span className="text-[11px] font-mono font-semibold tracking-wider text-slate-400 uppercase">
               Temporal Playback / Global Fire Dynamics
             </span>
-            <h1 className="text-2xl md:text-3xl font-sans font-semibold text-slate-900 tracking-tight">
-              Watch fire migrate across the planet.
-            </h1>
-            <p className="text-xs md:text-sm text-slate-500 font-sans max-w-2xl">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Global Fire Activity Time Machine
+            </h2>
+            <p className="text-xs text-slate-500 max-w-2xl">
               Step through daily NASA satellite observations. Scrub the timeline to observe how fire clusters 
               ignite, spread, and extinguish across agricultural belts and boreal forests.
             </p>

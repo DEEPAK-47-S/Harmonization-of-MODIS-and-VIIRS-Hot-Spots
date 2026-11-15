@@ -14,7 +14,8 @@ import {
   BookOpen,
   Layers,
   BarChart3,
-  X
+  X,
+  Radio
 } from 'lucide-react';
 import { useNav } from '../context/NavContext';
 
@@ -29,10 +30,10 @@ interface NavGroup {
 
 const navGroups: NavGroup[] = [
   {
-    label: 'Monitor',
+    label: 'Monitoring',
     items: [
-      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { to: '/fire-map', label: 'Live Fire Map', icon: MapIcon },
+      { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
+      { to: '/fire-map', label: 'Active Fire Map', icon: MapIcon },
       { to: '/calendar', label: 'Burning Calendar', icon: Calendar },
     ]
   },
@@ -41,23 +42,24 @@ const navGroups: NavGroup[] = [
     items: [
       { to: '/comparison', label: 'Sensor Comparison', icon: GitCompare },
       { to: '/trends', label: 'Historical Trends', icon: TrendingUp },
-      { to: '/insights', label: 'Unusual Activity', icon: AlertTriangle },
+      { to: '/insights', label: 'Anomaly Detection', icon: AlertTriangle },
     ]
   },
   {
-    label: 'Global',
+    label: 'Global Intelligence',
     items: [
       { to: '/global-explorer', label: 'Global Explorer', icon: Globe2 },
-      { to: '/time-machine', label: 'Global Time Machine', icon: Clock },
+      { to: '/time-machine', label: 'Time Machine', icon: Clock },
       { to: '/country-comparison', label: 'Country Benchmark', icon: BarChart3 },
     ]
   },
   {
     label: 'Platform',
     items: [
-      { to: '/coverage', label: 'Coverage Matrix', icon: Layers },
-      { to: '/about', label: 'Methodology', icon: BookOpen },
-      { to: '/settings', label: 'Settings & Ingestion', icon: Settings },
+      { to: '/coverage', label: 'Sensor Coverage', icon: Layers },
+      { to: '/data-sources', label: 'FIRMS Sources', icon: Radio },
+      { to: '/about', label: 'Documentation', icon: BookOpen },
+      { to: '/settings', label: 'Data Ingestion', icon: Settings },
     ]
   }
 ];
@@ -66,41 +68,38 @@ export const Sidebar: React.FC = () => {
   const { isMobileOpen, closeMobile } = useNav();
 
   const renderNavContent = () => (
-    <div className="flex flex-col h-full justify-between">
+    <div className="flex flex-col h-full justify-between bg-white text-slate-800">
       <div className="flex flex-col min-h-0">
         {/* Brand Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-200/80 flex items-center justify-between shrink-0">
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white shadow-sm shrink-0">
-              <Flame className="w-5 h-5 fill-white/20" />
+        <div className="h-14 px-4 border-b border-slate-200/90 flex items-center justify-between shrink-0">
+          <div className="flex items-center space-x-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-md bg-orange-600 flex items-center justify-center text-white shrink-0">
+              <Flame className="w-4 h-4" />
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center space-x-1.5">
-                <span className="font-bold text-lg tracking-tight text-slate-900">FirePulse</span>
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 border border-orange-200">2026</span>
-              </div>
-              <p className="text-[11px] text-slate-500 font-normal truncate">NASA Active-Fire Intelligence</p>
+            <div className="min-w-0 flex items-baseline space-x-2">
+              <span className="font-bold text-sm tracking-tight text-slate-900">FirePulse</span>
+              <span className="text-[10px] font-mono text-slate-500 font-medium">1km Grid</span>
             </div>
           </div>
 
           {/* Close button on mobile */}
           <button 
             onClick={closeMobile}
-            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="md:hidden p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             title="Close navigation"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Grouped Navigation */}
-        <nav className="p-3 space-y-4 overflow-y-auto flex-1">
+        {/* Navigation Groups */}
+        <nav className="p-2 space-y-4 overflow-y-auto flex-1">
           {navGroups.map((group) => (
-            <div key={group.label} className="space-y-1">
-              <h4 className="px-3 text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+            <div key={group.label} className="space-y-0.5">
+              <div className="px-2.5 py-1 text-[10px] font-mono font-medium uppercase tracking-wider text-slate-400 select-none">
                 {group.label}
-              </h4>
-              <div className="space-y-1">
+              </div>
+              <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -109,14 +108,14 @@ export const Sidebar: React.FC = () => {
                       to={item.to}
                       onClick={closeMobile}
                       className={({ isActive }) =>
-                        `flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                        `flex items-center space-x-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors ${
                           isActive
-                            ? 'bg-orange-50 text-orange-600 font-semibold border border-orange-200/80 shadow-2xs'
+                            ? 'bg-slate-900 text-white font-semibold shadow-xs'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                         }`
                       }
                     >
-                      <Icon className="w-4 h-4 shrink-0" />
+                      <Icon className="w-3.5 h-3.5 shrink-0 opacity-80" />
                       <span className="truncate">{item.label}</span>
                     </NavLink>
                   );
@@ -127,16 +126,15 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Footer Team Attribution */}
-      <div className="p-3.5 border-t border-slate-200/80 bg-slate-50 shrink-0">
-        <div className="flex items-center space-x-2 mb-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span className="text-xs font-bold text-slate-800">Team Virtual Warriors</span>
+      {/* Footer System Status */}
+      <div className="p-3 border-t border-slate-200/90 bg-slate-50/70 shrink-0">
+        <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="font-medium text-slate-700">NASA LANCE</span>
+          </div>
+          <span className="text-[10px] font-mono text-slate-500">EPSG:6933</span>
         </div>
-        <p className="text-[10px] text-slate-500 leading-tight">
-          NASA Space Apps Challenge 2026<br />
-          Harmonization of MODIS &amp; VIIRS Hot Spots
-        </p>
       </div>
     </div>
   );
@@ -144,21 +142,18 @@ export const Sidebar: React.FC = () => {
   return (
     <>
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden md:flex w-[230px] bg-white border-r border-slate-200/80 flex-col justify-between shrink-0 h-screen sticky top-0 select-none z-30">
+      <aside className="hidden md:flex w-[210px] bg-white border-r border-slate-200/90 flex-col justify-between shrink-0 h-screen sticky top-0 select-none z-30">
         {renderNavContent()}
       </aside>
 
-      {/* Mobile Drawer (Slide-over with Backdrop) */}
+      {/* Mobile Drawer */}
       {isMobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
-          {/* Backdrop */}
           <div 
             onClick={closeMobile}
-            className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs transition-opacity animate-fade-in"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
           />
-
-          {/* Drawer Panel */}
-          <div className="relative w-[280px] max-w-[85vw] bg-white h-full shadow-2xl flex flex-col z-10 animate-slide-in-left border-r border-slate-200/80">
+          <div className="relative w-[260px] max-w-[80vw] bg-white h-full shadow-xl flex flex-col z-10 border-r border-slate-200">
             {renderNavContent()}
           </div>
         </div>

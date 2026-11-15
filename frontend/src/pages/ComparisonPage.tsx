@@ -53,9 +53,9 @@ export const ComparisonPage: React.FC = () => {
   };
 
   const overlapPieData = data?.overlap ? [
-    { name: 'Co-Detected (Both)', value: data.overlap.co_detected_cell_days || 0, color: '#54785E' },
-    { name: 'VIIRS Only', value: data.overlap.viirs_only_cell_days || 0, color: '#318C9B' },
-    { name: 'MODIS Only', value: data.overlap.modis_only_cell_days || 0, color: '#C27B26' },
+    { name: 'Co-Detected (Both)', value: data.overlap.co_detected_cell_days || 0, color: '#059669' },
+    { name: 'VIIRS Only', value: data.overlap.viirs_only_cell_days || 0, color: '#0284C7' },
+    { name: 'MODIS Only', value: data.overlap.modis_only_cell_days || 0, color: '#D97706' },
   ].filter(d => d.value > 0) : [];
 
   return (
@@ -98,10 +98,10 @@ export const ComparisonPage: React.FC = () => {
         {/* Side-by-Side Sensor Attribute Sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* MODIS Column (Amber Identity) */}
-          <div className="bg-white border-t-4 border-t-[#C27B26] border-x border-b border-slate-200 rounded-lg p-5 shadow-sm space-y-4">
+          <div className="bg-white border-t-2 border-t-amber-600 border-x border-b border-slate-200 rounded-lg p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center space-x-2.5">
-                <div className="w-7 h-7 rounded bg-amber-600/10 text-amber-700 flex items-center justify-center font-bold text-xs">
+                <div className="w-7 h-7 rounded bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-xs">
                   M
                 </div>
                 <div>
@@ -109,7 +109,7 @@ export const ComparisonPage: React.FC = () => {
                   <p className="text-[11px] text-slate-500">Terra &amp; Aqua Satellites</p>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-600/10 text-amber-700 border border-amber-400/30">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                 1,000 m Nominal
               </span>
             </div>
@@ -154,11 +154,11 @@ export const ComparisonPage: React.FC = () => {
             </div>
           </div>
 
-          {/* VIIRS Column (Teal Identity) */}
-          <div className="bg-white border-t-4 border-t-[#318C9B] border-x border-b border-slate-200 rounded-lg p-5 shadow-sm space-y-4">
+          {/* VIIRS Column (Sky Identity) */}
+          <div className="bg-white border-t-2 border-t-sky-600 border-x border-b border-slate-200 rounded-lg p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center space-x-2.5">
-                <div className="w-7 h-7 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center font-bold text-xs">
+                <div className="w-7 h-7 rounded bg-sky-50 text-sky-700 flex items-center justify-center font-bold text-xs">
                   V
                 </div>
                 <div>
@@ -166,7 +166,7 @@ export const ComparisonPage: React.FC = () => {
                   <p className="text-[11px] text-slate-500">NOAA-20, NOAA-21 &amp; S-NPP</p>
                 </div>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-sky-600/10 text-sky-600 border border-[#318C9B]/30">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-sky-50 text-sky-700 border border-sky-200">
                 375 m Nominal (I-Bands)
               </span>
             </div>
@@ -232,19 +232,19 @@ export const ComparisonPage: React.FC = () => {
             {/* Visual Box Diagram */}
             <div className="bg-white p-4 rounded border border-slate-200 flex flex-col items-center justify-center">
               <span className="text-[10px] font-mono uppercase text-slate-500 mb-3 font-semibold">Pixel Scale Diagram</span>
-              <div className="relative w-40 h-40 border-2 border-dashed border-amber-400 bg-amber-600/5 rounded flex flex-wrap p-1 gap-1 items-start justify-start">
+              <div className="relative w-40 h-40 border-2 border-dashed border-amber-400 bg-amber-50 rounded flex flex-wrap p-1 gap-1 items-start justify-start">
                 <span className="absolute -top-2.5 left-2 bg-white px-1 text-[9px] font-mono font-bold text-amber-700 border border-slate-200 rounded">
                   MODIS: 1,000 m
                 </span>
                 {Array.from({ length: 7 }).map((_, i) => (
                   <div
                     key={i}
-                    className="w-11 h-11 border border-[#318C9B] bg-sky-600/15 rounded flex items-center justify-center text-[9px] font-mono text-sky-600 font-bold"
+                    className="w-11 h-11 border border-sky-400 bg-sky-50 rounded flex items-center justify-center text-[9px] font-mono text-sky-700 font-bold"
                   >
                     375m
                   </div>
                 ))}
-                <div className="w-11 h-11 border border-[#318C9B]/40 border-dashed rounded flex items-center justify-center text-[8px] text-sky-600 font-mono">
+                <div className="w-11 h-11 border border-sky-300 border-dashed rounded flex items-center justify-center text-[8px] text-sky-600 font-mono">
                   +0.11
                 </div>
               </div>

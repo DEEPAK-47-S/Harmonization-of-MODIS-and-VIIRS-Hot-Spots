@@ -201,41 +201,41 @@ export const CalendarPage: React.FC = () => {
       />
 
       <main className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
-        {/* Modern Introduction */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/80 pb-6">
-          <div className="space-y-1.5">
-            <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-semibold tracking-wide uppercase">
-              NASA Space Apps 2026 Core Objective • Temporal Intelligence
+        {/* Header Strip */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-5">
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+              Temporal Intelligence
             </span>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               Harmonized Burning Activity Calendar
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-normal max-w-2xl">
+            </h2>
+            <p className="text-xs text-slate-500 max-w-2xl">
               Track seasonal fire dynamics across satellites. Explore year-by-month historical baselines, detect unusual monthly anomalies, and drill down into individual day observations.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {/* View Mode Switcher */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-md border border-slate-200">
               <button
                 onClick={() => setViewMode('matrix')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                   viewMode === 'matrix'
-                    ? 'bg-white text-orange-600 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-slate-900 font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <Table className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Annual Heatmap (Years × Months)</span>
-                <span className="sm:hidden">Annual Heatmap</span>
+                <span className="hidden sm:inline">Annual Heatmap</span>
+                <span className="sm:hidden">Heatmap</span>
               </button>
               <button
                 onClick={() => setViewMode('month')}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                   viewMode === 'month'
-                    ? 'bg-white text-orange-600 shadow-2xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-slate-900 font-semibold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <CalendarIcon className="w-3.5 h-3.5" />
@@ -254,17 +254,17 @@ export const CalendarPage: React.FC = () => {
                 north: aoi.north
               })}
               download
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 border border-slate-200 transition-colors shadow-2xs"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-slate-50 text-xs font-medium text-slate-700 border border-slate-300 transition-colors shadow-2xs"
               title="Download Monthly Harmonized Grid CSV"
             >
-              <Download className="w-3.5 h-3.5 text-sky-500" />
+              <Download className="w-3.5 h-3.5 text-slate-600" />
               <span>Export CSV</span>
             </a>
           </div>
         </div>
 
         {/* Navigation & Metric Selector Strip */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200/90 rounded-lg p-3.5 shadow-xs flex flex-wrap items-center justify-between gap-4">
           {viewMode === 'month' ? (
             /* Month & Year Controls */
             <div className="flex items-center space-x-3">

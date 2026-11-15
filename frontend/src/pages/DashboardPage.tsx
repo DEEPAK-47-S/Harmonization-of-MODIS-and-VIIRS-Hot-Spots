@@ -13,10 +13,8 @@ import {
   Info, 
   Download,
   Globe2,
-  Sparkles,
-  Sliders,
-  TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink
 } from 'lucide-react';
 import { 
   MapContainer, 
@@ -62,26 +60,25 @@ function MapBoundsFitter({ aoi, hotspots }: { aoi: AOIBounds; hotspots: Observat
       return;
     }
 
-    if (hotspots && hotspots.length > 0) {
+    if (hotspots.length > 0) {
       const lats = hotspots.map(h => h.latitude);
       const lons = hotspots.map(h => h.longitude);
       const minLat = Math.min(...lats);
       const maxLat = Math.max(...lats);
       const minLon = Math.min(...lons);
       const maxLon = Math.max(...lons);
-      
-      const padLat = Math.max(0.15, (maxLat - minLat) * 0.1);
-      const padLon = Math.max(0.15, (maxLon - minLon) * 0.1);
-      
+      const latPad = Math.max(0.04, (maxLat - minLat) * 0.12);
+      const lonPad = Math.max(0.04, (maxLon - minLon) * 0.12);
+
       map.fitBounds([
-        [minLat - padLat, minLon - padLon],
-        [maxLat + padLat, maxLon + padLon]
-      ], { maxZoom: 12, animate: true });
+        [minLat - latPad, minLon - lonPad],
+        [maxLat + latPad, maxLon + lonPad]
+      ], { padding: [24, 24], maxZoom: 12, animate: true });
     } else {
       map.fitBounds([
         [aoi.south, aoi.west],
         [aoi.north, aoi.east]
-      ], { maxZoom: 10, animate: true });
+      ], { padding: [20, 20], animate: true });
     }
   }, [aoi, hotspots, map]);
 
@@ -93,9 +90,9 @@ export const DashboardPage: React.FC = () => {
   const { showToast } = useToast();
 
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
-  const [globalSummary, setGlobalSummary] = useState<GlobalSummary | null>(null);
   const [hotspots, setHotspots] = useState<Observation[]>([]);
   const [gridCells, setGridCells] = useState<GridCell[]>([]);
+  const [globalSummary, setGlobalSummary] = useState<GlobalSummary | null>(null);
   const [densityClusters, setDensityClusters] = useState<MapDensityCluster[]>([]);
   
   const [loading, setLoading] = useState<boolean>(true);
@@ -111,7 +108,7 @@ export const DashboardPage: React.FC = () => {
   // Observations Table pagination
   const [tablePage, setTablePage] = useState<number>(1);
   const [tableSortAsc, setTableSortAsc] = useState<boolean>(false);
-  const pageSize = 8;
+  const pageSize = 10;
 
   const isWorld = aoi.name === 'Entire World' || (aoi.west <= -170 && aoi.east >= 170);
 
@@ -158,8 +155,8 @@ export const DashboardPage: React.FC = () => {
         east: aoi.east,
         north: aoi.north,
         aoi_name: aoi.name,
-        day_range: 3,
-        sources: ['MODIS_NRT', 'VIIRS_NOAA20_NRT', 'VIIRS_NOAA21_NRT']
+        day_range: 1,
+        sources: ['MODIS_NRT', 'VIIRS_NOAA20_NRT']
       });
 
       setIngestMsg({
@@ -205,153 +202,145 @@ export const DashboardPage: React.FC = () => {
   const viirsPct = totalObs > 0 ? 100 - modisPct : 0;
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC] overflow-y-auto">
+    <div className="flex-1 flex flex-col min-w-0 bg-slate-50 overflow-y-auto">
       <Header 
         title="Harmonized Fire Intelligence" 
-        subtitle="Spatially and temporally aggregated NASA FIRMS observations"
+        subtitle="Spatially and temporally calibrated NASA FIRMS observations (EPSG:6933 1km Grid)"
       />
 
-      <main className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
-        {/* HERO SECTION - MODERN GEN-Z LIGHT */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200/80 pb-5">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-semibold tracking-wide uppercase">
-              <Sparkles className="w-3 h-3" />
-              <span>{isWorld ? 'Planetary Fire Intel • Global Scope' : `Focused Region • ${aoi.name}`}</span>
+      <main className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
+        {/* Title & Action Strip */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+          <div>
+            <div className="flex items-center space-x-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {isWorld ? 'Global Active Fires Overview' : `Active Fires: ${aoi.name}`}
+              </h2>
+              <span className="text-xs px-2 py-0.5 rounded bg-slate-200/80 font-mono text-slate-700 font-medium">
+                {isWorld ? 'Worldwide' : 'Regional AOI'}
+              </span>
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
-              {isWorld ? 'Real-time Planetary Active Fires' : `Thermal Intelligence: ${aoi.name}`}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-normal max-w-2xl">
-              {isWorld 
-                ? 'NASA MODIS (Terra/Aqua) and VIIRS (NOAA-20/21) active fire observations, harmonized onto an analytical 1km equal-area grid.' 
-                : `Satellite detections and 1km harmonized burning footprints across ${aoi.name}.`}
+            <p className="text-xs text-slate-500 mt-0.5">
+              Cross-calibrated Terra/Aqua MODIS (1,000m) and NOAA-20/21 VIIRS (375m) observations.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex items-center space-x-2 shrink-0">
             <button
               onClick={handleQuickIngest}
               disabled={ingesting}
-              className="flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-orange-600 hover:bg-orange-700 text-white transition-colors shadow-xs disabled:opacity-50"
             >
               <Play className={`w-3.5 h-3.5 ${ingesting ? 'animate-spin' : ''}`} />
-              <span>{ingesting ? 'Syncing FIRMS...' : isWorld ? 'Sync Global NASA' : 'Sync Region NASA'}</span>
+              <span>{ingesting ? 'Syncing FIRMS...' : 'Sync NASA Data'}</span>
             </button>
             <Link
               to="/settings"
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors shadow-2xs"
+              className="px-3 py-1.5 rounded-md text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 transition-colors shadow-2xs"
             >
-              Archive
+              Ingest Options
             </Link>
           </div>
         </div>
 
         {/* Ingestion notice */}
         {ingestMsg && (
-          <div className={`p-4 rounded-xl text-xs flex items-center space-x-3 border ${
+          <div className={`p-3 rounded-md text-xs flex items-center space-x-2.5 border ${
             ingestMsg.type === 'success'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
               : 'bg-red-50 border-red-200 text-red-800'
           }`}>
             <Info className="w-4 h-4 shrink-0" />
-            <span className="font-semibold">{ingestMsg.text}</span>
+            <span className="font-medium">{ingestMsg.text}</span>
           </div>
         )}
 
-        {/* METRIC CARDS STRIP - 4 COLS DESKTOP, 2X2 MOBILE */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* METRICS ROW (4 Metrics Cards) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 1. Active Grid Cells */}
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Active 1km Cells</span>
-              <div className="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center">
-                <Grid className="w-4 h-4" />
-              </div>
+          <div className="bg-white border border-slate-200/90 rounded-lg p-4 shadow-xs">
+            <div className="flex items-center justify-between text-slate-500 mb-1">
+              <span className="text-xs font-medium">Active 1km Cells</span>
+              <Grid className="w-4 h-4 text-orange-600" />
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
               {loading ? '—' : ((summary?.kpi?.active_grid_cell_days ?? 0).toLocaleString())}
             </div>
-            <div className="text-[11px] text-slate-600 font-medium mt-1">Harmonized 1km footprint</div>
-            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
-              EPSG:6933 standard cylindrical equal-area cells.
-            </p>
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>Harmonized footprint</span>
+              <span className="font-mono text-[10px] text-slate-400">EPSG:6933</span>
+            </div>
           </div>
 
           {/* 2. MODIS Observations */}
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-amber-600 font-semibold">MODIS Detections</span>
-              <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
-                <Flame className="w-4 h-4" />
-              </div>
+          <div className="bg-white border border-slate-200/90 rounded-lg p-4 shadow-xs">
+            <div className="flex items-center justify-between text-slate-500 mb-1">
+              <span className="text-xs font-medium">MODIS Detections</span>
+              <Flame className="w-4 h-4 text-amber-600" />
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
               {loading ? '—' : ((summary?.kpi?.total_modis_observations ?? 0).toLocaleString())}
             </div>
-            <div className="text-[11px] text-slate-600 font-medium mt-1">Terra &amp; Aqua Satellites</div>
-            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
-              1,000 m nominal nadir resolution.
-            </p>
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>Terra &amp; Aqua</span>
+              <span className="font-mono text-[10px] text-amber-700">1,000m</span>
+            </div>
           </div>
 
           {/* 3. VIIRS Observations */}
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-sky-600 font-semibold">VIIRS Detections</span>
-              <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
-                <Layers className="w-4 h-4" />
-              </div>
+          <div className="bg-white border border-slate-200/90 rounded-lg p-4 shadow-xs">
+            <div className="flex items-center justify-between text-slate-500 mb-1">
+              <span className="text-xs font-medium">VIIRS Detections</span>
+              <Layers className="w-4 h-4 text-sky-600" />
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
               {loading ? '—' : ((summary?.kpi?.total_viirs_observations ?? 0).toLocaleString())}
             </div>
-            <div className="text-[11px] text-slate-600 font-medium mt-1">NOAA-20/21 &amp; S-NPP</div>
-            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
-              375 m high-resolution thermal I-bands.
-            </p>
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>NOAA-20/21 &amp; S-NPP</span>
+              <span className="font-mono text-[10px] text-sky-700">375m</span>
+            </div>
           </div>
 
-          {/* 4. Cross-Sensor Co-Detected */}
-          <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-emerald-600 font-semibold">Dual Verified</span>
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <CheckCircle2 className="w-4 h-4" />
-              </div>
+          {/* 4. Dual Verified / Co-Detected */}
+          <div className="bg-white border border-slate-200/90 rounded-lg p-4 shadow-xs">
+            <div className="flex items-center justify-between text-slate-500 mb-1">
+              <span className="text-xs font-medium">Dual Co-Detected</span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
               {loading ? '—' : ((summary?.kpi?.cross_sensor_co_detected_cell_days ?? 0).toLocaleString())}
             </div>
-            <div className="text-[11px] text-slate-600 font-medium mt-1">Co-Detected Cell-Days</div>
-            <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">
-              Detected by both MODIS &amp; VIIRS on same day.
-            </p>
+            <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+              <span>Same-day verification</span>
+              <span className="font-mono text-[10px] text-emerald-700">Both Sensors</span>
+            </div>
           </div>
         </div>
 
-        {/* MAIN VISUALIZATION: MAP (8 cols) + RIGHT PANEL (4 cols) */}
+        {/* MAP & RIGHT PANEL (2 columns: 8 cols + 4 cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          {/* MAP */}
-          <div className="lg:col-span-8 bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs flex flex-col">
-            <div className="p-4 border-b border-slate-200/80 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
+          {/* Map Column */}
+          <div className="lg:col-span-8 bg-white border border-slate-200/90 rounded-lg overflow-hidden shadow-xs flex flex-col">
+            {/* Map Controls Header */}
+            <div className="px-4 py-2.5 border-b border-slate-200/80 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-bold text-slate-900">Active Fire Map</span>
-                <span className="text-[10px] font-mono text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-full shadow-2xs">
+                <span className="text-xs font-semibold text-slate-900">Geospatial Distribution</span>
+                <span className="text-[10px] font-mono text-slate-600 bg-white border border-slate-200 px-1.5 py-0.5 rounded">
                   {isWorld 
-                    ? `${densityClusters.length} clusters (${densityClusters.reduce((acc, c) => acc + (c.total_detections || c.count || 0), 0).toLocaleString()} fires)` 
+                    ? `${densityClusters.length} clusters` 
                     : `${visibleHotspots.length} points visible`}
                 </span>
               </div>
 
-              {/* Modern layer toggle pills */}
-              <div className="flex items-center space-x-1.5 text-xs">
+              {/* Layer toggles */}
+              <div className="flex items-center space-x-1 text-xs">
                 <button
                   type="button"
                   onClick={() => setShowModis(!showModis)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
                     showModis 
-                      ? 'bg-amber-100 text-amber-800 border border-amber-300' 
+                      ? 'bg-amber-100 text-amber-900 border border-amber-300' 
                       : 'bg-white text-slate-400 border border-slate-200'
                   }`}
                 >
@@ -360,9 +349,9 @@ export const DashboardPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowViirs(!showViirs)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
                     showViirs 
-                      ? 'bg-sky-100 text-sky-800 border border-sky-300' 
+                      ? 'bg-sky-100 text-sky-900 border border-sky-300' 
                       : 'bg-white text-slate-400 border border-slate-200'
                   }`}
                 >
@@ -371,61 +360,59 @@ export const DashboardPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowGrid(!showGrid)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
                     showGrid 
-                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                      ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' 
                       : 'bg-white text-slate-400 border border-slate-200'
                   }`}
                 >
                   1km Grid
                 </button>
 
-                <div className="h-4 w-[1px] bg-slate-200 mx-1"></div>
+                <div className="h-3 w-[1px] bg-slate-200 mx-1"></div>
 
                 <select
                   value={mapStyle}
                   onChange={e => setMapStyle(e.target.value as any)}
-                  className="bg-white border border-slate-200 rounded-lg text-[11px] py-1 px-2 font-medium text-slate-700 focus:outline-none"
+                  className="bg-white border border-slate-300 rounded text-[11px] py-0.5 px-1.5 text-slate-700 focus:outline-none"
                 >
                   <option value="light">Light Canvas</option>
-                  <option value="satellite">Satellite Imagery</option>
-                  <option value="dark">Dark Canvas</option>
+                  <option value="satellite">Satellite</option>
+                  <option value="dark">Dark</option>
                 </select>
               </div>
             </div>
 
-            <div className="h-[420px] sm:h-[480px] lg:h-[520px] w-full relative z-0">
+            {/* Map Canvas */}
+            <div className="h-[440px] w-full relative z-0">
               <MapContainer
                 center={isWorld ? [20, 0] : [aoi.south + (aoi.north - aoi.south) / 2, aoi.west + (aoi.east - aoi.west) / 2]}
                 zoom={isWorld ? 2 : 7}
                 style={{ height: '100%', width: '100%' }}
-                attributionControl={true}
+                attributionControl={false}
               >
                 {mapStyle === 'light' && (
                   <TileLayer
                     url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-                    attribution="&copy; Esri, HERE, Garmin"
                     maxZoom={16}
                   />
                 )}
                 {mapStyle === 'satellite' && (
                   <TileLayer
                     url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                    attribution="&copy; Esri, Maxar, Earthstar Geographics"
                     maxZoom={18}
                   />
                 )}
                 {mapStyle === 'dark' && (
                   <TileLayer
                     url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-                    attribution="&copy; Esri, HERE, Garmin"
                     maxZoom={16}
                   />
                 )}
 
                 {!isWorld && <MapBoundsFitter aoi={aoi} hotspots={visibleHotspots} />}
 
-                {/* AOI Bounding Box for regional views */}
+                {/* Regional AOI Bounding Box */}
                 {!isWorld && (
                   <Rectangle
                     bounds={[
@@ -433,7 +420,7 @@ export const DashboardPage: React.FC = () => {
                       [aoi.north, aoi.east]
                     ]}
                     pathOptions={{
-                      color: '#FF5722',
+                      color: '#EA580C',
                       weight: 1.5,
                       dashArray: '4, 4',
                       fill: false
@@ -441,17 +428,13 @@ export const DashboardPage: React.FC = () => {
                   />
                 )}
 
-                {/* World Mode: Macro Density Clusters with Rich Instant Tooltip */}
+                {/* Global Mode: Macro Density Clusters */}
                 {isWorld && densityClusters.map((c, idx) => {
                   const detCount = c.total_detections || c.count || 1;
-                  const radius = Math.min(22, Math.max(6, Math.sqrt(detCount) * 2.5));
+                  const radius = Math.min(20, Math.max(5, Math.sqrt(detCount) * 2.2));
                   const isCo = c.has_co_detection;
                   const hasViirs = (c.viirs_detections || c.viirs_count || 0) > 0;
-                  const color = isCo 
-                    ? '#10B981' 
-                    : hasViirs 
-                    ? '#0EA5E9' 
-                    : '#F59E0B';
+                  const color = isCo ? '#10B981' : hasViirs ? '#0284C7' : '#D97706';
 
                   return (
                     <CircleMarker
@@ -460,48 +443,24 @@ export const DashboardPage: React.FC = () => {
                       radius={radius}
                       pathOptions={{
                         fillColor: color,
-                        fillOpacity: 0.82,
+                        fillOpacity: 0.85,
                         color: '#FFFFFF',
-                        weight: 1.5
+                        weight: 1.2
                       }}
                     >
-                      <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
-                        <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
-                          <div className="font-bold flex items-center space-x-1.5">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
-                            <span>{detCount.toLocaleString()} Fire Detections</span>
-                          </div>
-                          <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                            {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
-                          </div>
-                          <div className="flex items-center space-x-2 text-[10px] font-semibold text-slate-700 mt-1">
-                            <span className="text-amber-600">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
-                            <span>•</span>
-                            <span className="text-sky-600">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
-                          </div>
-                          <div className="text-[10px] text-orange-600 font-bold mt-0.5">
-                            Mean FRP: {(c.mean_frp || 0).toFixed(1)} MW
-                          </div>
-                        </div>
-                      </LeafletTooltip>
                       <Popup>
-                        <div className="p-2 space-y-1.5 text-xs font-sans text-slate-800">
-                          <div className="font-bold border-b border-slate-100 pb-1 text-sm text-slate-900">
+                        <div className="p-1 space-y-1 font-sans text-xs">
+                          <div className="font-semibold text-slate-900">
                             {detCount.toLocaleString()} Fire Detections
                           </div>
                           <div className="text-[10px] text-slate-500 font-mono">
                             {formatCoord(c.lat, true)}, {formatCoord(c.lon, false)}
                           </div>
-                          <div className="flex justify-between text-[11px] pt-1">
-                            <span className="text-amber-600 font-medium">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
-                            <span className="text-sky-600 font-medium">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
+                          <div className="flex justify-between text-[11px] pt-1 border-t border-slate-100">
+                            <span className="text-amber-700">MODIS: {c.modis_detections ?? c.modis_count ?? 0}</span>
+                            <span className="text-sky-700">VIIRS: {c.viirs_detections ?? c.viirs_count ?? 0}</span>
                           </div>
-                          {isCo && (
-                            <div className="text-[10px] text-emerald-600 font-bold">
-                              ✓ Cross-Sensor Co-Detection
-                            </div>
-                          )}
-                          <div className="text-[10px] text-slate-500">
+                          <div className="text-[10px] text-slate-600">
                             Mean FRP: {(c.mean_frp || 0).toFixed(1)} MW
                           </div>
                         </div>
@@ -510,7 +469,7 @@ export const DashboardPage: React.FC = () => {
                   );
                 })}
 
-                {/* Regional Mode: 1km Grid Cells with Instant Hover Tooltip */}
+                {/* Regional Mode: 1km Grid Cells */}
                 {!isWorld && showGrid && gridCells.map(cell => {
                   const b = cell.cell_bounds_wgs84;
                   if (!b) return null;
@@ -520,86 +479,50 @@ export const DashboardPage: React.FC = () => {
                       key={cell.grid_cell_id}
                       bounds={[[b.south, b.west], [b.north, b.east]]}
                       pathOptions={{
-                        color: isCo ? '#10B981' : '#10B981',
-                        weight: isCo ? 2 : 1.2,
-                        fillColor: isCo ? '#10B981' : '#10B981',
+                        color: isCo ? '#059669' : '#10B981',
+                        weight: isCo ? 1.8 : 1.0,
+                        fillColor: isCo ? '#10B981' : '#34D399',
                         fillOpacity: isCo ? 0.35 : 0.18
                       }}
                     >
-                      <LeafletTooltip direction="top" offset={[0, -4]} opacity={1}>
-                        <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
-                          <div className="font-bold text-emerald-700 flex items-center space-x-1">
-                            <span>1km Equal-Area Grid Cell</span>
-                            {isCo && <span className="text-[9px] bg-emerald-100 text-emerald-800 px-1 rounded font-bold">DUAL</span>}
-                          </div>
-                          <div className="text-[10px] font-mono text-slate-500">{cell.grid_cell_id}</div>
-                          <div className="text-[11px] font-semibold text-slate-800 mt-1">
-                            {cell.total_detections} Detections • {cell.sensors_present}
-                          </div>
-                        </div>
-                      </LeafletTooltip>
                       <Popup>
-                        <div className="text-xs space-y-1.5 font-sans">
-                          <div className="font-bold text-slate-900">1km Equal-Area Grid Cell</div>
-                          <div className="font-mono text-[10px] text-slate-500">{cell.grid_cell_id}</div>
-                          <div className="flex items-center space-x-1">
-                            <span className="text-slate-500">Status:</span>
-                            <span className="font-semibold text-slate-800">{cell.sensors_present}</span>
-                          </div>
-                          <div>Total Detections: <span className="font-bold text-slate-900">{cell.total_detections}</span></div>
-                          <div>Mean FRP: <span className="font-bold text-orange-600">{((cell.modis_frp_mean || cell.viirs_frp_mean || 0)).toFixed(1)} MW</span></div>
+                        <div className="text-xs space-y-1 font-sans">
+                          <div className="font-semibold text-slate-900">1km Grid Cell: {cell.grid_cell_id}</div>
+                          <div className="text-slate-600">Detections: <strong>{cell.total_detections}</strong> ({cell.sensors_present})</div>
+                          <div className="text-slate-600">Mean FRP: <strong>{((cell.modis_frp_mean || cell.viirs_frp_mean || 0)).toFixed(1)} MW</strong></div>
                         </div>
                       </Popup>
                     </Rectangle>
                   );
                 })}
 
-                {/* Regional Mode: Granular Observation Points with Hover Tooltip */}
+                {/* Regional Mode: Observation Points */}
                 {!isWorld && visibleHotspots.map(h => {
                   const isModis = h.sensor_family === 'MODIS';
-                  const color = isModis ? '#F59E0B' : '#0EA5E9';
+                  const color = isModis ? '#D97706' : '#0284C7';
                   return (
                     <CircleMarker
                       key={h.observation_id}
                       center={[h.latitude, h.longitude]}
-                      radius={isModis ? 6 : 4.5}
+                      radius={isModis ? 5 : 4}
                       pathOptions={{
                         color: '#FFFFFF',
-                        weight: 1.5,
+                        weight: 1.2,
                         fillColor: color,
-                        fillOpacity: 0.92
+                        fillOpacity: 0.9
                       }}
                     >
-                      <LeafletTooltip direction="top" offset={[0, -6]} opacity={1}>
-                        <div className="p-1.5 text-xs font-sans text-slate-900 leading-tight">
-                          <div className="font-bold flex items-center space-x-1">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></span>
-                            <span>{h.sensor_family} • {h.satellite}</span>
-                          </div>
-                          <div className="text-[10px] font-mono text-slate-500 mt-0.5">
-                            {formatCoord(h.latitude, true)}, {formatCoord(h.longitude, false)}
-                          </div>
-                          <div className="flex items-center space-x-2 text-[11px] font-bold text-orange-600 mt-1">
-                            <span>{h.frp_mw?.toFixed(1)} MW</span>
-                            <span className="text-slate-300">•</span>
-                            <span className="text-slate-700 font-semibold">{h.brightness_temperature_kelvin?.toFixed(0)} K</span>
-                          </div>
-                        </div>
-                      </LeafletTooltip>
                       <Popup>
-                        <div className="text-xs space-y-1.5 font-sans">
-                          <div className="flex items-center space-x-1.5 font-bold text-slate-900">
-                            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }}></span>
-                            <span>{h.sensor_family} ({h.satellite})</span>
-                          </div>
+                        <div className="text-xs space-y-1 font-sans">
+                          <div className="font-semibold text-slate-900">{h.sensor_family} ({h.satellite})</div>
                           <div className="font-mono text-[10px] text-slate-500">
                             {formatCoord(h.latitude, true)}, {formatCoord(h.longitude, false)}
                           </div>
-                          <div className="grid grid-cols-2 gap-x-2 text-[11px] pt-1.5 border-t border-slate-100">
+                          <div className="grid grid-cols-2 gap-x-2 text-[11px] pt-1 border-t border-slate-100">
                             <div>FRP: <span className="font-bold text-orange-600">{h.frp_mw?.toFixed(1)} MW</span></div>
-                            <div>Temp: <span className="font-semibold text-slate-800">{h.brightness_temperature_kelvin?.toFixed(0)} K</span></div>
-                            <div>Time: <span className="font-mono text-[10px] text-slate-600">{h.acquisition_datetime_utc?.slice(11, 16)} UTC</span></div>
-                            <div>Conf: <span className="font-semibold text-slate-800">{h.confidence_raw || 'N/A'}</span></div>
+                            <div>Temp: <span>{h.brightness_temperature_kelvin?.toFixed(0)} K</span></div>
+                            <div>Time: <span className="font-mono text-[10px]">{h.acquisition_datetime_utc?.slice(11, 16)} UTC</span></div>
+                            <div>Confidence: <span>{h.confidence_raw || '—'}</span></div>
                           </div>
                         </div>
                       </Popup>
@@ -609,63 +532,61 @@ export const DashboardPage: React.FC = () => {
               </MapContainer>
             </div>
 
-            <div className="p-3 bg-slate-50/70 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-600">
-              <div className="flex items-center space-x-3">
+            {/* Map Legend Footer */}
+            <div className="px-4 py-2 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between text-xs text-slate-600">
+              <div className="flex items-center space-x-4">
                 <span className="flex items-center space-x-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                  <span className="font-medium">MODIS (1 km)</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-600"></span>
+                  <span className="text-[11px]">MODIS (1,000m)</span>
                 </span>
                 <span className="flex items-center space-x-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
-                  <span className="font-medium">VIIRS (375 m)</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-sky-600"></span>
+                  <span className="text-[11px]">VIIRS (375m)</span>
                 </span>
                 <span className="flex items-center space-x-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                  <span className="font-medium">Co-Detected 1km Cell</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                  <span className="text-[11px]">Dual Co-Detected</span>
                 </span>
               </div>
-              <Link to="/fire-map" className="text-orange-600 hover:text-orange-700 font-bold flex items-center space-x-1">
-                <span>Open Full Map</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+              <Link to="/fire-map" className="text-orange-600 hover:text-orange-700 font-semibold text-[11px] flex items-center space-x-0.5">
+                <span>Detailed Map</span>
+                <ChevronRight className="w-3 h-3" />
               </Link>
             </div>
           </div>
 
-          {/* ACTIVITY SUMMARY (4 cols) */}
-          <div className="lg:col-span-4 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-3">
-                <h3 className="font-bold text-base text-slate-900">Observation Summary</h3>
-                <span className="text-[10px] font-mono text-slate-400 uppercase">UTC Synchronized</span>
+          {/* Right Panel: Observation Summary */}
+          <div className="lg:col-span-4 bg-white border border-slate-200/90 rounded-lg p-4 shadow-xs flex flex-col justify-between space-y-4">
+            <div className="space-y-4">
+              <div className="border-b border-slate-200/80 pb-2.5 flex items-center justify-between">
+                <h3 className="font-semibold text-sm text-slate-900">Observation Summary</h3>
+                <span className="text-[10px] font-mono text-slate-400">UTC CLOCK</span>
               </div>
 
               {/* Sensor share bar */}
-              <div className="space-y-1.5 mb-4">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-medium">Sensor Balance</span>
-                  <span className="font-mono text-[11px] font-bold text-slate-800">
+                  <span className="text-slate-600 font-medium">Sensor Balance</span>
+                  <span className="font-mono text-[11px] text-slate-700 font-semibold">
                     {modisPct}% MODIS / {viirsPct}% VIIRS
                   </span>
                 </div>
-                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
-                  <div style={{ width: `${modisPct}%` }} className="bg-amber-500 transition-all duration-300" title={`MODIS: ${modisPct}%`}></div>
-                  <div style={{ width: `${viirsPct}%` }} className="bg-sky-500 transition-all duration-300" title={`VIIRS: ${viirsPct}%`}></div>
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden flex">
+                  <div style={{ width: `${modisPct}%` }} className="bg-amber-600" title={`MODIS: ${modisPct}%`}></div>
+                  <div style={{ width: `${viirsPct}%` }} className="bg-sky-600" title={`VIIRS: ${viirsPct}%`}></div>
                 </div>
               </div>
 
-              {/* Summary Items */}
-              <div className="space-y-3 text-xs">
+              {/* Metadata Items */}
+              <div className="space-y-2 text-xs">
                 {isWorld && globalSummary && globalSummary.top_countries && globalSummary.top_countries.length > 0 ? (
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-mono uppercase text-slate-400 font-semibold">Active Regions</span>
-                    <div className="space-y-1.5">
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-mono uppercase text-slate-400 font-semibold">Top Active Nations</span>
+                    <div className="space-y-1">
                       {globalSummary.top_countries.slice(0, 4).map((tc) => (
-                        <div key={tc.iso3} className="p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
-                          <div>
-                            <span className="font-bold text-slate-900 text-xs">{tc.name}</span>
-                            <span className="text-[10px] font-mono text-slate-400 ml-1.5">{tc.iso3}</span>
-                          </div>
-                          <span className="text-xs font-mono font-bold text-orange-600">
+                        <div key={tc.iso3} className="p-2 bg-slate-50 border border-slate-200 rounded flex items-center justify-between">
+                          <span className="font-medium text-slate-800">{tc.name}</span>
+                          <span className="font-mono text-slate-600 text-[11px]">
                             {((tc as any).observations_count || (tc as any).observation_count || 0).toLocaleString()} fires
                           </span>
                         </div>
@@ -674,92 +595,76 @@ export const DashboardPage: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                      <span className="text-[10px] font-mono uppercase text-slate-400">Latest Satellite Acquisition</span>
-                      <div className="font-mono font-bold text-sm text-slate-900 mt-0.5">
+                    <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded">
+                      <span className="text-[10px] font-mono uppercase text-slate-400 block">Latest Telemetry</span>
+                      <div className="font-mono font-medium text-xs text-slate-900 mt-0.5">
                         {summary?.kpi?.latest_observation_utc ? summary.kpi.latest_observation_utc.replace('T', ' ').slice(0, 16) + ' UTC' : 'No records recorded'}
                       </div>
                     </div>
 
-                    <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                      <span className="text-[10px] font-mono uppercase text-slate-400">Active AOI</span>
-                      <div className="font-bold text-xs text-slate-900 mt-0.5">{aoi.name}</div>
-                      <div className="font-mono text-[10px] text-slate-400">{formatAOIBounds(aoi)}</div>
+                    <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded">
+                      <span className="text-[10px] font-mono uppercase text-slate-400 block">Active Bounding Box</span>
+                      <div className="font-mono text-[11px] text-slate-800 mt-0.5">{formatAOIBounds(aoi)}</div>
                     </div>
                   </>
                 )}
 
-                <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                  <span className="text-[10px] font-mono uppercase text-slate-400">Analytical Projection</span>
-                  <div className="font-mono font-bold text-xs text-slate-900 mt-0.5">EPSG:6933 Equal-Area</div>
+                <div className="p-2.5 bg-slate-50 border border-slate-200/80 rounded">
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block">Analytical Projection</span>
+                  <div className="font-mono text-xs font-semibold text-slate-900 mt-0.5">EPSG:6933 Equal-Area</div>
                   <p className="text-[10px] text-slate-500 mt-0.5">
-                    Guarantees equal ground surface area (1 km²) per grid cell worldwide.
+                    Ensures true 1 km² cell surface area regardless of latitude.
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="pt-2 border-t border-slate-200/80 space-y-2">
-              {isWorld ? (
-                <>
-                  <Link 
-                    to="/global-explorer"
-                    className="w-full flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-800 border border-slate-200 transition-colors"
-                  >
-                    <span>Explore Continents &amp; Countries</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
-                  <Link 
-                    to="/time-machine"
-                    className="w-full flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-xs font-bold text-orange-600 border border-orange-200 transition-colors"
-                  >
-                    <span>Launch Global Time Machine</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
-                </>
-              ) : (
-                <Link 
-                  to="/comparison"
-                  className="w-full flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-800 border border-slate-200 transition-colors"
-                >
-                  <span>View Full Sensor Comparison</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </Link>
-              )}
+              <Link 
+                to="/comparison"
+                className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition-colors"
+              >
+                <span>Sensor Footprint Comparison</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+              <Link 
+                to="/calendar"
+                className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-medium transition-colors"
+              >
+                <span>Harmonized Calendar</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* TWO-COLUMN SECTION: TIMELINE + MONTHLY SUMMARY */}
+        {/* TIMELINE & RECENT ACTIVITY (2 columns: 7 cols + 5 cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          {/* Daily Activity Timeline (7 cols) */}
-          <div className="lg:col-span-7 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          {/* Daily Activity Chart */}
+          <div className="lg:col-span-7 bg-white border border-slate-200/90 rounded-lg p-4 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h3 className="font-bold text-base text-slate-900">Daily Activity Timeline</h3>
+                  <h3 className="font-semibold text-sm text-slate-900">Daily Observation Timeline</h3>
                   <p className="text-xs text-slate-500">
-                    Harmonized 1km grid cells vs raw sensor detection counts per UTC day
+                    Active 1km grid cells vs raw detection counts
                   </p>
                 </div>
               </div>
 
-              <div className="h-64 w-full mt-4">
+              <div className="h-60 w-full mt-2">
                 {summary?.recent_timeline && summary.recent_timeline.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={summary.recent_timeline} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <XAxis dataKey="date" stroke="#94A3B8" fontSize={10} tickLine={false} />
                       <YAxis stroke="#94A3B8" fontSize={10} tickLine={false} />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '12px', fontSize: '11px', color: '#0F172A', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                        contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: '6px', fontSize: '11px', color: '#0F172A' }}
                       />
-                      <Legend 
-                        wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} 
-                        iconType="circle"
-                      />
-                      <Bar dataKey="active_grid_cells" name="Active 1km Cells" fill="#FF5722" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="viirs_count" name="VIIRS Detections" fill="#0EA5E9" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="modis_count" name="MODIS Detections" fill="#F59E0B" radius={[4, 4, 0, 0]} />
+                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '6px' }} />
+                      <Bar dataKey="active_grid_cells" name="Active 1km Cells" fill="#EA580C" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="viirs_count" name="VIIRS (375m)" fill="#0284C7" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="modis_count" name="MODIS (1,000m)" fill="#D97706" radius={[3, 3, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
@@ -767,59 +672,60 @@ export const DashboardPage: React.FC = () => {
                     <p className="text-xs">No observation records ingested yet for this AOI.</p>
                     <button
                       onClick={handleQuickIngest}
-                      className="px-3.5 py-2 text-xs font-bold rounded-xl bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                      className="px-3 py-1.5 text-xs font-semibold rounded bg-orange-600 text-white hover:bg-orange-700 transition-colors"
                     >
-                      Fetch NASA Observations
+                      Sync NASA Data
                     </button>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
-              <span>Source: NASA FIRMS (Terra/Aqua MODIS, NOAA-20/21 VIIRS)</span>
-              <span className="font-mono">Timezone: UTC 24-hr</span>
+            <div className="pt-2 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
+              <span>NASA FIRMS Near-Real-Time Data Streams</span>
+              <span className="font-mono">UTC Standard</span>
             </div>
           </div>
 
-          {/* Monthly Overview Card (5 cols) */}
-          <div className="lg:col-span-5 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+          {/* Burning Calendar Overview */}
+          <div className="lg:col-span-5 bg-white border border-slate-200/90 rounded-lg p-4 shadow-xs flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <h3 className="font-bold text-base text-slate-900">Burning Calendar Overview</h3>
+                  <h3 className="font-semibold text-sm text-slate-900">Seasonality &amp; Calendar Preview</h3>
                   <p className="text-xs text-slate-500">
-                    Quantile-based distribution across recent observation days
+                    Daily 1km cell density across the last 14 observation dates
                   </p>
                 </div>
-                <Link to="/calendar" className="text-xs text-orange-600 font-bold hover:underline">
-                  Open Calendar &rarr;
+                <Link to="/calendar" className="text-xs text-orange-600 font-semibold hover:underline">
+                  Full View &rarr;
                 </Link>
               </div>
 
-              {/* Visual Calendar Teaser Matrix */}
-              <div className="my-4 p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-3">
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                  <span className="font-medium">Recent Observation Grid</span>
-                  <span className="font-mono text-[11px] font-bold text-slate-800">
-                    {summary?.recent_timeline?.filter(t => t.active_grid_cells > 0).length || 0} active dates
+              {/* Mini Calendar Scrubber */}
+              <div className="my-3 p-3 bg-slate-50 border border-slate-200/80 rounded space-y-2">
+                <div className="flex items-center justify-between text-xs text-slate-600">
+                  <span className="font-medium">Recent Observation Dates</span>
+                  <span className="font-mono text-[11px] font-semibold text-slate-800">
+                    {summary?.recent_timeline?.filter(t => t.active_grid_cells > 0).length || 0} active days
                   </span>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1.5 pt-1">
+                <div className="grid grid-cols-7 gap-1 pt-1">
                   {(summary?.recent_timeline?.slice(-14) || []).map((day, idx) => {
                     const count = day.active_grid_cells;
                     let bg = '#E2E8F0';
-                    if (count > 0 && count <= 3) bg = '#FFEDD5';
-                    else if (count > 3 && count <= 10) bg = '#FDBA74';
-                    else if (count > 10) bg = '#FF5722';
+                    let text = 'text-slate-700';
+                    if (count > 0 && count <= 3) { bg = '#FFEDD5'; text = 'text-orange-900'; }
+                    else if (count > 3 && count <= 10) { bg = '#FB923C'; text = 'text-white'; }
+                    else if (count > 10) { bg = '#EA580C'; text = 'text-white'; }
 
                     return (
                       <div 
                         key={idx} 
                         title={`${day.date}: ${count} active 1km cells`}
                         style={{ backgroundColor: bg }}
-                        className="h-8 rounded-lg flex items-center justify-center text-[10px] font-mono text-slate-900 font-bold transition-transform hover:scale-105"
+                        className={`h-7 rounded flex items-center justify-center text-[10px] font-mono font-semibold ${text} transition-opacity hover:opacity-80`}
                       >
                         {day.date.slice(8, 10)}
                       </div>
@@ -827,58 +733,58 @@ export const DashboardPage: React.FC = () => {
                   })}
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-slate-200">
-                  <span>Lower Activity</span>
+                <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1.5 border-t border-slate-200">
+                  <span>Zero</span>
                   <div className="flex items-center space-x-1">
-                    <span className="w-2.5 h-2.5 rounded bg-slate-200"></span>
-                    <span className="w-2.5 h-2.5 rounded bg-orange-100"></span>
-                    <span className="w-2.5 h-2.5 rounded bg-orange-300"></span>
-                    <span className="w-2.5 h-2.5 rounded bg-orange-500"></span>
+                    <span className="w-2 h-2 rounded bg-slate-200"></span>
+                    <span className="w-2 h-2 rounded bg-orange-100"></span>
+                    <span className="w-2 h-2 rounded bg-orange-400"></span>
+                    <span className="w-2 h-2 rounded bg-orange-600"></span>
                   </div>
                   <span>High Activity</span>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 leading-relaxed">
-                The Burning Activity Calendar uses empirical relative quantiles instead of arbitrary universal risk cutoffs, making regional patterns comparable across seasons.
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Standardizes raw satellite incident spikes by mapping detections to permanent 1km land surface cells.
               </p>
             </div>
 
-            <div className="pt-3 border-t border-slate-100">
+            <div className="pt-2 border-t border-slate-100">
               <Link 
-                to="/calendar"
-                className="w-full flex items-center justify-center space-x-1.5 py-2.5 px-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-xs font-bold text-orange-600 border border-orange-200 transition-colors"
+                to="/trends"
+                className="w-full flex items-center justify-center space-x-1.5 py-2 px-3 rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-medium transition-colors"
               >
-                <CalendarIcon className="w-3.5 h-3.5" />
-                <span>Launch Full Burning Calendar</span>
+                <span>Multi-Year Historical Trends</span>
+                <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
         </div>
 
-        {/* RECENT OBSERVATIONS TABLE */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+        {/* OBSERVATIONS DATA TABLE */}
+        <div className="bg-white border border-slate-200/90 rounded-lg shadow-xs overflow-hidden">
+          <div className="p-3.5 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 className="font-bold text-base text-slate-900">Recent Satellite Observations</h3>
+              <h3 className="font-semibold text-sm text-slate-900">Recent Satellite Observations</h3>
               <p className="text-xs text-slate-500">
-                Individual sensor detections ingested into the active database
+                Granular incident telemetry from active satellite overpasses
               </p>
             </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setTableSortAsc(!tableSortAsc)}
-                className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                className="flex items-center space-x-1 px-2.5 py-1 rounded border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                <ArrowUpDown className="w-3 h-3" />
-                <span>{tableSortAsc ? 'Oldest First' : 'Newest First'}</span>
+                <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                <span>{tableSortAsc ? 'Oldest' : 'Newest'}</span>
               </button>
               <a
                 href={FirePulseAPI.getExportUrl('observations', { west: aoi.west, south: aoi.south, east: aoi.east, north: aoi.north })}
                 download
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+                className="flex items-center space-x-1 px-2.5 py-1 rounded border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
               >
-                <Download className="w-3.5 h-3.5 text-sky-500" />
+                <Download className="w-3 h-3 text-slate-500" />
                 <span>Export CSV</span>
               </a>
             </div>
@@ -887,14 +793,14 @@ export const DashboardPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50/70 border-b border-slate-200 text-[10px] font-mono uppercase text-slate-400">
-                  <th className="py-3 px-4 font-bold">UTC Date &amp; Time</th>
-                  <th className="py-3 px-4 font-bold">Coordinates (WGS84)</th>
-                  <th className="py-3 px-4 font-bold">Sensor Family</th>
-                  <th className="py-3 px-4 font-bold">Satellite</th>
-                  <th className="py-3 px-4 font-bold">FRP (MW)</th>
-                  <th className="py-3 px-4 font-bold">Brightness (K)</th>
-                  <th className="py-3 px-4 font-bold">Confidence</th>
+                <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-mono uppercase text-slate-500">
+                  <th className="py-2.5 px-3.5 font-semibold">UTC Date &amp; Time</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Coordinates</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Sensor</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Satellite</th>
+                  <th className="py-2.5 px-3.5 font-semibold">FRP (MW)</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Brightness (K)</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Confidence</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-sans">
@@ -902,30 +808,30 @@ export const DashboardPage: React.FC = () => {
                   paginatedHotspots.map(h => {
                     const isModis = h.sensor_family === 'MODIS';
                     return (
-                      <tr key={h.observation_id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="py-3 px-4 font-mono font-medium text-slate-900">
+                      <tr key={h.observation_id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-2.5 px-3.5 font-mono text-slate-900">
                           {h.acquisition_datetime_utc ? h.acquisition_datetime_utc.replace('T', ' ').slice(0, 16) + ' UTC' : '—'}
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-500">
+                        <td className="py-2.5 px-3.5 font-mono text-slate-500 text-[11px]">
                           {formatCoord(h.latitude, true)}, {formatCoord(h.longitude, false)}
                         </td>
-                        <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                        <td className="py-2.5 px-3.5">
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${
                             isModis 
-                              ? 'bg-amber-50 text-amber-700 border border-amber-200' 
-                              : 'bg-sky-50 text-sky-700 border border-sky-200'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-200' 
+                              : 'bg-sky-50 text-sky-800 border border-sky-200'
                           }`}>
                             {h.sensor_family}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-slate-800 font-semibold">{h.satellite}</td>
-                        <td className="py-3 px-4 font-mono font-bold text-orange-600">
+                        <td className="py-2.5 px-3.5 text-slate-700">{h.satellite}</td>
+                        <td className="py-2.5 px-3.5 font-mono font-semibold text-orange-600">
                           {h.frp_mw !== null && h.frp_mw !== undefined ? h.frp_mw.toFixed(1) : '—'}
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-600">
+                        <td className="py-2.5 px-3.5 font-mono text-slate-600">
                           {h.brightness_temperature_kelvin ? h.brightness_temperature_kelvin.toFixed(1) : '—'}
                         </td>
-                        <td className="py-3 px-4 text-slate-500 font-medium">
+                        <td className="py-2.5 px-3.5 text-slate-500">
                           {h.confidence_raw || '—'}
                         </td>
                       </tr>
@@ -933,8 +839,8 @@ export const DashboardPage: React.FC = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-xs text-slate-400">
-                      No observations available for this area. Click "Sync NASA FIRMS" above to fetch recent observations.
+                    <td colSpan={7} className="py-6 text-center text-xs text-slate-400">
+                      No observations in database for this region. Click "Sync NASA Data" above to fetch telemetry.
                     </td>
                   </tr>
                 )}
@@ -944,22 +850,22 @@ export const DashboardPage: React.FC = () => {
 
           {/* Table pagination */}
           {totalPages > 1 && (
-            <div className="p-3 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between text-xs text-slate-500">
-              <span className="font-medium">
-                Showing page {tablePage} of {totalPages} ({sortedHotspots.length} total records)
+            <div className="p-2.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+              <span className="font-medium text-[11px]">
+                Page {tablePage} of {totalPages} ({sortedHotspots.length} records)
               </span>
-              <div className="flex items-center space-x-1.5">
+              <div className="flex items-center space-x-1">
                 <button
-                  disabled={tablePage === 1}
                   onClick={() => setTablePage(p => Math.max(1, p - 1))}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-colors"
+                  disabled={tablePage === 1}
+                  className="px-2 py-0.5 rounded border border-slate-300 text-xs text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-40"
                 >
-                  Previous
+                  Prev
                 </button>
                 <button
-                  disabled={tablePage === totalPages}
                   onClick={() => setTablePage(p => Math.min(totalPages, p + 1))}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-colors"
+                  disabled={tablePage === totalPages}
+                  className="px-2 py-0.5 rounded border border-slate-300 text-xs text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-40"
                 >
                   Next
                 </button>
@@ -967,27 +873,6 @@ export const DashboardPage: React.FC = () => {
             </div>
           )}
         </div>
-
-        {/* MODERN FOOTER */}
-        <footer className="border-t border-slate-200/80 pt-6 pb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-slate-500">
-          <div className="space-y-1">
-            <p className="font-bold text-slate-900">
-              FirePulse: NASA Space Apps Challenge 2026 • Team Virtual Warriors
-            </p>
-            <p className="text-[11px] text-slate-400">
-              Active fire data provided by NASA LANCE / FIRMS. Standardized on EPSG:6933 Equal-Area Grid.
-            </p>
-          </div>
-          <div className="flex items-center space-x-4 text-[11px] font-mono">
-            <span>AOI: {aoi.name}</span>
-            <span>•</span>
-            <span>Harmonization: 1km Daily Cell</span>
-            <span>•</span>
-            <Link to="/about" className="text-orange-600 font-bold hover:underline">
-              Read Methodology
-            </Link>
-          </div>
-        </footer>
       </main>
     </div>
   );

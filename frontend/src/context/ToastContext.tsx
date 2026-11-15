@@ -32,15 +32,15 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const dismiss = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
 
   const iconMap = {
-    success: <CheckCircle2 className="w-4 h-4 text-[#54785E] shrink-0 mt-0.5" />,
-    error: <AlertCircle className="w-4 h-4 text-[#BD493C] shrink-0 mt-0.5" />,
-    info: <Info className="w-4 h-4 text-[#318C9B] shrink-0 mt-0.5" />,
+    success: <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />,
+    error: <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />,
+    info: <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />,
   };
 
   const colorMap = {
-    success: 'border-[#54785E]/30 bg-white text-[#252923]',
-    error: 'border-[#BD493C]/30 bg-white text-[#252923]',
-    info: 'border-[#318C9B]/30 bg-white text-[#252923]',
+    success: 'border-emerald-200 bg-white text-slate-900',
+    error: 'border-red-200 bg-white text-slate-900',
+    info: 'border-sky-200 bg-white text-slate-900',
   };
 
   return (
