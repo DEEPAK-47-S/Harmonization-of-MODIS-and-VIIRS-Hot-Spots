@@ -320,11 +320,64 @@ class GlobalFireService:
         north: float = 90.0
     ) -> List[Dict[str, Any]]:
         """
-        Pre-aggregated daily frames for smooth Time Machine animations without client freezes.
+        Pre-aggregated daily frames with spatial clusters for responsive worldwide Time Machine playback.
+        Bins active cells into regional geographic clusters across continents.
         """
         db = SessionLocal()
         try:
-            rows = db.query(
+            # Query regional spatial clusters (approx 3-degree geographic bins)
+            bin_lat_expr = func.round(DailyGridActivity.cell_center_lat / 3.0) * 3.0
+            bin_lon_expr = func.round(DailyGridActivity.cell_center_lon / 3.0) * 3.0
+
+            cluster_rows = db.query(
+                DailyGridActivity.activity_date_utc,
+                func.count(DailyGridActivity.id).label("active_cells"),
+                func.sum(DailyGridActivity.modis_detection_count).label("modis"),
+                func.sum(DailyGridActivity.viirs_detection_count).label("viirs"),
+                func.avg(DailyGridActivity.cell_center_lat).label("avg_lat"),
+                func.avg(DailyGridActivity.cell_center_lon).label("avg_lon"),
+                func.avg(func.coalesce(DailyGridActivity.viirs_frp_mean, DailyGridActivity.modis_frp_mean, 15.0)).label("avg_frp")
+            ).filter(
+                DailyGridActivity.activity_date_utc >= date_from,
+                DailyGridActivity.activity_date_utc <= date_to,
+                DailyGridActivity.cell_center_lon >= west,
+                DailyGridActivity.cell_center_lon <= east,
+                DailyGridActivity.cell_center_lat >= south,
+                DailyGridActivity.cell_center_lat <= north
+            ).group_by(
+                DailyGridActivity.activity_date_utc,
+                bin_lat_expr,
+                bin_lon_expr
+            ).order_by(DailyGridActivity.activity_date_utc.asc()).all()
+
+            date_clusters_map: Dict[str, List[Dict[str, Any]]] = {}
+            for cr in cluster_rows:
+                dt = cr[0]
+                m_cnt = int(cr[2] or 0)
+                v_cnt = int(cr[3] or 0)
+                tot = m_cnt + v_cnt
+                if tot == 0:
+                    continue
+                clat = round(float(cr[4]), 3) if cr[4] is not None else 0.0
+                clon = round(float(cr[5]), 3) if cr[5] is not None else 0.0
+                frp = round(float(cr[6]), 1) if cr[6] is not None else 15.0
+
+                if dt not in date_clusters_map:
+                    date_clusters_map[dt] = []
+
+                date_clusters_map[dt].append({
+                    "lat": clat,
+                    "lon": clon,
+                    "total_detections": tot,
+                    "modis_detections": m_cnt,
+                    "viirs_detections": v_cnt,
+                    "has_co_detection": (m_cnt > 0 and v_cnt > 0),
+                    "mean_frp": frp,
+                    "point_count": tot
+                })
+
+            # Query overall daily totals
+            daily_rows = db.query(
                 DailyGridActivity.activity_date_utc,
                 func.count(DailyGridActivity.id).label("active_cells"),
                 func.sum(DailyGridActivity.modis_detection_count).label("modis"),
@@ -341,34 +394,25 @@ class GlobalFireService:
             ).group_by(DailyGridActivity.activity_date_utc).order_by(DailyGridActivity.activity_date_utc.asc()).all()
 
             frames = []
-            for r in rows:
-                modis_cnt = r[2] or 0
-                viirs_cnt = r[3] or 0
+            for r in daily_rows:
+                dt = r[0]
+                modis_cnt = int(r[2] or 0)
+                viirs_cnt = int(r[3] or 0)
                 total_obs = modis_cnt + viirs_cnt
                 c_lat = round(r[4], 3) if r[4] else 0.0
                 c_lon = round(r[5], 3) if r[5] else 0.0
+                clusters = date_clusters_map.get(dt, [])
 
                 frames.append({
-                    "date": r[0],
-                    "date_utc": r[0],
+                    "date": dt,
+                    "date_utc": dt,
                     "total_observations": total_obs,
-                    "active_cells": r[1] or 0,
+                    "active_cells": int(r[1] or 0),
                     "modis_count": modis_cnt,
                     "viirs_count": viirs_cnt,
                     "center_lat": c_lat,
                     "center_lon": c_lon,
-                    "clusters": [
-                        {
-                            "lat": c_lat,
-                            "lon": c_lon,
-                            "total_detections": total_obs,
-                            "modis_detections": modis_cnt,
-                            "viirs_detections": viirs_cnt,
-                            "has_co_detection": modis_cnt > 0 and viirs_cnt > 0,
-                            "mean_frp": 15.0,
-                            "point_count": total_obs
-                        }
-                    ] if total_obs > 0 else []
+                    "clusters": clusters
                 })
             return frames
         finally:
